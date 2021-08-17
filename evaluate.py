@@ -179,6 +179,8 @@ if __name__ == "__main__":
         return np.random.rand(len(inputs))
 
     dataset = load_sts12("../SentEval/data/downstream/STS/STS12-en-test")
+    dataset = {"noise": load_data_sts(("../SimCSE/SentEval/data/downstream/STS/STS12-en-test/STS.input-retyped.MSRpar.txt", "../SimCSE/SentEval/data/downstream/STS/STS12-en-test/STS.gs.MSRpar.txt"))}
+    print(dataset)
     print(evaluate_sts(dataset, {}, prepare, batcher))
 
 """
