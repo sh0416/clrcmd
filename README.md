@@ -8,7 +8,9 @@ STS12, STS13, STS14, STS15, STS16, STS-B, SICK-R를 평가할 수 있는 벤치�
 데이터는 무조건 \t으로 나뉘어져 있고 문장1\t문장2\t점수의 형태로 나타난다고 가정한다.
 
 ```bash
+bash get_transfer_data.bash
 conda create -n sentence-benchmark
+conda activate sentence-benchmark
 conda install --file requirements.txt
 python -m evaluate
 ```
