@@ -22,12 +22,12 @@ def prepare(inputs: List[Input]) -> Any:
             word, vec = line.split(" ", 1)
             if word in words:
                 word2vec[word] = np.fromstring(vec, sep=" ")
-    return word2vec
+    return {"word2vec": word2vec}
 
 
 def batcher(inputs: List[Input], param: Any) -> np.ndarray:
     def _compute(x: List[str]) -> np.ndarray:
-        x = map(param["state"].get, x)
+        x = map(param["word2vec"].get, x)
         x = filter(lambda x: x is not None, x)
         x = list(x)
         x = np.mean(np.stack(list(x), axis=0), axis=0)

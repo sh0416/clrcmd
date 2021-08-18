@@ -1,12 +1,15 @@
 import csv
 import argparse
-from functools import partial
+import logging
 from typing import Any, Callable, Dict, List, NamedTuple, Tuple
 
 import numpy as np
 from scipy.stats import pearsonr, spearmanr
 
 from utils import batch
+
+
+logger = logging.getLogger(__name__)
 
 
 class Input(NamedTuple):
@@ -61,7 +64,13 @@ def load_sts12(dirpath: str) -> Dict[str, List[Example]]:
         "surprise.SMTnews",
     ]
     datasets = map(load_data_sts, create_filepaths_sts(dirpath, dataset_names))
-    return {k: v for k, v in zip(dataset_names, datasets)}
+    datasets = {k: v for k, v in zip(dataset_names, datasets)}
+    assert len(datasets["MSRpar"]) == 750, len(datasets["MSRpar"])
+    assert len(datasets["MSRvid"]) == 750, len(datasets["MSRvid"])
+    assert len(datasets["SMTeuroparl"]) == 459, len(datasets["SMTeuroparl"])
+    assert len(datasets["surprise.OnWN"]) == 750, len(datasets["surprise.OnWN"])
+    assert len(datasets["surprise.SMTnews"]) == 399, len(datasets["surprise.SMTnews"])
+    return datasets
 
 
 def load_sts13(dirpath: str) -> Dict[str, List[Example]]:
@@ -122,7 +131,7 @@ def evaluate_sts(
     results = {}
     for name, _dataset in dataset.items():
         scores, labels = [], []
-        param["state"] = prepare([x.input for x in _dataset])
+        param = {**param, **prepare([x.input for x in _dataset])}
         for examples in batch(_dataset, 4):
             scores.append(batcher([x.input for x in examples], param))
             labels.append([x.score for x in examples])
@@ -161,15 +170,17 @@ def evaluate_sts(
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--method", type=str, choices=["random", "bow", "sbert"])
+parser.add_argument(
+    "--method", type=str, choices=["random", "bow", "sbert"], required=True
+)
 
 if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.method == "random":
 
-        def prepare(inputs: List[Input]) -> Any:
-            pass
+        def prepare(inputs: List[Input]) -> Dict:
+            return {}
 
         def batcher(inputs: List[Input], param: Any) -> np.ndarray:
             return np.random.rand(len(inputs))
@@ -177,7 +188,9 @@ if __name__ == "__main__":
     elif args.method == "bow":
         from bow import prepare, batcher
     elif args.method == "sbert":
-        raise NotImplementedError()
+        from sbert import prepare, batcher
+    else:
+        raise AttributeError()
 
     # STS12
     dataset = load_sts12("data/STS/STS12-en-test")
