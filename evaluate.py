@@ -9,18 +9,12 @@ from scipy.stats import pearsonr, spearmanr
 from utils import batch
 
 
-class ExampleRaw(NamedTuple):
+class Input(NamedTuple):
     text1: List[str]
     text2: List[str]
-    score: float
 
 
-class Input(NamedTuple):
-    text1: np.ndarray
-    text2: np.ndarray
-
-
-class ExamplePreprocessed(NamedTuple):
+class Example(NamedTuple):
     input: Input
     score: float
 
@@ -29,7 +23,7 @@ def tokenize(row: Dict[str, str]) -> Dict[str, List[str]]:
     return {"text1": row["text1"].split(), "text2": row["text2"].split()}
 
 
-def load_data_sts(filepaths: Tuple[str, str]) -> List[ExampleRaw]:
+def load_data_sts(filepaths: Tuple[str, str]) -> List[Example]:
     filepath_input, filepath_label = filepaths
     with open(filepath_input) as f_input, open(filepath_label) as f_label:
         reader_input = csv.DictReader(
@@ -45,11 +39,16 @@ def load_data_sts(filepaths: Tuple[str, str]) -> List[ExampleRaw]:
             quoting=csv.QUOTE_NONE,
         )
         reader_input = map(tokenize, reader_input)
-        reader_label = map(lambda x: {"score": float(x["score"])}, reader_label)
-        reader = map(lambda x: {**x[0], **x[1]}, zip(reader_input, reader_label))
-        dataset = list(map(lambda x: ExampleRaw(**x), reader))
+        reader_input = map(lambda x: Input(**x), reader_input)
+        reader_label = map(lambda x: float(x["score"]), reader_label)
+        dataset = map(
+            lambda x: Example(input=x[0], score=x[1]), zip(reader_input, reader_label)
+        )
+        dataset = list(dataset)
         # Sort data by length to minimize padding in batcher
-        dataset = sorted(dataset, key=lambda x: (len(x.text1), len(x.text2), x.score))
+        dataset = sorted(
+            dataset, key=lambda x: (len(x.input.text1), len(x.input.text2))
+        )
         return dataset
 
 
@@ -61,7 +60,7 @@ def create_filepaths_sts(dirpath: str, datasets: List[str]) -> List[Tuple[str, s
     return list(zip(filepaths_input, filepaths_label))
 
 
-def load_sts12(dirpath: str) -> Dict[str, List[ExampleRaw]]:
+def load_sts12(dirpath: str) -> Dict[str, List[Example]]:
     dataset_names = [
         "MSRpar",
         "MSRvid",
@@ -73,13 +72,13 @@ def load_sts12(dirpath: str) -> Dict[str, List[ExampleRaw]]:
     return {k: v for k, v in zip(dataset_names, datasets)}
 
 
-def load_sts13(dirpath: str) -> Dict[str, List[ExampleRaw]]:
+def load_sts13(dirpath: str) -> Dict[str, List[Example]]:
     dataset_names = ["FNWN", "headlines", "OnWN"]
     datasets = map(load_data_sts, create_filepaths_sts(dirpath, dataset_names))
     return {k: v for k, v in zip(dataset_names, datasets)}
 
 
-def load_sts14(dirpath: str) -> Dict[str, List[ExampleRaw]]:
+def load_sts14(dirpath: str) -> Dict[str, List[Example]]:
     dataset_names = [
         "deft-forum",
         "deft-news",
@@ -92,7 +91,7 @@ def load_sts14(dirpath: str) -> Dict[str, List[ExampleRaw]]:
     return {k: v for k, v in zip(dataset_names, datasets)}
 
 
-def load_sts15(dirpath: str) -> Dict[str, List[ExampleRaw]]:
+def load_sts15(dirpath: str) -> Dict[str, List[Example]]:
     dataset_names = [
         "answers-forums",
         "answers-students",
@@ -104,7 +103,7 @@ def load_sts15(dirpath: str) -> Dict[str, List[ExampleRaw]]:
     return {k: v for k, v in zip(dataset_names, datasets)}
 
 
-def load_sts16(dirpath: str) -> Dict[str, List[ExampleRaw]]:
+def load_sts16(dirpath: str) -> Dict[str, List[Example]]:
     dataset_names = [
         "answer-answer",
         "headlines",
@@ -117,14 +116,10 @@ def load_sts16(dirpath: str) -> Dict[str, List[ExampleRaw]]:
 
 
 def evaluate_sts(
-    dataset: Dict[str, List[ExampleRaw]],
+    dataset: Dict[str, List[Example]],
     param: Any,
-    prepare: Callable[[ExampleRaw, Any], ExamplePreprocessed],
     batcher: Callable[[List[Input], Any], np.ndarray],
 ) -> float:
-    dataset = {
-        k: list(map(partial(prepare, param=param), v)) for k, v in dataset.items()
-    }
     results = {}
     for name, _dataset in dataset.items():
         scores, labels = [], []
@@ -170,16 +165,21 @@ parser = argparse.ArgumentParser()
 if __name__ == "__main__":
     args = parser.parse_args()
 
-    def prepare(raw: ExampleRaw, param: Any) -> ExamplePreprocessed:
-        return ExamplePreprocessed(
-            input=Input(text1=raw.text1, text2=raw.text2), score=raw.score
-        )
-
     def batcher(inputs: List[Input], param: Any) -> np.ndarray:
         return np.random.rand(len(inputs))
 
+    dataset = load_sts12("data/STS/STS12-en-test")
+    """
     dataset = load_sts12("../SentEval/data/downstream/STS/STS12-en-test")
-    dataset = {"noise": load_data_sts(("../SimCSE/SentEval/data/downstream/STS/STS12-en-test/STS.input-retyped.MSRpar.txt", "../SimCSE/SentEval/data/downstream/STS/STS12-en-test/STS.gs.MSRpar.txt"))}
+    dataset = {
+        "noise": load_data_sts(
+            (
+                "../SimCSE/SentEval/data/downstream/STS/STS12-en-test/STS.input-retyped.MSRpar.txt",
+                "../SimCSE/SentEval/data/downstream/STS/STS12-en-test/STS.gs.MSRpar.txt",
+            )
+        )
+    }
+    """
     print(dataset)
     print(evaluate_sts(dataset, {}, prepare, batcher))
 
