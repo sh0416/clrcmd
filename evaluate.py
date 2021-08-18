@@ -19,32 +19,24 @@ class Example(NamedTuple):
     score: float
 
 
-def tokenize(row: Dict[str, str]) -> Dict[str, List[str]]:
-    return {"text1": row["text1"].split(), "text2": row["text2"].split()}
+def tokenize(row: Tuple[str, str]) -> Tuple[List[str], List[str]]:
+    return row[0].split(), row[1].split()
 
 
 def load_data_sts(filepaths: Tuple[str, str]) -> List[Example]:
     filepath_input, filepath_label = filepaths
     with open(filepath_input) as f_input, open(filepath_label) as f_label:
-        reader_input = csv.DictReader(
-            f_input,
-            delimiter="\t",
-            fieldnames=["text1", "text2"],
-            quoting=csv.QUOTE_NONE,
-        )
-        reader_label = csv.DictReader(
-            f_label,
-            delimiter="\t",
-            fieldnames=["score"],
-            quoting=csv.QUOTE_NONE,
-        )
+        reader_input = csv.reader(f_input, delimiter="\t", quoting=csv.QUOTE_NONE)
+        reader_label = csv.reader(f_label, delimiter="\t", quoting=csv.QUOTE_NONE)
         reader_input = map(tokenize, reader_input)
-        reader_input = map(lambda x: Input(**x), reader_input)
-        reader_label = map(lambda x: float(x["score"]), reader_label)
-        dataset = map(
-            lambda x: Example(input=x[0], score=x[1]), zip(reader_input, reader_label)
-        )
+        reader_input = map(lambda x: Input(text1=x[0], text2=x[1]), reader_input)
+        reader_label = map(lambda x: float(x[0]) if len(x) > 0 else None, reader_label)
+        reader = filter(lambda x: x[1] is not None, zip(reader_input, reader_label))
+        dataset = map(lambda x: Example(input=x[0], score=x[1]), reader)
         dataset = list(dataset)
+        for idx, row in enumerate(dataset, start=1):
+            assert len(row.input.text1) > 0, f"Text1 is empty: Row {idx}: {row}"
+            assert len(row.input.text2) > 0, f"Text2 is empty: Row {idx}: {row}"
         # Sort data by length to minimize padding in batcher
         dataset = sorted(
             dataset, key=lambda x: (len(x.input.text1), len(x.input.text2))
@@ -100,7 +92,13 @@ def load_sts15(dirpath: str) -> Dict[str, List[Example]]:
         "images",
     ]
     datasets = map(load_data_sts, create_filepaths_sts(dirpath, dataset_names))
-    return {k: v for k, v in zip(dataset_names, datasets)}
+    datasets = {k: v for k, v in zip(dataset_names, datasets)}
+    assert len(datasets["answers-forums"]) == 375, len(datasets["answers-forums"])
+    assert len(datasets["answers-students"]) == 750, len(datasets["answers-students"])
+    assert len(datasets["belief"]) == 375, len(datasets["belief"])
+    assert len(datasets["headlines"]) == 750, len(datasets["headlines"])
+    assert len(datasets["images"]) == 750, len(datasets["images"])
+    return datasets
 
 
 def load_sts16(dirpath: str) -> Dict[str, List[Example]]:
@@ -117,12 +115,14 @@ def load_sts16(dirpath: str) -> Dict[str, List[Example]]:
 
 def evaluate_sts(
     dataset: Dict[str, List[Example]],
-    param: Any,
+    param: Dict[str, Any],
+    prepare: Callable[[List[Input]], Any],
     batcher: Callable[[List[Input], Any], np.ndarray],
 ) -> float:
     results = {}
     for name, _dataset in dataset.items():
         scores, labels = [], []
+        param["state"] = prepare([x.input for x in _dataset])
         for examples in batch(_dataset, 4):
             scores.append(batcher([x.input for x in examples], param))
             labels.append([x.score for x in examples])
@@ -161,27 +161,62 @@ def evaluate_sts(
 
 
 parser = argparse.ArgumentParser()
+parser.add_argument("--method", type=str, choices=["random", "bow", "sbert"])
 
 if __name__ == "__main__":
     args = parser.parse_args()
 
-    def batcher(inputs: List[Input], param: Any) -> np.ndarray:
-        return np.random.rand(len(inputs))
+    if args.method == "random":
 
+        def prepare(inputs: List[Input]) -> Any:
+            pass
+
+        def batcher(inputs: List[Input], param: Any) -> np.ndarray:
+            return np.random.rand(len(inputs))
+
+    elif args.method == "bow":
+        from bow import prepare, batcher
+    elif args.method == "sbert":
+        raise NotImplementedError()
+
+    # STS12
     dataset = load_sts12("data/STS/STS12-en-test")
-    """
-    dataset = load_sts12("../SentEval/data/downstream/STS/STS12-en-test")
-    dataset = {
-        "noise": load_data_sts(
+    print("STS12")
+    print(evaluate_sts(dataset, {}, prepare, batcher))
+    dataset = load_sts13("data/STS/STS13-en-test")
+    print("STS13")
+    print(evaluate_sts(dataset, {}, prepare, batcher))
+    dataset = load_sts14("data/STS/STS14-en-test")
+    print("STS14")
+    print(evaluate_sts(dataset, {}, prepare, batcher))
+    dataset = load_sts15("data/STS/STS15-en-test")
+    print("STS15")
+    print(evaluate_sts(dataset, {}, prepare, batcher))
+    dataset = load_sts16("data/STS/STS16-en-test")
+    print("STS16")
+    print(evaluate_sts(dataset, {}, prepare, batcher))
+
+    # Custom data
+    dataset_clean = {
+        "MSRpar": load_data_sts(
             (
-                "../SimCSE/SentEval/data/downstream/STS/STS12-en-test/STS.input-retyped.MSRpar.txt",
-                "../SimCSE/SentEval/data/downstream/STS/STS12-en-test/STS.gs.MSRpar.txt",
+                "data/STSSmall/STS12-en-test/STS.input.MSRpar.txt",
+                "data/STSSmall/STS12-en-test/STS.gs.MSRpar.txt",
             )
         )
     }
-    """
-    print(dataset)
-    print(evaluate_sts(dataset, {}, prepare, batcher))
+    dataset_noise = {
+        "MSRpar": load_data_sts(
+            (
+                "data/STSSmallRetyped/STS12-en-test/STS.input.MSRpar.txt",
+                "data/STSSmallRetyped/STS12-en-test/STS.gs.MSRpar.txt",
+            )
+        )
+    }
+    print("CLEAN DATASET")
+    print(evaluate_sts(dataset_clean, {}, prepare, batcher))
+    print("NOISE DATASET")
+    print(evaluate_sts(dataset_noise, {}, prepare, batcher))
 
 """
 class STSBenchmarkEval(SICKRelatednessEval):

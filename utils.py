@@ -6,7 +6,8 @@ import numpy as np
 
 def cos(u: np.ndarray, v: np.ndarray) -> np.ndarray:
     u, v = np.nan_to_num(u), np.nan_to_num(v)
-    return np.dot(u, v) / (np.linalg.norm(u) * np.linalg.norm(v))
+    x = np.dot(u, v) / (np.linalg.norm(u) * np.linalg.norm(v))
+    return np.nan_to_num(x)
 
 
 def batch(dataset: List, batch_size: int) -> Iterable:
