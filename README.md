@@ -15,4 +15,6 @@ conda install --file requirements.txt
 python -m evaluate
 ```
 
+파일 설명
 
+* evaluate.py : 문장 벤치마
