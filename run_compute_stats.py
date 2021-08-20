@@ -1,5 +1,6 @@
 import itertools
 import statistics
+
 from evaluate import load_sts12, load_sts13, load_sts14, load_sts15, load_sts16
 
 sts = [

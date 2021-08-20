@@ -1,11 +1,12 @@
 """Bag of word model"""
-from typing import List, Any
-from evaluate import Input
-import numpy as np
-from collections import Counter
 import itertools
-from utils import cos
+from collections import Counter
+from typing import Any, List
 
+import numpy as np
+from evaluate import Input
+
+from utils import cos
 
 FASTTEXT_PATH = "data/fasttext/crawl-300d-2M.vec"
 

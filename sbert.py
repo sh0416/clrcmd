@@ -1,7 +1,9 @@
-from sentence_transformers import SentenceTransformer
-from evaluate import Input
-from typing import List, Any
+from typing import Any, List
+
 import numpy as np
+from evaluate import Input
+from sentence_transformers import SentenceTransformer
+
 from utils import cos
 
 
