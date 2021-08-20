@@ -1,7 +1,8 @@
+"""Sentence bert"""
 from typing import Any, List
 
 import numpy as np
-from evaluate import Input
+from dataset import Input
 from sentence_transformers import SentenceTransformer
 
 from utils import cos

@@ -13,6 +13,7 @@ from dataset import (
     load_sts14,
     load_sts15,
     load_sts16,
+    save_dataset,
 )
 
 logger = logging.getLogger(__name__)
@@ -148,7 +149,7 @@ parser.add_argument(
     help="dataset",
 )
 parser.add_argument("--data-dir", type=str, required=True)
-parser.add_argument("--sources", nargs="+", required=True)
+parser.add_argument("--sources", type=str, nargs="*")
 parser.add_argument("--out-dir", type=str, required=True)
 parser.add_argument(
     "--strategy",
@@ -196,5 +197,5 @@ if __name__ == "__main__":
     noise_dataset = {
         k: add_noise_examples(v, s) for (k, v), s in zip(dataset.items(), seeds)
     }
-    print(noise_dataset)
+    save_dataset(args.out_dir, noise_dataset)
 

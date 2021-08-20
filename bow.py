@@ -4,7 +4,7 @@ from collections import Counter
 from typing import Any, List
 
 import numpy as np
-from evaluate import Input
+from dataset import Input
 
 from utils import cos
 
