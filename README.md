@@ -5,16 +5,29 @@ STS12, STS13, STS14, STS15, STS16, STS-B, SICK-R를 평가할 수 있는 벤치�
 
 많은 부분 SentEval 레포지토리를 따라하지만 SentEval과 다르게 데이터셋을 쉽게 추가할 수 있게 만든다.
 
-데이터는 무조건 \t으로 나뉘어져 있고 문장1\t문장2\t점수의 형태로 나타난다고 가정한다.
-
 ```bash
+# SentEval benchmark data loading script
 bash get_transfer_data.bash
+# SimCSE training data loading script
+wget -O .data/wiki1m_for_simcse.txt https://huggingface.co/datasets/princeton-nlp/datasets-for-simcse/resolve/main/wiki1m_for_simcse.txt
 conda create -n sentence-benchmark
 conda activate sentence-benchmark
-conda install --file requirements.txt
-python -m evaluate
+conda install numpy scipy scikit-learn matplotlib
+pip install -r requirements.txt
+python -m run_evaluate
 ```
 
-파일 설명
+## Files
 
-* evaluate.py : 문장 벤치마
+### Dataset
+* `get_transfer_data.bash`: Download senteval data from web and preprocess it (e.g. mosestokenizer)
+* `tokenizer.sed`: Tokenizer script used in `get_transfer_data.bash`
+
+### Model
+* `simcse/*`: Code related to the simcse paper
+* `tokenizer.py`: Tokenizer that the bpe dropout is implemented in this script
+* `run_train.py`: Finetune model using dataset
+
+### Evaluate
+* `run_evaluate.py` : Evaluate sentence representation quality using given benchmark data
+

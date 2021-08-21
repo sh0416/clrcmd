@@ -3,4 +3,6 @@ isort
 flake8
 numpy
 scipy
+transformers
+datasets
 sentence-transformers

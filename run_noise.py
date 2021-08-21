@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 def swap_word_middle(w: str, seed: int) -> str:
     """첫 문자와 마지막 문자를 제외한 문자들 중 인접한 두 문자를 바꾼다
-    
+
     :param w: 바꿀 단어
     :type w: str
     :param seed: 랜덤 함수에 쓸 상태
@@ -198,4 +198,3 @@ if __name__ == "__main__":
         k: add_noise_examples(v, s) for (k, v), s in zip(dataset.items(), seeds)
     }
     save_dataset(args.out_dir, noise_dataset)
-

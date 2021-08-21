@@ -3,8 +3,6 @@ import logging
 from typing import Any, Callable, Dict, List
 
 import numpy as np
-from scipy.stats import pearsonr, spearmanr
-
 from dataset import (
     Example,
     Input,
@@ -15,6 +13,8 @@ from dataset import (
     load_sts15,
     load_sts16,
 )
+from scipy.stats import pearsonr, spearmanr
+
 from utils import batch
 
 logger = logging.getLogger(__name__)
