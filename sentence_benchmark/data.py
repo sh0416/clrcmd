@@ -23,21 +23,37 @@ def detokenize(row: Tuple[List[str], List[str]]) -> Tuple[str, str]:
 def load_data_sts(filepaths: Tuple[str, str]) -> List[Example]:
     filepath_input, filepath_label = filepaths
     with open(filepath_input) as f_input, open(filepath_label) as f_label:
-        reader_input = csv.reader(f_input, delimiter="\t", quoting=csv.QUOTE_NONE)
-        reader_label = csv.reader(f_label, delimiter="\t", quoting=csv.QUOTE_NONE)
+        reader_input = csv.reader(
+            f_input, delimiter="\t", quoting=csv.QUOTE_NONE
+        )
+        reader_label = csv.reader(
+            f_label, delimiter="\t", quoting=csv.QUOTE_NONE
+        )
         reader_input = map(tokenize, reader_input)
-        reader_input = map(lambda x: Input(text1=x[0], text2=x[1]), reader_input)
-        reader_label = map(lambda x: float(x[0]) if len(x) > 0 else None, reader_label)
-        reader = filter(lambda x: x[1] is not None, zip(reader_input, reader_label))
+        reader_input = map(
+            lambda x: Input(text1=x[0], text2=x[1]), reader_input
+        )
+        reader_label = map(
+            lambda x: float(x[0]) if len(x) > 0 else None, reader_label
+        )
+        reader = filter(
+            lambda x: x[1] is not None, zip(reader_input, reader_label)
+        )
         dataset = map(lambda x: Example(input=x[0], score=x[1]), reader)
         dataset = list(dataset)
         for idx, row in enumerate(dataset, start=1):
-            assert len(row.input.text1) > 0, f"Text1 is empty: Row {idx}: {row}"
-            assert len(row.input.text2) > 0, f"Text2 is empty: Row {idx}: {row}"
+            assert (
+                len(row.input.text1) > 0
+            ), f"Text1 is empty: Row {idx}: {row}"
+            assert (
+                len(row.input.text2) > 0
+            ), f"Text2 is empty: Row {idx}: {row}"
         return dataset
 
 
-def create_filepaths_sts(dirpath: str, sources: List[str]) -> List[Tuple[str, str]]:
+def create_filepaths_sts(
+    dirpath: str, sources: List[str]
+) -> List[Tuple[str, str]]:
     filenames_input = map(lambda x: f"STS.input.{x}.txt", sources)
     filenames_label = map(lambda x: f"STS.gs.{x}.txt", sources)
     filepaths_input = map(lambda x: f"{dirpath}/{x}", filenames_input)
@@ -60,7 +76,10 @@ def save_dataset(dirpath: str, dataset: Dict[str, List[Example]]) -> None:
                 f, delimiter="\t", quotechar=None, quoting=csv.QUOTE_NONE
             )
             writer.writerows(
-                (detokenize((row.input.text1, row.input.text2)) for row in _dataset)
+                (
+                    detokenize((row.input.text1, row.input.text2))
+                    for row in _dataset
+                )
             )
         with open(filepath_label, "w", newline="") as f:
             writer = csv.writer(
@@ -70,13 +89,21 @@ def save_dataset(dirpath: str, dataset: Dict[str, List[Example]]) -> None:
 
 
 def load_sts12(dirpath: str) -> Dict[str, List[Example]]:
-    sources = ["MSRpar", "MSRvid", "SMTeuroparl", "surprise.OnWN", "surprise.SMTnews"]
+    sources = [
+        "MSRpar",
+        "MSRvid",
+        "SMTeuroparl",
+        "surprise.OnWN",
+        "surprise.SMTnews",
+    ]
     dataset = load_sources(dirpath, sources)
     assert len(dataset["MSRpar"]) == 750, len(dataset["MSRpar"])
     assert len(dataset["MSRvid"]) == 750, len(dataset["MSRvid"])
     assert len(dataset["SMTeuroparl"]) == 459, len(dataset["SMTeuroparl"])
     assert len(dataset["surprise.OnWN"]) == 750, len(dataset["surprise.OnWN"])
-    assert len(dataset["surprise.SMTnews"]) == 399, len(dataset["surprise.SMTnews"])
+    assert len(dataset["surprise.SMTnews"]) == 399, len(
+        dataset["surprise.SMTnews"]
+    )
     return dataset
 
 
@@ -90,7 +117,14 @@ def load_sts13(dirpath: str) -> Dict[str, List[Example]]:
 
 
 def load_sts14(dirpath: str) -> Dict[str, List[Example]]:
-    sources = ["deft-forum", "deft-news", "headlines", "images", "OnWN", "tweet-news"]
+    sources = [
+        "deft-forum",
+        "deft-news",
+        "headlines",
+        "images",
+        "OnWN",
+        "tweet-news",
+    ]
     dataset = load_sources(dirpath, sources)
     assert len(dataset["deft-forum"]) == 450
     assert len(dataset["deft-news"]) == 300
@@ -102,10 +136,20 @@ def load_sts14(dirpath: str) -> Dict[str, List[Example]]:
 
 
 def load_sts15(dirpath: str) -> Dict[str, List[Example]]:
-    sources = ["answers-forums", "answers-students", "belief", "headlines", "images"]
+    sources = [
+        "answers-forums",
+        "answers-students",
+        "belief",
+        "headlines",
+        "images",
+    ]
     dataset = load_sources(dirpath, sources)
-    assert len(dataset["answers-forums"]) == 375, len(dataset["answers-forums"])
-    assert len(dataset["answers-students"]) == 750, len(dataset["answers-students"])
+    assert len(dataset["answers-forums"]) == 375, len(
+        dataset["answers-forums"]
+    )
+    assert len(dataset["answers-students"]) == 750, len(
+        dataset["answers-students"]
+    )
     assert len(dataset["belief"]) == 375, len(dataset["belief"])
     assert len(dataset["headlines"]) == 750, len(dataset["headlines"])
     assert len(dataset["images"]) == 750, len(dataset["images"])

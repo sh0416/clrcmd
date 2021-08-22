@@ -14,7 +14,10 @@ sts = {
 
 # 쌍 개수 구하기
 pairs = [
-    row for dataset in sts.values() for source in dataset.values() for row in source
+    row
+    for dataset in sts.values()
+    for source in dataset.values()
+    for row in source
 ]
 print(f"The number of pairs {len(pairs)}")
 

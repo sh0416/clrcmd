@@ -7,12 +7,20 @@ from datasets import load_dataset
 from tokenizer import RobertaTokenizerDropout
 from transformers import RobertaTokenizerFast
 
-parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument(
-    "--filepath", type=str, default=".data/wiki1m_for_simcse.txt", help="filepath"
+parser = argparse.ArgumentParser(
+    formatter_class=argparse.ArgumentDefaultsHelpFormatter
 )
 parser.add_argument(
-    "--bpe-dropout-prob", type=float, default=0.0, help="bpe dropout probability"
+    "--filepath",
+    type=str,
+    default=".data/wiki1m_for_simcse.txt",
+    help="filepath",
+)
+parser.add_argument(
+    "--bpe-dropout-prob",
+    type=float,
+    default=0.0,
+    help="bpe dropout probability",
 )
 
 if __name__ == "__main__":
@@ -39,7 +47,9 @@ if __name__ == "__main__":
         return features
 
     # Tokenize data using BPE dropout
-    tokenized_dataset = datasets["train"].map(tokenize, batched=False, num_proc=16)
+    tokenized_dataset = datasets["train"].map(
+        tokenize, batched=False, num_proc=16
+    )
 
     # Sanity check: The size of dataset must be 1,000,000
     print(len(tokenized_dataset))
@@ -47,12 +57,16 @@ if __name__ == "__main__":
     # Sanity check: Two tokenized sequences recover same text
     print(
         tokenizer.decode(
-            tokenizer.convert_tokens_to_ids(tokenized_dataset[0]["input_strs"].split())
+            tokenizer.convert_tokens_to_ids(
+                tokenized_dataset[0]["input_strs"].split()
+            )
         )
     )
     print(
         tokenizer.decode(
-            tokenizer.convert_tokens_to_ids(tokenized_dataset[0]["input_strs2"].split())
+            tokenizer.convert_tokens_to_ids(
+                tokenized_dataset[0]["input_strs2"].split()
+            )
         )
     )
 

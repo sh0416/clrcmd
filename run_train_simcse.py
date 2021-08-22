@@ -113,7 +113,9 @@ class ModelArguments:
     )
 
     # SimCSE's arguments
-    temp: float = field(default=0.05, metadata={"help": "Temperature for softmax."})
+    temp: float = field(
+        default=0.05, metadata={"help": "Temperature for softmax."}
+    )
     pooler_type: str = field(
         default="cls",
         metadata={
@@ -150,7 +152,9 @@ class DataTrainingArguments:
     # Huggingface's original arguments.
     dataset_name: Optional[str] = field(
         default=None,
-        metadata={"help": "The name of the dataset to use (via the datasets library)."},
+        metadata={
+            "help": "The name of the dataset to use (via the datasets library)."
+        },
     )
     dataset_config_name: Optional[str] = field(
         default=None,
@@ -170,7 +174,9 @@ class DataTrainingArguments:
     )
     preprocessing_num_workers: Optional[int] = field(
         default=None,
-        metadata={"help": "The number of processes to use for the preprocessing."},
+        metadata={
+            "help": "The number of processes to use for the preprocessing."
+        },
     )
 
     # SimCSE's arguments
@@ -246,7 +252,9 @@ class OurTrainingArguments(TrainingArguments):
             # trigger an error that a device index is missing. Index 0 takes into account the
             # GPUs available in the environment, so `CUDA_VISIBLE_DEVICES=1,2` with `cuda:0`
             # will use the first GPU in that env, i.e. GPU#1
-            device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+            device = torch.device(
+                "cuda:0" if torch.cuda.is_available() else "cpu"
+            )
             # Sometimes the line in the postinit has not been run before we end up here, so just checking we're not at
             # the default value.
             self._n_gpu = torch.cuda.device_count()
@@ -358,7 +366,9 @@ def main():
             delimiter="\t" if "tsv" in data_args.train_file else ",",
         )
     else:
-        datasets = load_dataset(extension, data_files=data_files, cache_dir="./data/")
+        datasets = load_dataset(
+            extension, data_files=data_files, cache_dir="./data/"
+        )
 
     # See more about loading any type of standard or custom dataset (from files, python dict, pandas DataFrame, etc) at
     # https://huggingface.co/docs/datasets/loading_datasets.html.
@@ -374,14 +384,18 @@ def main():
         "use_auth_token": True if model_args.use_auth_token else None,
     }
     if model_args.config_name:
-        config = AutoConfig.from_pretrained(model_args.config_name, **config_kwargs)
+        config = AutoConfig.from_pretrained(
+            model_args.config_name, **config_kwargs
+        )
     elif model_args.model_name_or_path:
         config = AutoConfig.from_pretrained(
             model_args.model_name_or_path, **config_kwargs
         )
     else:
         config = CONFIG_MAPPING[model_args.model_type]()
-        logger.warning("You are instantiating a new config instance from scratch.")
+        logger.warning(
+            "You are instantiating a new config instance from scratch."
+        )
 
     tokenizer_kwargs = {
         "cache_dir": model_args.cache_dir,
@@ -464,10 +478,12 @@ def main():
                 examples[sent1_cname][idx] = " "
 
         sentences1 = [
-            tokenizer.convert_tokens_to_ids(x.split()) for x in examples[sent0_cname]
+            tokenizer.convert_tokens_to_ids(x.split())
+            for x in examples[sent0_cname]
         ]
         sentences2 = [
-            tokenizer.convert_tokens_to_ids(x.split()) for x in examples[sent1_cname]
+            tokenizer.convert_tokens_to_ids(x.split())
+            for x in examples[sent1_cname]
         ]
         assert all(
             [
@@ -538,7 +554,9 @@ def main():
 
         def __call__(
             self,
-            features: List[Dict[str, Union[List[int], List[List[int]], torch.Tensor]]],
+            features: List[
+                Dict[str, Union[List[int], List[List[int]], torch.Tensor]]
+            ],
         ) -> Dict[str, torch.Tensor]:
             special_keys = [
                 "input_ids",
@@ -557,7 +575,9 @@ def main():
                 for i in range(num_sent):
                     flat_features.append(
                         {
-                            k: feature[k][i] if k in special_keys else feature[k]
+                            k: feature[k][i]
+                            if k in special_keys
+                            else feature[k]
                             for k in feature
                         }
                     )
@@ -616,11 +636,14 @@ def main():
 
             probability_matrix.masked_fill_(special_tokens_mask, value=0.0)
             masked_indices = torch.bernoulli(probability_matrix).bool()
-            labels[~masked_indices] = -100  # We only compute loss on masked tokens
+            labels[
+                ~masked_indices
+            ] = -100  # We only compute loss on masked tokens
 
             # 80% of the time, we replace masked input tokens with tokenizer.mask_token ([MASK])
             indices_replaced = (
-                torch.bernoulli(torch.full(labels.shape, 0.8)).bool() & masked_indices
+                torch.bernoulli(torch.full(labels.shape, 0.8)).bool()
+                & masked_indices
             )
             inputs[indices_replaced] = self.tokenizer.convert_tokens_to_ids(
                 self.tokenizer.mask_token
@@ -668,7 +691,9 @@ def main():
         train_result = trainer.train(model_path=model_path)
         trainer.save_model()  # Saves the tokenizer too for easy upload
 
-        output_train_file = os.path.join(training_args.output_dir, "train_results.txt")
+        output_train_file = os.path.join(
+            training_args.output_dir, "train_results.txt"
+        )
         if trainer.is_world_process_zero():
             with open(output_train_file, "w") as writer:
                 logger.info("***** Train results *****")
@@ -687,7 +712,9 @@ def main():
         logger.info("*** Evaluate ***")
         results = trainer.evaluate(eval_senteval_transfer=True)
 
-        output_eval_file = os.path.join(training_args.output_dir, "eval_results.txt")
+        output_eval_file = os.path.join(
+            training_args.output_dir, "eval_results.txt"
+        )
         if trainer.is_world_process_zero():
             with open(output_eval_file, "w") as writer:
                 logger.info("***** Eval results *****")

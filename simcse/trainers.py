@@ -10,7 +10,16 @@ import sys
 import time
 import warnings
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Union,
+)
 
 import torch
 import torch.nn as nn
@@ -116,7 +125,10 @@ class CLTrainer(Trainer):
                 batch[k] = batch[k].to(self.args.device)
             with torch.no_grad():
                 outputs = self.model(
-                    **batch, output_hidden_states=True, return_dict=True, sent_emb=True
+                    **batch,
+                    output_hidden_states=True,
+                    return_dict=True,
+                    sent_emb=True,
                 )
                 pooler_output = outputs.pooler_output
             return pooler_output.cpu()
@@ -212,7 +224,9 @@ class CLTrainer(Trainer):
                         self.optimizer.state_dict(),
                         os.path.join(output_dir, "optimizer.pt"),
                     )
-                    with warnings.catch_warnings(record=True) as caught_warnings:
+                    with warnings.catch_warnings(
+                        record=True
+                    ) as caught_warnings:
                         xm.save(
                             self.lr_scheduler.state_dict(),
                             os.path.join(output_dir, "scheduler.pt"),
@@ -224,7 +238,9 @@ class CLTrainer(Trainer):
                         self.optimizer.state_dict(),
                         os.path.join(output_dir, "optimizer.pt"),
                     )
-                    with warnings.catch_warnings(record=True) as caught_warnings:
+                    with warnings.catch_warnings(
+                        record=True
+                    ) as caught_warnings:
                         torch.save(
                             self.lr_scheduler.state_dict(),
                             os.path.join(output_dir, "scheduler.pt"),
@@ -238,7 +254,9 @@ class CLTrainer(Trainer):
                     )
         else:
             # Save model checkpoint
-            checkpoint_folder = f"{PREFIX_CHECKPOINT_DIR}-{self.state.global_step}"
+            checkpoint_folder = (
+                f"{PREFIX_CHECKPOINT_DIR}-{self.state.global_step}"
+            )
 
             if self.hp_search_backend is not None and trial is not None:
                 if self.hp_search_backend == HPSearchBackend.OPTUNA:
@@ -248,13 +266,17 @@ class CLTrainer(Trainer):
 
                     run_id = tune.get_trial_id()
                 run_name = (
-                    self.hp_name(trial) if self.hp_name is not None else f"run-{run_id}"
+                    self.hp_name(trial)
+                    if self.hp_name is not None
+                    else f"run-{run_id}"
                 )
                 output_dir = os.path.join(
                     self.args.output_dir, run_name, checkpoint_folder
                 )
             else:
-                output_dir = os.path.join(self.args.output_dir, checkpoint_folder)
+                output_dir = os.path.join(
+                    self.args.output_dir, checkpoint_folder
+                )
 
                 self.store_flos()
 
@@ -293,7 +315,9 @@ class CLTrainer(Trainer):
 
             # Save the Trainer state
             if self.is_world_process_zero():
-                self.state.save_to_json(os.path.join(output_dir, "trainer_state.json"))
+                self.state.save_to_json(
+                    os.path.join(output_dir, "trainer_state.json")
+                )
 
             # Maybe delete some older checkpoints.
             if self.is_world_process_zero():
@@ -336,7 +360,9 @@ class CLTrainer(Trainer):
             self.optimizer, self.lr_scheduler = None, None
 
         # Keeping track whether we can can len() on the dataset or not
-        train_dataset_is_sized = isinstance(self.train_dataset, collections.abc.Sized)
+        train_dataset_is_sized = isinstance(
+            self.train_dataset, collections.abc.Sized
+        )
 
         # Data loader and number of training steps
         train_dataloader = self.get_train_dataloader()
@@ -426,7 +452,9 @@ class CLTrainer(Trainer):
 
         # Train!
         if is_torch_tpu_available():
-            total_train_batch_size = self.args.train_batch_size * xm.xrt_world_size()
+            total_train_batch_size = (
+                self.args.train_batch_size * xm.xrt_world_size()
+            )
         else:
             total_train_batch_size = (
                 self.args.train_batch_size
@@ -470,12 +498,16 @@ class CLTrainer(Trainer):
             self.state = TrainerState.load_from_json(
                 os.path.join(model_path, "trainer_state.json")
             )
-            epochs_trained = self.state.global_step // num_update_steps_per_epoch
+            epochs_trained = (
+                self.state.global_step // num_update_steps_per_epoch
+            )
             if not self.args.ignore_data_skip:
                 steps_trained_in_current_epoch = self.state.global_step % (
                     num_update_steps_per_epoch
                 )
-                steps_trained_in_current_epoch *= self.args.gradient_accumulation_steps
+                steps_trained_in_current_epoch *= (
+                    self.args.gradient_accumulation_steps
+                )
             else:
                 steps_trained_in_current_epoch = 0
 
@@ -500,7 +532,9 @@ class CLTrainer(Trainer):
         self.state.trial_name = (
             self.hp_name(trial) if self.hp_name is not None else None
         )
-        self.state.trial_params = hp_params(trial) if trial is not None else None
+        self.state.trial_params = (
+            hp_params(trial) if trial is not None else None
+        )
         # This should be the same if the state has been saved but in case the training arguments changed, it's safer
         # to set this after the load.
         self.state.max_steps = max_steps
@@ -538,13 +572,17 @@ class CLTrainer(Trainer):
                 self._past = None
 
             steps_in_epoch = (
-                len(train_dataloader) if train_dataset_is_sized else self.args.max_steps
+                len(train_dataloader)
+                if train_dataset_is_sized
+                else self.args.max_steps
             )
             self.control = self.callback_handler.on_epoch_begin(
                 self.args, self.state, self.control
             )
 
-            assert train_dataset_is_sized, "currently we only support sized dataloader!"
+            assert (
+                train_dataset_is_sized
+            ), "currently we only support sized dataloader!"
 
             inputs = None
             last_inputs = None
@@ -588,7 +626,9 @@ class CLTrainer(Trainer):
 
                         if hasattr(self.optimizer, "clip_grad_norm"):
                             # Some optimizers (like the sharded optimizer) have a specific way to do gradient clipping
-                            self.optimizer.clip_grad_norm(self.args.max_grad_norm)
+                            self.optimizer.clip_grad_norm(
+                                self.args.max_grad_norm
+                            )
                         else:
                             # Revert to normal clipping otherwise, handling Apex or full precision
                             torch.nn.utils.clip_grad_norm_(
@@ -619,7 +659,10 @@ class CLTrainer(Trainer):
 
                     self._maybe_log_save_evaluate(tr_loss, model, trial, epoch)
 
-                if self.control.should_epoch_stop or self.control.should_training_stop:
+                if (
+                    self.control.should_epoch_stop
+                    or self.control.should_training_stop
+                ):
                     break
 
             self.control = self.callback_handler.on_epoch_end(
@@ -655,13 +698,16 @@ class CLTrainer(Trainer):
             )
             if isinstance(self.model, PreTrainedModel):
                 self.model = self.model.from_pretrained(
-                    self.state.best_model_checkpoint, model_args=self.model_args
+                    self.state.best_model_checkpoint,
+                    model_args=self.model_args,
                 )
                 if not self.is_model_parallel:
                     self.model = self.model.to(self.args.device)
             else:
                 state_dict = torch.load(
-                    os.path.join(self.state.best_model_checkpoint, WEIGHTS_NAME)
+                    os.path.join(
+                        self.state.best_model_checkpoint, WEIGHTS_NAME
+                    )
                 )
                 self.model.load_state_dict(state_dict)
 

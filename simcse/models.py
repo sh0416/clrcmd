@@ -96,14 +96,18 @@ class Pooler(nn.Module):
             first_hidden = hidden_states[0]
             last_hidden = hidden_states[-1]
             pooled_result = (
-                (first_hidden + last_hidden) / 2.0 * attention_mask.unsqueeze(-1)
+                (first_hidden + last_hidden)
+                / 2.0
+                * attention_mask.unsqueeze(-1)
             ).sum(1) / attention_mask.sum(-1).unsqueeze(-1)
             return pooled_result
         elif self.pooler_type == "avg_top2":
             second_last_hidden = hidden_states[-2]
             last_hidden = hidden_states[-1]
             pooled_result = (
-                (last_hidden + second_last_hidden) / 2.0 * attention_mask.unsqueeze(-1)
+                (last_hidden + second_last_hidden)
+                / 2.0
+                * attention_mask.unsqueeze(-1)
             ).sum(1) / attention_mask.sum(-1).unsqueeze(-1)
             return pooled_result
         else:
@@ -137,7 +141,9 @@ def cl_forward(
     mlm_input_ids=None,
     mlm_labels=None,
 ):
-    return_dict = return_dict if return_dict is not None else cls.config.use_return_dict
+    return_dict = (
+        return_dict if return_dict is not None else cls.config.use_return_dict
+    )
     ori_input_ids = input_ids
     batch_size = input_ids.size(0)
     # Number of sentences in one instance
@@ -146,7 +152,9 @@ def cl_forward(
 
     mlm_outputs = None
     # Flatten input for encoding
-    input_ids = input_ids.view((-1, input_ids.size(-1)))  # (bs * num_sent, len)
+    input_ids = input_ids.view(
+        (-1, input_ids.size(-1))
+    )  # (bs * num_sent, len)
     attention_mask = attention_mask.view(
         (-1, attention_mask.size(-1))
     )  # (bs * num_sent len)
@@ -209,7 +217,9 @@ def cl_forward(
     if dist.is_initialized() and cls.training:
         # Gather hard negative
         if num_sent >= 3:
-            z3_list = [torch.zeros_like(z3) for _ in range(dist.get_world_size())]
+            z3_list = [
+                torch.zeros_like(z3) for _ in range(dist.get_world_size())
+            ]
             dist.all_gather(tensor_list=z3_list, tensor=z3.contiguous())
             z3_list[dist.get_rank()] = z3
             z3 = torch.cat(z3_list, 0)
@@ -260,7 +270,8 @@ def cl_forward(
         mlm_labels = mlm_labels.view(-1, mlm_labels.size(-1))
         prediction_scores = cls.lm_head(mlm_outputs.last_hidden_state)
         masked_lm_loss = loss_fct(
-            prediction_scores.view(-1, cls.config.vocab_size), mlm_labels.view(-1)
+            prediction_scores.view(-1, cls.config.vocab_size),
+            mlm_labels.view(-1),
         )
         loss = loss + cls.model_args.mlm_weight * masked_lm_loss
 
@@ -290,7 +301,9 @@ def sentemb_forward(
     return_dict=None,
 ):
 
-    return_dict = return_dict if return_dict is not None else cls.config.use_return_dict
+    return_dict = (
+        return_dict if return_dict is not None else cls.config.use_return_dict
+    )
 
     outputs = encoder(
         input_ids,

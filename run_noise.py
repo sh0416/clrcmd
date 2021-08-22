@@ -140,7 +140,9 @@ def apply_sequence(wlist: List[str], strategy: str, seed: int) -> List[str]:
     return list(map(lambda x: strategy(x[0], x[1]), zip(wlist, seed_list)))
 
 
-parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+parser = argparse.ArgumentParser(
+    formatter_class=argparse.ArgumentDefaultsHelpFormatter
+)
 parser.add_argument(
     "--dataset",
     type=str,
@@ -178,13 +180,19 @@ if __name__ == "__main__":
     else:
         raise argparse.ArgumentError("Invalid --dataset")
 
-    def add_noise_examples(examples: List[Example], seed: int) -> List[Example]:
+    def add_noise_examples(
+        examples: List[Example], seed: int
+    ) -> List[Example]:
         def add_noise_example(example: Example, seed: int) -> Example:
             random.seed(seed)
             seed1, seed2 = random.choices(range(10000), k=2)
             input = Input(
-                text1=apply_sequence(example.input.text1, args.strategy, seed1),
-                text2=apply_sequence(example.input.text2, args.strategy, seed2),
+                text1=apply_sequence(
+                    example.input.text1, args.strategy, seed1
+                ),
+                text2=apply_sequence(
+                    example.input.text2, args.strategy, seed2
+                ),
             )
             return Example(input=input, score=example.score)
 
@@ -195,6 +203,7 @@ if __name__ == "__main__":
     random.seed(0)
     seeds = random.choices(range(10000), k=len(dataset))
     noise_dataset = {
-        k: add_noise_examples(v, s) for (k, v), s in zip(dataset.items(), seeds)
+        k: add_noise_examples(v, s)
+        for (k, v), s in zip(dataset.items(), seeds)
     }
     save_dataset(args.out_dir, noise_dataset)
