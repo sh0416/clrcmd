@@ -4,10 +4,11 @@ from collections import Counter
 from typing import Any, List
 
 import numpy as np
-from dataset import Input
-from utils import cos
 
-FASTTEXT_PATH = "data/fasttext/crawl-300d-2M.vec"
+from sentence_benchmark.data import Input
+from sentence_benchmark.utils import cos
+
+FASTTEXT_PATH = ".data/fasttext/crawl-300d-2M.vec"
 
 
 def prepare(inputs: List[Input]) -> Any:
