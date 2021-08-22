@@ -1,8 +1,7 @@
 import argparse
 import logging
 
-from sentence_benchmark.evaluate import evaluate_sts
-from sentence_benchmark.dataset import (
+from sentence_benchmark.data import (
     load_sources,
     load_sts12,
     load_sts13,
@@ -10,6 +9,7 @@ from sentence_benchmark.dataset import (
     load_sts15,
     load_sts16,
 )
+from sentence_benchmark.evaluate import evaluate_sts
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ parser.add_argument(
 parser.add_argument(
     "--data-dir",
     type=str,
-    default="data/STS/STS12-en-test",
+    default=".data/STS/STS12-en-test",
     help="data dir",
 )
 parser.add_argument(
@@ -100,4 +100,3 @@ if __name__ == "__main__":
     logger.info(
         f"    spearman (waverage): {result['all']['spearman']['wmean']:.4f}"
     )
-

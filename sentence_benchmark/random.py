@@ -1,5 +1,7 @@
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
 import numpy as np
+
 from sentence_benchmark.data import Input
 
 

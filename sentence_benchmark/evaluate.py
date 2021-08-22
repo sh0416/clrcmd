@@ -1,9 +1,10 @@
 from typing import Any, Callable, Dict, List
 
+import numpy as np
 from scipy.stats import pearsonr, spearmanr
-from utils import batch
 
 from sentence_benchmark.data import Example, Input
+from sentence_benchmark.utils import batch
 
 
 def evaluate_sts(
