@@ -3,6 +3,6 @@ isort
 flake8
 numpy
 scipy
-transformers
+transformers==4.2.1
 datasets
 sentence-transformers

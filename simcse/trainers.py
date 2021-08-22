@@ -87,7 +87,6 @@ sys.path.insert(0, PATH_TO_SENTEVAL)
 from datetime import datetime
 
 import numpy as np
-import senteval
 from filelock import FileLock
 
 logger = logging.get_logger(__name__)
@@ -132,6 +131,7 @@ class CLTrainer(Trainer):
             "epoch_size": 2,
         }
 
+        # TODO: Revise this logic
         se = senteval.engine.SE(params, batcher, prepare)
         tasks = ["STSBenchmark", "SICKRelatedness"]
         if eval_senteval_transfer or self.args.eval_transfer:
@@ -346,6 +346,8 @@ class CLTrainer(Trainer):
         # number of training steps per epoch: num_update_steps_per_epoch
         # total number of training steps to execute: max_steps
         if train_dataset_is_sized:
+            print(len(train_dataloader))
+            print(self.args.gradient_accumulation_steps)
             num_update_steps_per_epoch = (
                 len(train_dataloader) // self.args.gradient_accumulation_steps
             )

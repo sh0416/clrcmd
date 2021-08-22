@@ -10,6 +10,7 @@ from typing import Dict, List, Optional, Tuple, Union
 import torch
 import transformers
 from datasets import load_dataset
+from tokenizer import RobertaTokenizerDropout
 from transformers import (
     CONFIG_MAPPING,
     MODEL_FOR_MASKED_LM_MAPPING,
@@ -46,7 +47,6 @@ from transformers.trainer_utils import is_main_process
 
 from simcse.models import BertForCL, RobertaForCL
 from simcse.trainers import CLTrainer
-from tokenizer import RobertaTokenizerDropout
 
 logger = logging.getLogger(__name__)
 MODEL_CONFIG_CLASSES = list(MODEL_FOR_MASKED_LM_MAPPING.keys())
@@ -443,8 +443,8 @@ def main():
     else:
         raise NotImplementedError
     """
-    sent0_cname = "input_ids"
-    sent1_cname = "input_ids2"
+    sent0_cname = "input_strs"
+    sent1_cname = "input_strs2"
 
     def prepare_features(examples):
         # padding = longest (default)
@@ -463,8 +463,12 @@ def main():
             if examples[sent1_cname][idx] is None:
                 examples[sent1_cname][idx] = " "
 
-        sentences1 = [list(map(int, x.split())) for x in examples[sent0_cname]]
-        sentences2 = [list(map(int, x.split())) for x in examples[sent1_cname]]
+        sentences1 = [
+            tokenizer.convert_tokens_to_ids(x.split()) for x in examples[sent0_cname]
+        ]
+        sentences2 = [
+            tokenizer.convert_tokens_to_ids(x.split()) for x in examples[sent1_cname]
+        ]
         assert all(
             [
                 x == y

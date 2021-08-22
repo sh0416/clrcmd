@@ -5,7 +5,6 @@ from typing import Any, List
 
 import numpy as np
 from dataset import Input
-
 from utils import cos
 
 FASTTEXT_PATH = "data/fasttext/crawl-300d-2M.vec"
