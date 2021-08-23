@@ -2,12 +2,18 @@ import argparse
 import logging
 
 from sentence_benchmark.data import (
+    load_sickr_dev,
+    load_sickr_test,
+    load_sickr_train,
     load_sources,
     load_sts12,
     load_sts13,
     load_sts14,
     load_sts15,
     load_sts16,
+    load_stsb_dev,
+    load_stsb_test,
+    load_stsb_train,
 )
 from sentence_benchmark.evaluate import evaluate_sts
 
@@ -28,20 +34,27 @@ parser.add_argument(
     "--dataset",
     type=str,
     default="STS12",
-    choices=["STS12", "STS13", "STS14", "STS15", "STS16", "custom"],
+    choices=[
+        "STS12",
+        "STS13",
+        "STS14",
+        "STS15",
+        "STS16",
+        "STSB-train",
+        "STSB-dev",
+        "STSB-test",
+        "SICKR-train",
+        "SICKR-dev",
+        "SICKR-test",
+        "custom",
+    ],
     help="dataset",
 )
 parser.add_argument(
-    "--data-dir",
-    type=str,
-    default=".data/STS/STS12-en-test",
-    help="data dir",
+    "--data-dir", type=str, default=".data/STS/STS12-en-test", help="data dir",
 )
 parser.add_argument(
-    "--sources",
-    type=str,
-    nargs="*",
-    help="sources",
+    "--sources", type=str, nargs="*", help="sources",
 )
 
 
@@ -54,19 +67,35 @@ if __name__ == "__main__":
 
     # Load dataset
     if args.dataset == "STS12":
-        dataset = load_sts12(args.data_dir)
+        load_fn = load_sts12
     elif args.dataset == "STS13":
-        dataset = load_sts13(args.data_dir)
+        load_fn = load_sts13
     elif args.dataset == "STS14":
-        dataset = load_sts14(args.data_dir)
+        load_fn = load_sts14
     elif args.dataset == "STS15":
-        dataset = load_sts15(args.data_dir)
+        load_fn = load_sts15
     elif args.dataset == "STS16":
-        dataset = load_sts16(args.data_dir)
+        load_fn = load_sts16
+    elif args.dataset == "STSB-train":
+        load_fn = load_stsb_train
+    elif args.dataset == "STSB-dev":
+        load_fn = load_stsb_dev
+    elif args.dataset == "STSB-test":
+        load_fn = load_stsb_test
+    elif args.dataset == "SICKR-train":
+        load_fn = load_sickr_train
+    elif args.dataset == "SICKR-dev":
+        load_fn = load_sickr_dev
+    elif args.dataset == "SICKR-test":
+        load_fn = load_sickr_test
     elif args.dataset == "custom":
-        dataset = load_sources(args.data_dir, args.sources)
+        load_fn = load_sources
     else:
         raise argparse.ArgumentError("Invalid --dataset")
+    if args.dataset == "custom":
+        dataset = load_fn(args.data_dir, args.sources)
+    else:
+        dataset = load_fn(args.data_dir)
 
     # Load method
     if args.method == "random":
