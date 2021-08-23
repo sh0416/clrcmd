@@ -27,8 +27,11 @@ parser.add_argument(
     "--method",
     type=str,
     default="random",
-    choices=["random", "bow", "sbert"],
+    choices=["random", "bow", "sbert", "simcse"],
     help="method",
+)
+parser.add_argument(
+    "--checkpoint", type=str, help="checkpoint",
 )
 parser.add_argument(
     "--dataset",
@@ -104,11 +107,13 @@ if __name__ == "__main__":
         from sentence_benchmark.models.bow import batcher, prepare
     elif args.method == "sbert":
         from sentence_benchmark.models.sbert import batcher, prepare
+    elif args.method == "simcse":
+        from sentence_benchmark.models.simcse import batcher, prepare
     else:
         raise AttributeError()
 
     # Evaluate
-    result = evaluate_sts(dataset, {}, prepare, batcher)
+    result = evaluate_sts(dataset, vars(args), prepare, batcher)
     logger.info("** Result **")
     for source, source_result in result.items():
         if source == "all":
@@ -117,6 +122,8 @@ if __name__ == "__main__":
         logger.info(f"    pearson: {source_result['pearson'][0]:.4f}")
         logger.info(f"    spearman: {source_result['spearman'][0]:.4f}")
     logger.info("  all")
+    logger.info(f"    pearson  (all): {result['all']['pearson']['all']:.4f}")
+    logger.info(f"    spearman (all): {result['all']['spearman']['all']:.4f}")
     logger.info(
         f"    pearson  (average): {result['all']['pearson']['mean']:.4f}"
     )

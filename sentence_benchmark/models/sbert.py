@@ -1,5 +1,5 @@
 """Sentence bert"""
-from typing import Any, List
+from typing import Dict, List
 
 import numpy as np
 from sentence_transformers import SentenceTransformer
@@ -8,12 +8,14 @@ from sentence_benchmark.data import Input
 from sentence_benchmark.utils import cos
 
 
-def prepare(inputs: List[Input]) -> Any:
+def prepare(inputs: List[Input], param: Dict) -> Dict:
     model = SentenceTransformer("nli-roberta-base-v2")
-    return {"model": model}
+    model.eval()
+    param["model"] = model
+    return param
 
 
-def batcher(inputs: List[Input], param: Any) -> np.ndarray:
+def batcher(inputs: List[Input], param: Dict) -> np.ndarray:
     model = param["model"]
     x1 = model.encode(
         [" ".join(x.text1) for x in inputs], 4, show_progress_bar=False

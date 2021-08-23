@@ -1,7 +1,7 @@
 """Bag of word model"""
 import itertools
 from collections import Counter
-from typing import Any, List
+from typing import Dict, List
 
 import numpy as np
 
@@ -11,7 +11,7 @@ from sentence_benchmark.utils import cos
 FASTTEXT_PATH = ".data/fasttext/crawl-300d-2M.vec"
 
 
-def prepare(inputs: List[Input]) -> Any:
+def prepare(inputs: List[Input], param: Dict) -> Dict:
     stream1 = itertools.chain.from_iterable((x.text1 for x in inputs))
     stream2 = itertools.chain.from_iterable((x.text2 for x in inputs))
     words = Counter(itertools.chain(stream1, stream2))
@@ -23,10 +23,11 @@ def prepare(inputs: List[Input]) -> Any:
             word, vec = line.split(" ", 1)
             if word in words:
                 word2vec[word] = np.fromstring(vec, sep=" ")
-    return {"word2vec": word2vec}
+    param["word2vec"] = word2vec
+    return param
 
 
-def batcher(inputs: List[Input], param: Any) -> np.ndarray:
+def batcher(inputs: List[Input], param: Dict) -> np.ndarray:
     def _compute(x: List[str]) -> np.ndarray:
         x = map(param["word2vec"].get, x)
         x = filter(lambda x: x is not None, x)

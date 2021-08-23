@@ -25,9 +25,9 @@ echo "batch_size: ${batch_size}"
 echo "gradient_accumulation_step: ${gradient_accumulation_step}"
 
 # Tokenize corpus
-#python -m tokenizer \
-#    --filepath data/wiki1m_for_simcse.txt \
-#    --bpe-dropout-prob ${bpe_dropout_prob} \
+python -m run_tokenize \
+    --filepath .data/wiki1m_for_simcse.txt \
+    --bpe-dropout-prob ${bpe_dropout_prob} \
 
 
 # Allow multiple threads
@@ -47,7 +47,7 @@ python -m run_train_simcse \
     --metric_for_best_model stsb_spearman \
     --load_best_model_at_end \
     --eval_steps 125 \
-    --pooler_type cls \
+    --pooler_type cls_before_pooler \
     --mlp_only_train \
     --overwrite_output_dir \
     --temp 0.05 \
