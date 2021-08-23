@@ -488,7 +488,7 @@ def main():
         )
 
         features = {
-            [
+            key: [
                 [sent_features[key][i], sent_features[key][i + total]]
                 for i in range(total)
             ]

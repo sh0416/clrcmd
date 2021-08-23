@@ -10,7 +10,16 @@ import sys
 import time
 import warnings
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Union,
+)
 
 import torch
 import torch.nn as nn
@@ -58,6 +67,8 @@ from transformers.trainer_utils import (
 from transformers.training_args import ParallelMode, TrainingArguments
 from transformers.utils import logging
 
+from sentence_benchmark.evaluate import evaluate_sts
+
 if is_torch_tpu_available():
     import torch_xla.core.xla_model as xm
     import torch_xla.debug.metrics as met
@@ -81,6 +92,8 @@ from filelock import FileLock
 from transformers.optimization import Adafactor, AdamW, get_scheduler
 from transformers.trainer import _model_unwrap
 
+from sentence_benchmark.data import Input, load_sickr_dev, load_stsb_dev
+
 logger = logging.get_logger(__name__)
 
 
@@ -95,14 +108,12 @@ class CLTrainer(Trainer):
 
         # SentEval prepare and batcher
         def prepare(inputs: List[Input]) -> Dict:
-            {}
+            return {}
 
         def batcher(inputs: List[Input], param: Any) -> np.ndarray:
-            sentences = [" ".join(s) for s in batch]
+            sentences = [" ".join(s) for s in inputs]
             batch = self.tokenizer.batch_encode_plus(
-                sentences,
-                return_tensors="pt",
-                padding=True,
+                sentences, return_tensors="pt", padding=True,
             )
             for k in batch:
                 batch[k] = batch[k].to(self.args.device)
@@ -118,13 +129,17 @@ class CLTrainer(Trainer):
 
         # TODO: Revise this logic
         self.model.eval()
-        dataset = load_sts12(".data/STS/STS12-en-test")
-        results = evaluate_sts(dataset, {}, prepare, batcher)
+        dataset_stsb = load_stsb_dev(".data/STS/STSBenchmark")
+        dataset_sickr = load_sickr_dev(".data/SICK")
+        result_stsb = evaluate_sts(dataset_stsb, {}, prepare, batcher)
+        result_sickr = evaluate_sts(dataset_sickr, {}, prepare, batcher)
 
-        sts12_spearman = results["all"]["spearman"][0]
+        stsb_spearman = result_stsb["all"]["spearman"][0]
+        sickr_spearman = result_sickr["all"]["spearman"][0]
 
         metrics = {
-            "eval_sts12_spearman": sts12_spearman,
+            "eval_stsb_spearman": stsb_spearman,
+            "eval_sickr_spearman": sickr_spearman,
         }
         self.log(metrics)
         return metrics

@@ -78,7 +78,8 @@ def load_data_sts(filepaths: Tuple[str, str]) -> List[Example]:
     :rtype: List[Example]
     """
 
-    def _create(x_input: Tuple[str, ...], x_label: Tuple[str, ...]) -> Example:
+    def _create(x: Tuple[Tuple[str, ...], Tuple[str, ...]]) -> Example:
+        x_input, x_label = x
         text1, text2 = tokenize(x_input)
         input = Input(text1=text1, text2=text2)
         return Example(input=input, score=float(x_label[0]))
@@ -121,7 +122,7 @@ def create_filepaths_sts(
 
 
 def load_sources(dirpath: str, sources: List[str]) -> Dict[str, List[Example]]:
-    """Give sources, load dataset
+    """Give sources, load dataset. Assume that the files follow STS format
 
     :param dirpath: Directory where the whole files located
     :type dirpath: str
