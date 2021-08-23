@@ -44,7 +44,7 @@ python -m run_train_simcse \
     --gradient_accumulation_step ${gradient_accumulation_step} \
     --dataloader_drop_last \
     --evaluation_strategy steps \
-    --metric_for_best_model stsb_spearman \
+    --metric_for_best_model sts12_spearman \
     --load_best_model_at_end \
     --eval_steps 125 \
     --pooler_type cls \

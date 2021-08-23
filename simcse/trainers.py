@@ -74,20 +74,12 @@ if is_datasets_available():
     import datasets
 
 import copy
-
-from transformers.optimization import Adafactor, AdamW, get_scheduler
-from transformers.trainer import _model_unwrap
-
-# Set path to SentEval
-PATH_TO_SENTEVAL = "./SentEval"
-PATH_TO_DATA = "./SentEval/data"
-
-# Import SentEval
-sys.path.insert(0, PATH_TO_SENTEVAL)
 from datetime import datetime
 
 import numpy as np
 from filelock import FileLock
+from transformers.optimization import Adafactor, AdamW, get_scheduler
+from transformers.trainer import _model_unwrap
 
 logger = logging.get_logger(__name__)
 
@@ -102,10 +94,10 @@ class CLTrainer(Trainer):
     ) -> Dict[str, float]:
 
         # SentEval prepare and batcher
-        def prepare(params, samples):
-            return
+        def prepare(inputs: List[Input]) -> Dict:
+            {}
 
-        def batcher(params, batch):
+        def batcher(inputs: List[Input], param: Any) -> np.ndarray:
             sentences = [" ".join(s) for s in batch]
             batch = self.tokenizer.batch_encode_plus(
                 sentences,
@@ -124,50 +116,16 @@ class CLTrainer(Trainer):
                 pooler_output = outputs.pooler_output
             return pooler_output.cpu()
 
-        # Set params for SentEval (fastmode)
-        params = {"task_path": PATH_TO_DATA, "usepytorch": True, "kfold": 5}
-        params["classifier"] = {
-            "nhid": 0,
-            "optim": "rmsprop",
-            "batch_size": 128,
-            "tenacity": 3,
-            "epoch_size": 2,
-        }
-
         # TODO: Revise this logic
-        se = senteval.engine.SE(params, batcher, prepare)
-        tasks = ["STSBenchmark", "SICKRelatedness"]
-        if eval_senteval_transfer or self.args.eval_transfer:
-            tasks = [
-                "STSBenchmark",
-                "SICKRelatedness",
-                "MR",
-                "CR",
-                "SUBJ",
-                "MPQA",
-                "SST2",
-                "TREC",
-                "MRPC",
-            ]
         self.model.eval()
-        results = se.eval(tasks)
+        dataset = load_sts12(".data/STS/STS12-en-test")
+        results = evaluate_sts(dataset, {}, prepare, batcher)
 
-        stsb_spearman = results["STSBenchmark"]["dev"]["spearman"][0]
-        sickr_spearman = results["SICKRelatedness"]["dev"]["spearman"][0]
+        sts12_spearman = results["all"]["spearman"][0]
 
         metrics = {
-            "eval_stsb_spearman": stsb_spearman,
-            "eval_sickr_spearman": sickr_spearman,
-            "eval_avg_sts": (stsb_spearman + sickr_spearman) / 2,
+            "eval_sts12_spearman": sts12_spearman,
         }
-        if eval_senteval_transfer or self.args.eval_transfer:
-            avg_transfer = 0
-            for task in ["MR", "CR", "SUBJ", "MPQA", "SST2", "TREC", "MRPC"]:
-                avg_transfer += results[task]["devacc"]
-                metrics["eval_{}".format(task)] = results[task]["devacc"]
-            avg_transfer /= 7
-            metrics["eval_avg_transfer"] = avg_transfer
-
         self.log(metrics)
         return metrics
 

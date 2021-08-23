@@ -10,7 +10,6 @@ from typing import Dict, List, Optional, Tuple, Union
 import torch
 import transformers
 from datasets import load_dataset
-from tokenizer import RobertaTokenizerDropout
 from transformers import (
     CONFIG_MAPPING,
     MODEL_FOR_MASKED_LM_MAPPING,
@@ -45,6 +44,8 @@ from transformers.tokenization_utils_base import (
 )
 from transformers.trainer_utils import is_main_process
 
+from sentence_benchmark.data import Input
+from sentence_benchmark.tokenizer import RobertaTokenizerDropout
 from simcse.models import BertForCL, RobertaForCL
 from simcse.trainers import CLTrainer
 
