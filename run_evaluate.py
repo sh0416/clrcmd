@@ -99,11 +99,11 @@ if __name__ == "__main__":
 
     # Load method
     if args.method == "random":
-        from sentence_benchmark.random import batcher, prepare
+        from sentence_benchmark.models.random import batcher, prepare
     elif args.method == "bow":
-        from sentence_benchmark.bow import batcher, prepare
+        from sentence_benchmark.models.bow import batcher, prepare
     elif args.method == "sbert":
-        from sentence_benchmark.sbert import batcher, prepare
+        from sentence_benchmark.models.sbert import batcher, prepare
     else:
         raise AttributeError()
 
