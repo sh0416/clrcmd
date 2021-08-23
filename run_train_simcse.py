@@ -409,8 +409,7 @@ def main():
     elif model_args.model_name_or_path:
         if "roberta" in model_args.model_name_or_path:
             tokenizer = RobertaTokenizer.from_pretrained(
-                model_args.model_name_or_path,
-                **tokenizer_kwargs,
+                model_args.model_name_or_path, **tokenizer_kwargs,
             )
         else:
             raise NotImplementedError()
@@ -441,23 +440,6 @@ def main():
     # Prepare features
     column_names = datasets["train"].column_names
     sent2_cname = None
-    """
-    if len(column_names) == 2:
-        # Pair datasets
-        sent0_cname = column_names[0]
-        sent1_cname = column_names[1]
-    elif len(column_names) == 3:
-        # Pair datasets with hard negatives
-        sent0_cname = column_names[0]
-        sent1_cname = column_names[1]
-        sent2_cname = column_names[2]
-    elif len(column_names) == 1:
-        # Unsupervised datasets
-        sent0_cname = column_names[0]
-        sent1_cname = column_names[0]
-    else:
-        raise NotImplementedError
-    """
     sent0_cname = "input_strs"
     sent1_cname = "input_strs2"
 
@@ -497,13 +479,6 @@ def main():
         )
         sentences = sentences1 + sentences2
 
-        # If hard negative exists
-        if sent2_cname is not None:
-            for idx in range(total):
-                if examples[sent2_cname][idx] is None:
-                    examples[sent2_cname][idx] = " "
-            sentences += examples[sent2_cname]
-
         sent_features = tokenizer.batch_encode_plus(
             sentences,
             is_split_into_words=True,
@@ -512,24 +487,13 @@ def main():
             padding="max_length" if data_args.pad_to_max_length else False,
         )
 
-        features = {}
-        if sent2_cname is not None:
-            for key in sent_features:
-                features[key] = [
-                    [
-                        sent_features[key][i],
-                        sent_features[key][i + total],
-                        sent_features[key][i + total * 2],
-                    ]
-                    for i in range(total)
-                ]
-        else:
-            for key in sent_features:
-                features[key] = [
-                    [sent_features[key][i], sent_features[key][i + total]]
-                    for i in range(total)
-                ]
-
+        features = {
+            [
+                [sent_features[key][i], sent_features[key][i + total]]
+                for i in range(total)
+            ]
+            for key in sent_features
+        }
         return features
 
     if training_args.do_train:
