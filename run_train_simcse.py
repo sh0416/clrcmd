@@ -1,11 +1,8 @@
-import collections
 import logging
-import math
 import os
-import random
 import sys
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Optional
 
 import torch
 import transformers
@@ -14,11 +11,6 @@ from transformers import (
     CONFIG_MAPPING,
     MODEL_FOR_MASKED_LM_MAPPING,
     AutoConfig,
-    AutoModelForMaskedLM,
-    AutoModelForSequenceClassification,
-    AutoTokenizer,
-    BertForPreTraining,
-    BertModel,
     DataCollatorForLanguageModeling,
     DataCollatorWithPadding,
     EvalPrediction,
@@ -44,9 +36,7 @@ from transformers.tokenization_utils_base import (
 )
 from transformers.trainer_utils import is_main_process
 
-from sentence_benchmark.data import Input
-from sentence_benchmark.tokenizer import RobertaTokenizerDropout
-from simcse.models import BertForCL, RobertaForCL
+from simcse.models import RobertaForCL
 from simcse.trainers import CLTrainer
 
 logger = logging.getLogger(__name__)
@@ -57,7 +47,8 @@ MODEL_TYPES = tuple(conf.model_type for conf in MODEL_CONFIG_CLASSES)
 @dataclass
 class ModelArguments:
     """
-    Arguments pertaining to which model/config/tokenizer we are going to fine-tune, or train from scratch.
+    Arguments pertaining to which model/config/tokenizer we are going to
+    fine-tune, or train from scratch.
     """
 
     # Huggingface's original arguments
@@ -151,12 +142,6 @@ class DataTrainingArguments:
     """
 
     # Huggingface's original arguments.
-    dataset_name: Optional[str] = field(
-        default=None,
-        metadata={
-            "help": "The name of the dataset to use (via the datasets library)."
-        },
-    )
     dataset_config_name: Optional[str] = field(
         default=None,
         metadata={
@@ -181,7 +166,7 @@ class DataTrainingArguments:
     )
 
     # SimCSE's arguments
-    train_file: Optional[str] = field(
+    train_file: str = field(
         default=None,
         metadata={"help": "The training data file (.txt or .csv)."},
     )
@@ -192,13 +177,6 @@ class DataTrainingArguments:
             "than this will be truncated."
         },
     )
-    pad_to_max_length: bool = field(
-        default=False,
-        metadata={
-            "help": "Whether to pad all samples to `max_seq_length`. "
-            "If False, will pad the samples dynamically when batching to the maximum length in the batch."
-        },
-    )
     mlm_probability: float = field(
         default=0.15,
         metadata={
@@ -207,22 +185,13 @@ class DataTrainingArguments:
     )
 
     def __post_init__(self):
-        if (
-            self.dataset_name is None
-            and self.train_file is None
-            and self.validation_file is None
-        ):
-            raise ValueError(
-                "Need either a dataset name or a training/validation file."
-            )
-        else:
-            if self.train_file is not None:
-                extension = self.train_file.split(".")[-1]
-                assert extension in [
-                    "csv",
-                    "json",
-                    "txt",
-                ], "`train_file` should be a csv, a json or a txt file."
+        assert self.train_file is not None, "No --train_file is set"
+        extension = os.path.splitext(self.train_file)[1]
+        assert extension in [
+            ".csv",
+            ".json",
+            ".txt",
+        ], "`train_file` should be a csv, a json or a txt file."
 
 
 @dataclass
@@ -297,17 +266,14 @@ def main():
         (ModelArguments, DataTrainingArguments, OurTrainingArguments)
     )
     if len(sys.argv) == 2 and sys.argv[1].endswith(".json"):
-        # If we pass only one argument to the script and it's the path to a json file,
-        # let's parse it to get our arguments.
-        model_args, data_args, training_args = parser.parse_json_file(
-            json_file=os.path.abspath(sys.argv[1])
-        )
+        # If we pass only one argument to the script
+        # and it's the path to a json file, let's parse
+        # it to get our arguments.
+        json_file = os.path.abspath(sys.argv[1])
+        args = parser.parse_json_file(json_file=json_file)
     else:
-        (
-            model_args,
-            data_args,
-            training_args,
-        ) = parser.parse_args_into_dataclasses()
+        args = parser.parse_args_into_dataclasses()
+    model_args, data_args, training_args = args
 
     if (
         os.path.exists(training_args.output_dir)
@@ -316,63 +282,60 @@ def main():
         and not training_args.overwrite_output_dir
     ):
         raise ValueError(
-            f"Output directory ({training_args.output_dir}) already exists and is not empty."
+            f"Output directory ({training_args.output_dir})"
+            "already exists and is not empty."
             "Use --overwrite_output_dir to overcome."
         )
 
     # Setup logging
+    if is_main_process(training_args.local_rank):
+        level = logging.INFO
+    else:
+        level = logging.WARN
     logging.basicConfig(
-        format="%(asctime)s - %(levelname)s - %(name)s -   %(message)s",
+        format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
         datefmt="%m/%d/%Y %H:%M:%S",
-        level=logging.INFO
-        if is_main_process(training_args.local_rank)
-        else logging.WARN,
+        level=level,
     )
 
     # Log on each process the small summary:
     logger.warning(
-        f"Process rank: {training_args.local_rank}, device: {training_args.device}, n_gpu: {training_args.n_gpu}"
-        + f" distributed training: {bool(training_args.local_rank != -1)}, 16-bits training: {training_args.fp16}"
+        f"Process rank: {training_args.local_rank}, "
+        f"device: {training_args.device}, "
+        f"n_gpu: {training_args.n_gpu}, "
+        f"distributed training: {bool(training_args.local_rank != -1)}, "
+        f"16-bits training: {training_args.fp16} "
     )
-    # Set the verbosity to info of the Transformers logger (on main process only):
+    # Set the verbosity to info of the Transformers logger
+    # (on main process only):
     if is_main_process(training_args.local_rank):
         transformers.utils.logging.set_verbosity_info()
         transformers.utils.logging.enable_default_handler()
         transformers.utils.logging.enable_explicit_format()
-    logger.info("Training/evaluation parameters %s", training_args)
+    logger.info(f"Training/evaluation parameters {training_args}")
 
     # Set seed before initializing model.
     set_seed(training_args.seed)
 
-    # Get the datasets: you can either provide your own CSV/JSON/TXT training and evaluation files (see below)
-    # or just provide the name of one of the public datasets available on the hub at https://huggingface.co/datasets/
-    # (the dataset will be downloaded automatically from the datasets Hub
+    # Get the datasets: you can either provide your own CSV/JSON/TXT training
+    # and evaluation files (see below) or just provide the name of one of the
+    # public datasets available on the hub at https://huggingface.co/datasets/
+    # (the dataset will be downloaded automatically from the datasets Hub)
     #
-    # For CSV/JSON files, this script will use the column called 'text' or the first column. You can easily tweak this
-    # behavior (see below)
+    # For CSV/JSON files, this script will use the column called 'text' or the
+    # first column. You can easily tweak this behavior (see below)
     #
-    # In distributed training, the load_dataset function guarantee that only one local process can concurrently
-    # download the dataset.
-    data_files = {}
-    if data_args.train_file is not None:
-        data_files["train"] = data_args.train_file
-    extension = data_args.train_file.split(".")[-1]
-    if extension == "txt":
-        extension = "text"
-    if extension == "csv":
-        datasets = load_dataset(
-            extension,
-            data_files=data_files,
-            cache_dir="./data/",
-            delimiter="\t" if "tsv" in data_args.train_file else ",",
-        )
-    else:
-        datasets = load_dataset(
-            extension, data_files=data_files, cache_dir="./data/"
-        )
-
-    # See more about loading any type of standard or custom dataset (from files, python dict, pandas DataFrame, etc) at
-    # https://huggingface.co/docs/datasets/loading_datasets.html.
+    # In distributed training, the load_dataset function guarantee that only one
+    # local process can concurrently download the dataset.
+    data_files = {"train": data_args.train_file}
+    ext = os.path.splitext(data_args.train_file)[1]
+    if ext == ".txt":
+        ext = "text"
+    elif ext == ".csv":
+        ext = "csv"
+    elif ext == ".json":
+        ext = "json"
+    datasets = load_dataset(ext, data_files=data_files, cache_dir=".data/")
 
     # Load pretrained model and tokenizer
     #
@@ -389,14 +352,14 @@ def main():
             model_args.config_name, **config_kwargs
         )
     elif model_args.model_name_or_path:
-        config = AutoConfig.from_pretrained(
-            model_args.model_name_or_path, **config_kwargs
-        )
+        if "roberta" in model_args.model_name_or_path:
+            config = AutoConfig.from_pretrained(
+                model_args.model_name_or_path, **config_kwargs
+            )
+        else:
+            raise NotImplementedError()
     else:
-        config = CONFIG_MAPPING[model_args.model_type]()
-        logger.warning(
-            "You are instantiating a new config instance from scratch."
-        )
+        raise NotImplementedError()
 
     tokenizer_kwargs = {
         "cache_dir": model_args.cache_dir,
@@ -404,9 +367,7 @@ def main():
         "revision": model_args.model_revision,
         "use_auth_token": True if model_args.use_auth_token else None,
     }
-    if model_args.tokenizer_name:
-        raise NotImplementedError()
-    elif model_args.model_name_or_path:
+    if model_args.model_name_or_path:
         if "roberta" in model_args.model_name_or_path:
             tokenizer = RobertaTokenizer.from_pretrained(
                 model_args.model_name_or_path, **tokenizer_kwargs,
@@ -414,10 +375,7 @@ def main():
         else:
             raise NotImplementedError()
     else:
-        raise ValueError(
-            "You are instantiating a new tokenizer from scratch. This is not supported by this script."
-            "You can do it from another script, save it, and load it from here, using --tokenizer_name."
-        )
+        raise NotImplementedError()
 
     if model_args.model_name_or_path:
         if "roberta" in model_args.model_name_or_path:
@@ -431,15 +389,14 @@ def main():
                 model_args=model_args,
             )
         else:
-            raise NotImplementedError
+            raise NotImplementedError()
     else:
-        raise NotImplementedError
+        raise NotImplementedError()
 
+    # For the case where the tokenizer and model is different
     model.resize_token_embeddings(len(tokenizer))
 
     # Prepare features
-    column_names = datasets["train"].column_names
-    sent2_cname = None
     sent0_cname = "input_strs"
     sent1_cname = "input_strs2"
 
@@ -468,15 +425,10 @@ def main():
             tokenizer.convert_tokens_to_ids(x.split())
             for x in examples[sent1_cname]
         ]
-        assert all(
-            [
-                x == y
-                for x, y in zip(
-                    tokenizer.batch_decode(sentences1),
-                    tokenizer.batch_decode(sentences2),
-                )
-            ]
-        )
+        text1 = tokenizer.batch_decode(sentences1)
+        text2 = tokenizer.batch_decode(sentences2)
+        for x, y in zip(text1, text2):
+            assert x == y, f"{x} != {y}"
         sentences = sentences1 + sentences2
 
         sent_features = tokenizer.batch_encode_plus(
@@ -484,7 +436,8 @@ def main():
             is_split_into_words=True,
             max_length=data_args.max_seq_length,
             truncation=True,
-            padding="max_length" if data_args.pad_to_max_length else False,
+            padding="longest",
+            return_tensors="pt",
         )
 
         features = {
@@ -497,6 +450,7 @@ def main():
         return features
 
     if training_args.do_train:
+        column_names = datasets["train"].column_names
         train_dataset = datasets["train"].map(
             prepare_features,
             batched=True,
@@ -505,139 +459,15 @@ def main():
             load_from_cache_file=not data_args.overwrite_cache,
         )
         print(train_dataset[0]["input_ids"])
+    else:
+        raise ValueError("no --do_train is set")
 
-    # Data collator
-    @dataclass
-    class OurDataCollatorWithPadding:
-
-        tokenizer: PreTrainedTokenizerBase
-        padding: Union[bool, str, PaddingStrategy] = True
-        max_length: Optional[int] = None
-        pad_to_multiple_of: Optional[int] = None
-        mlm: bool = True
-        mlm_probability: float = data_args.mlm_probability
-
-        def __call__(
-            self,
-            features: List[
-                Dict[str, Union[List[int], List[List[int]], torch.Tensor]]
-            ],
-        ) -> Dict[str, torch.Tensor]:
-            special_keys = [
-                "input_ids",
-                "attention_mask",
-                "token_type_ids",
-                "mlm_input_ids",
-                "mlm_labels",
-            ]
-            bs = len(features)
-            if bs > 0:
-                num_sent = len(features[0]["input_ids"])
-            else:
-                return
-            flat_features = []
-            for feature in features:
-                for i in range(num_sent):
-                    flat_features.append(
-                        {
-                            k: feature[k][i]
-                            if k in special_keys
-                            else feature[k]
-                            for k in feature
-                        }
-                    )
-
-            batch = self.tokenizer.pad(
-                flat_features,
-                padding=self.padding,
-                max_length=self.max_length,
-                pad_to_multiple_of=self.pad_to_multiple_of,
-                return_tensors="pt",
-            )
-            if model_args.do_mlm:
-                batch["mlm_input_ids"], batch["mlm_labels"] = self.mask_tokens(
-                    batch["input_ids"]
-                )
-
-            batch = {
-                k: batch[k].view(bs, num_sent, -1)
-                if k in special_keys
-                else batch[k].view(bs, num_sent, -1)[:, 0]
-                for k in batch
-            }
-
-            if "label" in batch:
-                batch["labels"] = batch["label"]
-                del batch["label"]
-            if "label_ids" in batch:
-                batch["labels"] = batch["label_ids"]
-                del batch["label_ids"]
-
-            return batch
-
-        def mask_tokens(
-            self,
-            inputs: torch.Tensor,
-            special_tokens_mask: Optional[torch.Tensor] = None,
-        ) -> Tuple[torch.Tensor, torch.Tensor]:
-            """
-            Prepare masked tokens inputs/labels for masked language modeling: 80% MASK, 10% random, 10% original.
-            """
-            labels = inputs.clone()
-            # We sample a few tokens in each sequence for MLM training (with probability `self.mlm_probability`)
-            probability_matrix = torch.full(labels.shape, self.mlm_probability)
-            if special_tokens_mask is None:
-                special_tokens_mask = [
-                    self.tokenizer.get_special_tokens_mask(
-                        val, already_has_special_tokens=True
-                    )
-                    for val in labels.tolist()
-                ]
-                special_tokens_mask = torch.tensor(
-                    special_tokens_mask, dtype=torch.bool
-                )
-            else:
-                special_tokens_mask = special_tokens_mask.bool()
-
-            probability_matrix.masked_fill_(special_tokens_mask, value=0.0)
-            masked_indices = torch.bernoulli(probability_matrix).bool()
-            labels[
-                ~masked_indices
-            ] = -100  # We only compute loss on masked tokens
-
-            # 80% of the time, we replace masked input tokens with tokenizer.mask_token ([MASK])
-            indices_replaced = (
-                torch.bernoulli(torch.full(labels.shape, 0.8)).bool()
-                & masked_indices
-            )
-            inputs[indices_replaced] = self.tokenizer.convert_tokens_to_ids(
-                self.tokenizer.mask_token
-            )
-
-            # 10% of the time, we replace masked input tokens with random word
-            indices_random = (
-                torch.bernoulli(torch.full(labels.shape, 0.5)).bool()
-                & masked_indices
-                & ~indices_replaced
-            )
-            random_words = torch.randint(
-                len(self.tokenizer), labels.shape, dtype=torch.long
-            )
-            inputs[indices_random] = random_words[indices_random]
-
-            # The rest of the time (10% of the time) we keep the masked input tokens unchanged
-            return inputs, labels
-
-    data_collator = (
-        default_data_collator
-        if data_args.pad_to_max_length
-        else OurDataCollatorWithPadding(tokenizer)
-    )
+    data_collator = default_data_collator
 
     trainer = CLTrainer(
         model=model,
         args=training_args,
-        train_dataset=train_dataset if training_args.do_train else None,
+        train_dataset=train_dataset,
         tokenizer=tokenizer,
         data_collator=data_collator,
     )

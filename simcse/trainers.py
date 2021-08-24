@@ -1,16 +1,19 @@
 import collections
-import importlib.util
-import inspect
-import json
 import math
 import os
-import re
-import shutil
-import sys
 import time
 import warnings
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Union,
+)
 
 import torch
 import torch.nn as nn
@@ -29,7 +32,6 @@ from transformers.data.data_collator import (
 from transformers.file_utils import (
     WEIGHTS_NAME,
     is_apex_available,
-    is_datasets_available,
     is_in_notebook,
     is_torch_tpu_available,
 )
@@ -72,9 +74,6 @@ if is_apex_available():
 if version.parse(torch.__version__) >= version.parse("1.6"):
     _is_native_amp_available = True
     from torch.cuda.amp import autocast
-
-if is_datasets_available():
-    import datasets
 
 import copy
 from datetime import datetime
@@ -291,27 +290,17 @@ class CLTrainer(Trainer):
             if self.is_world_process_zero():
                 self._rotate_checkpoints(use_mtime=True)
 
-    def train(
-        self,
-        model_path: Optional[str] = None,
-        trial: Union["optuna.Trial", Dict[str, Any]] = None,
-    ):
+    def train(self, model_path: Optional[str] = None):
+        """Main training entry point.
+        The main difference between ours and Huggingface's original
+        implementation is that we also load model_args when reloading best
+        checkpoints for evaluation.
+
+        :param model_path: Local path to the model if the model to train has
+            been instantiated from a local path. If present, training will
+            resume from the optimizer/scheduler states loaded here.
+        :type model_path: Optional[str]
         """
-        Main training entry point.
-
-        Args:
-            model_path (:obj:`str`, `optional`):
-                Local path to the model if the model to train has been instantiated from a local path. If present,
-                training will resume from the optimizer/scheduler states loaded here.
-            trial (:obj:`optuna.Trial` or :obj:`Dict[str, Any]`, `optional`):
-                The trial run or the hyperparameter dictionary for hyperparameter search.
-
-        The main difference between ours and Huggingface's original implementation is that we
-        also load model_args when reloading best checkpoints for evaluation.
-        """
-        # This might change the seed so needs to run first.
-        self._hp_search_setup(trial)
-
         # Model re-init
         if self.model_init is not None:
             # Seed must be set before instantiating the model when using model_init.
