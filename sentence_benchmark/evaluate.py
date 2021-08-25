@@ -10,8 +10,8 @@ from sentence_benchmark.utils import batch
 def evaluate_sts(
     dataset: Dict[str, List[Example]],
     param: Dict[str, Any],
-    prepare: Callable[[List[Input]], Any],
-    batcher: Callable[[List[Input], Any], np.ndarray],
+    prepare: Callable[[List[Input], Dict], Dict],
+    batcher: Callable[[List[Input], Dict], np.ndarray],
 ) -> Dict[str, Dict[str, Any]]:
     results = {}
     scores_all = []

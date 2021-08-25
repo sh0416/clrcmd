@@ -37,19 +37,19 @@ python -m run_train_simcse \
     --model_name_or_path roberta-base \
     --train_file .data/wiki1m_for_simcse.txt_bpedropout_${bpe_dropout_prob}_roberta-base.csv \
     --output_dir result/my-unsup-simcse-roberta-base-${bpe_dropout_prob}-${learning_rate}-${max_seq_length} \
-    --num_train_epochs 1 \
-    --per_device_train_batch_size 64 \
-    --learning_rate ${learning_rate} \
-    --max_seq_length ${max_seq_length} \
-    --gradient_accumulation_step ${gradient_accumulation_step} \
+    --overwrite_output_dir \
     --dataloader_drop_last \
+    --num_train_epochs 1 \
+    --learning_rate ${learning_rate} \
+    --per_device_train_batch_size 64 \
+    --gradient_accumulation_step ${gradient_accumulation_step} \
+    --max_seq_length ${max_seq_length} \
     --evaluation_strategy steps \
+    --eval_steps 125 \
     --metric_for_best_model stsb_spearman \
     --load_best_model_at_end \
-    --eval_steps 125 \
     --pooler_type cls_before_pooler \
     --mlp_only_train \
-    --overwrite_output_dir \
     --temp 0.05 \
     --do_train \
     --do_eval \
