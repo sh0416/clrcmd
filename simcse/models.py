@@ -336,9 +336,9 @@ def sentemb_forward(
 class BertForCL(BertPreTrainedModel):
     _keys_to_ignore_on_load_missing = [r"position_ids"]
 
-    def __init__(self, config, *model_args, **model_kargs):
+    def __init__(self, config, *args, **kwargs):
         super().__init__(config)
-        self.model_args = model_kargs["model_args"]
+        self.model_args = kwargs["model_args"]
         self.bert = BertModel(config)
 
         if self.model_args.do_mlm:

@@ -47,6 +47,9 @@ python -m run_train_simcse \
     --evaluation_strategy steps \
     --eval_steps 125 \
     --metric_for_best_model stsb_spearman \
+    --save_strategy steps \
+    --save_steps 125 \
+    --save_total_limit 1 \
     --load_best_model_at_end \
     --pooler_type cls_before_pooler \
     --mlp_only_train \
