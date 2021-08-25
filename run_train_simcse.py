@@ -97,7 +97,10 @@ class ModelArguments:
     pooler_type: str = field(
         default="cls",
         metadata={
-            "help": "What kind of pooler to use (cls, cls_before_pooler, avg, avg_top2, avg_first_last)."
+            "help": (
+                "What kind of pooler to use (cls, cls_before_pooler, avg, "
+                "avg_top2, avg_first_last)."
+            )
         },
     )
     hard_negative_weight: float = field(
@@ -283,11 +286,9 @@ def main():
         "revision": model_args.model_revision,
         "use_auth_token": True if model_args.use_auth_token else None,
     }
-    if model_args.config_name:
-        config = AutoConfig.from_pretrained(
-            model_args.config_name, **config_kwargs
-        )
-    elif model_args.model_name_or_path:
+    if model_args.pooler_type in ["avg_top2", "avg_first_last"]:
+        config_kwargs["output_hidden_states"] = True
+    if model_args.model_name_or_path:
         if "roberta" in model_args.model_name_or_path:
             config = AutoConfig.from_pretrained(
                 model_args.model_name_or_path, **config_kwargs
@@ -306,8 +307,7 @@ def main():
     if model_args.model_name_or_path:
         if "roberta" in model_args.model_name_or_path:
             tokenizer = RobertaTokenizer.from_pretrained(
-                model_args.model_name_or_path,
-                **tokenizer_kwargs,
+                model_args.model_name_or_path, **tokenizer_kwargs
             )
         else:
             raise NotImplementedError()
@@ -373,7 +373,7 @@ def main():
             is_split_into_words=True,
             max_length=data_args.max_seq_length,
             truncation=True,
-            padding="longest",
+            padding="max_length",
             return_tensors="pt",
         )
 
@@ -410,25 +410,18 @@ def main():
     # Training
     if training_args.do_train:
         train_result = trainer.train()
-        trainer.save_model()  # Saves the tokenizer too for easy upload
 
-        output_train_file = os.path.join(
-            training_args.output_dir, "train_results.txt"
-        )
         if trainer.is_world_process_zero():
+            output_train_file = os.path.join(
+                training_args.output_dir, "train_results.txt"
+            )
             with open(output_train_file, "w") as writer:
                 logger.info("***** Train results *****")
                 for key, value in sorted(train_result.metrics.items()):
                     logger.info(f"  {key} = {value}")
                     writer.write(f"{key} = {value}\n")
 
-            # Need to save the state, since Trainer.save_model saves only the tokenizer with the model
-            trainer.state.save_to_json(
-                os.path.join(training_args.output_dir, "trainer_state.json")
-            )
-
     # Evaluation
-    results = {}
     if training_args.do_eval:
         logger.info("*** Evaluate ***")
         results = trainer.evaluate(eval_senteval_transfer=True)
@@ -442,8 +435,6 @@ def main():
                 for key, value in sorted(results.items()):
                     logger.info(f"  {key} = {value}")
                     writer.write(f"{key} = {value}\n")
-
-    return results
 
 
 def _mp_fn(index):

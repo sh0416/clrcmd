@@ -33,7 +33,7 @@ python -m run_tokenize \
 # Allow multiple threads
 export OMP_NUM_THREADS=8
 
-python -m run_train_simcse \
+python -m torch.distributed.launch --nproc_per_node $NUM_GPU --master_port $MASTER_PORT run_train_simcse.py \
     --model_name_or_path roberta-base \
     --train_file .data/wiki1m_for_simcse.txt_bpedropout_${bpe_dropout_prob}_roberta-base.csv \
     --output_dir result/my-unsup-simcse-roberta-base-${bpe_dropout_prob}-${learning_rate}-${max_seq_length} \
