@@ -68,8 +68,14 @@ class Pooler(nn.Module):
             "avg_first_last",
         ], f"unrecognized pooling type {self.pooler_type}"
 
-    def forward(self, attention_mask: Tensor, outputs: Tensor) -> Tensor:
-        if self.pooler_type in ["cls_before_pooler", "cls"]:
+    def forward(
+        self,
+        attention_mask: Tensor,
+        outputs: BaseModelOutputWithPoolingAndCrossAttentions,
+    ) -> Tensor:
+        if self.pooler_type == "cls":
+            return outputs.pooler_output
+        if self.pooler_type == "cls_before_pooler":
             last_hidden = outputs.last_hidden_state
             return last_hidden[:, 0]
         elif self.pooler_type == "avg":
@@ -105,9 +111,84 @@ def cl_init(cls, config):
     """
     cls.pooler_type = cls.model_args.pooler_type
     cls.pooler = Pooler(cls.model_args.pooler_type)
-    cls.mlp = MLPLayer(config.hidden_size, config.hidden_size)
     cls.sim = TemperatureSimilarity(temp=cls.model_args.temp)
     cls.init_weights()
+
+
+def dist_all_gather(x: Tensor) -> Tensor:
+    """Boilerplate code for all gather in distributed setting
+
+    :param x: Tensor to be gathered
+    :type x: Tensor
+    :return: Tensor after gathered. For the gradient flow, current rank is
+             replaced to original tensor
+    :rtype: Tensor
+    """
+    xlist = [torch.zeros_like(x) for _ in range(dist.get_world_size())]
+    dist.all_gather(tensor_list=xlist, tensor=x.contiguous())
+    # Since `all_gather` results do not have gradients, we replace the
+    # current process's corresponding embeddings with original tensors
+    xlist[dist.get_rank()] = x
+    return torch.cat(xlist, dim=0)
+
+
+def compute_loss_simclr(
+    cls,
+    outputs: BaseModelOutputWithPoolingAndCrossAttentions,
+    attention_mask,
+    batch_size: int,
+    num_sent: int,
+):
+    # Pooling
+    output = cls.pooler(attention_mask, outputs)
+    output = output.view(batch_size, num_sent, output.size(-1))
+    # (batch_size, num_sent, hidden)
+
+    # Separate representation
+    z1, z2 = output[:, 0], output[:, 1]
+    if num_sent == 3:
+        # Hard negative
+        z3 = output[:, 2]
+
+    # Gather all embeddings if using distributed training
+    if dist.is_initialized() and cls.training:
+        z1, z2 = dist_all_gather(z1), dist_all_gather(z2)
+        # Gather hard negative
+        if num_sent >= 3:
+            z3 = dist_all_gather(z3)
+
+    cos_sim = cls.sim(z1.unsqueeze(1), z2.unsqueeze(0))
+    # (batch_size, 1, hidden_dim) x (1, batch_size, hidden_dim) = (batch_size, batch_size)
+    # Hard negative
+    if num_sent >= 3:
+        z1_z3_cos = cls.sim(z1.unsqueeze(1), z3.unsqueeze(0))
+        # (batch_size, 1, hidden_dim) x (1, num_negative, hidden_dim) = (batch_size, num_negative)
+        cos_sim = torch.cat([cos_sim, z1_z3_cos], dim=1)
+        # (batch_size, batch_size + num_negative)
+
+    labels = torch.arange(
+        cos_sim.size(0), dtype=torch.long, device=cos_sim.device
+    )
+    loss_fct = nn.CrossEntropyLoss()
+
+    # Calculate loss with hard negatives
+    if num_sent == 3:
+        # Note that weights are actually logits of weights
+        z3_weight = cls.model_args.hard_negative_weight
+        weights = torch.tensor(
+            [
+                [0.0] * (cos_sim.size(-1) - z1_z3_cos.size(-1))
+                + [0.0] * i
+                + [z3_weight]
+                + [0.0] * (z1_z3_cos.size(-1) - i - 1)
+                for i in range(z1_z3_cos.size(-1))
+            ],
+            device=cos_sim.device,
+        )
+        cos_sim = cos_sim + weights
+
+    loss = loss_fct(cos_sim, labels)
+    return loss, cos_sim
 
 
 def cl_forward(
@@ -164,79 +245,9 @@ def cl_forward(
             return_dict=True,
         )
 
-    # Pooling
-    pooler_output = cls.pooler(attention_mask, outputs)
-    pooler_output = pooler_output.view(
-        batch_size, num_sent, pooler_output.size(-1)
+    loss, logits = compute_loss_simclr(
+        cls, outputs, attention_mask, batch_size, num_sent
     )
-    # (bs, num_sent, hidden)
-
-    # If using "cls", we add an extra MLP layer
-    # (same as BERT's original implementation) over the representation.
-    if cls.pooler_type == "cls":
-        pooler_output = cls.mlp(pooler_output)
-
-    # Separate representation
-    z1, z2 = pooler_output[:, 0], pooler_output[:, 1]
-
-    # Hard negative
-    if num_sent == 3:
-        z3 = pooler_output[:, 2]
-
-    # Gather all embeddings if using distributed training
-    if dist.is_initialized() and cls.training:
-        rank = dist.get_rank()
-        world_size = dist.get_world_size()
-        # Gather hard negative
-        if num_sent >= 3:
-            z3_list = [torch.zeros_like(z3) for _ in range(world_size)]
-            dist.all_gather(tensor_list=z3_list, tensor=z3.contiguous())
-            z3_list[rank] = z3
-            z3 = torch.cat(z3_list, 0)
-
-        # Dummy vectors for allgather
-        z1_list = [torch.zeros_like(z1) for _ in range(world_size)]
-        z2_list = [torch.zeros_like(z2) for _ in range(world_size)]
-        dist.all_gather(tensor_list=z1_list, tensor=z1.contiguous())
-        dist.all_gather(tensor_list=z2_list, tensor=z2.contiguous())
-
-        # Since `all_gather` results do not have gradients, we replace the
-        # current process's corresponding embeddings with original tensors
-        z1_list[rank] = z1
-        z2_list[rank] = z2
-        # Get full batch embeddings: (bs x N, hidden)
-        z1 = torch.cat(z1_list, 0)
-        z2 = torch.cat(z2_list, 0)
-
-    cos_sim = cls.sim(z1.unsqueeze(1), z2.unsqueeze(0))
-    # (batch_size, 1, hidden_dim) x (1, batch_size, hidden_dim) = (batch_size, batch_size)
-
-    # Hard negative
-    if num_sent >= 3:
-        z1_z3_cos = cls.sim(z1.unsqueeze(1), z3.unsqueeze(0))
-        # (batch_size, 1, hidden_dim) x (1, num_negative, hidden_dim) = (batch_size, num_negative)
-        cos_sim = torch.cat([cos_sim, z1_z3_cos], dim=1)
-        # (batch_size, batch_size + num_negative)
-
-    labels = torch.arange(cos_sim.size(0), dtype=torch.long, device=cls.device)
-    loss_fct = nn.CrossEntropyLoss()
-
-    # Calculate loss with hard negatives
-    if num_sent == 3:
-        # Note that weights are actually logits of weights
-        z3_weight = cls.model_args.hard_negative_weight
-        weights = torch.tensor(
-            [
-                [0.0] * (cos_sim.size(-1) - z1_z3_cos.size(-1))
-                + [0.0] * i
-                + [z3_weight]
-                + [0.0] * (z1_z3_cos.size(-1) - i - 1)
-                for i in range(z1_z3_cos.size(-1))
-            ]
-        ).to(cls.device)
-        cos_sim = cos_sim + weights
-
-    loss = loss_fct(cos_sim, labels)
 
     # Calculate loss for MLM
     if mlm_outputs is not None and mlm_labels is not None:
@@ -252,11 +263,11 @@ def cl_forward(
         return_dict if return_dict is not None else cls.config.use_return_dict
     )
     if not return_dict:
-        output = (cos_sim,) + outputs[2:]
+        output = (logits,) + outputs[2:]
         return ((loss,) + output) if loss is not None else output
     return SequenceClassifierOutput(
         loss=loss,
-        logits=cos_sim,
+        logits=logits,
         hidden_states=outputs.hidden_states,
         attentions=outputs.attentions,
     )

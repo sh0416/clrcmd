@@ -1,7 +1,13 @@
 import itertools
 import statistics
 
-from dataset import load_sts12, load_sts13, load_sts14, load_sts15, load_sts16
+from sentence_benchmark.data import (
+    load_sts12,
+    load_sts13,
+    load_sts14,
+    load_sts15,
+    load_sts16,
+)
 
 sts = {
     "sts12": load_sts12("data/STS/STS12-en-test"),
@@ -14,10 +20,7 @@ sts = {
 
 # 쌍 개수 구하기
 pairs = [
-    row
-    for dataset in sts.values()
-    for source in dataset.values()
-    for row in source
+    row for dataset in sts.values() for source in dataset.values() for row in source
 ]
 print(f"The number of pairs {len(pairs)}")
 
