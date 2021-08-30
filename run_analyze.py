@@ -1,13 +1,12 @@
-from transformers import RobertaTokenizer
+import csv
 import itertools
-from typing import List, Tuple, NamedTuple, Dict
-from transformers import RobertaModel
+from collections import defaultdict
+from typing import Dict, List, NamedTuple, Tuple
 
 import matplotlib.pyplot as plt
-import csv
-from torch import Tensor
 import torch
-from collections import defaultdict
+from torch import Tensor
+from transformers import RobertaModel, RobertaTokenizer
 
 
 class TextRepresentation(NamedTuple):
