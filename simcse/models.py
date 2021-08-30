@@ -6,7 +6,9 @@ import torch.distributed as dist
 import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
-from transformers.modeling_outputs import BaseModelOutputWithPoolingAndCrossAttentions
+from transformers.modeling_outputs import (
+    BaseModelOutputWithPoolingAndCrossAttentions,
+)
 from transformers.models.bert.modeling_bert import (
     BertLMPredictionHead,
     BertModel,
@@ -21,15 +23,6 @@ from transformers.models.roberta.modeling_roberta import (
 logger = logging.getLogger(__name__)
 
 
-class MLPLayer(nn.Module):
-    def __init__(self, dim_in: int, dim_out: int):
-        super().__init__()
-        self.layer = nn.Sequential(nn.Linear(dim_in, dim_out), nn.Tanh())
-
-    def forward(self, features: Tensor) -> Tensor:
-        return self.layer(features)
-
-
 class Pooler(nn.Module):
     """Poolers to get the sentence embedding
     'cls': [CLS] representation with BERT/RoBERTa's MLP pooler.
@@ -39,10 +32,9 @@ class Pooler(nn.Module):
     'avg_first_last': average of the first and the last layers.
     """
 
-    def __init__(self, pooler_type: str, hidden_size: int):
+    def __init__(self, pooler_type: str):
         super().__init__()
         self.pooler_type = pooler_type
-        self.layer = MLPLayer(hidden_size, hidden_size)
         assert self.pooler_type in [
             "cls",
             "cls_before_pooler",
@@ -58,7 +50,7 @@ class Pooler(nn.Module):
     ) -> Tensor:
         if self.pooler_type == "cls":
             if self.training:
-                return self.layer(outputs.last_hidden_state[:, 0])
+                return outputs.pooler_output
             else:
                 return outputs.last_hidden_state[:, 0]
         elif self.pooler_type == "cls_before_pooler":
@@ -95,7 +87,7 @@ def cl_init(cls, config):
     Contrastive learning class init function.
     """
     cls.pooler_type = cls.model_args.pooler_type
-    cls.pooler = Pooler(cls.model_args.pooler_type, config.hidden_size)
+    cls.pooler = Pooler(cls.model_args.pooler_type)
     cls.init_weights()
 
 
@@ -217,16 +209,23 @@ def compute_representation(
     )
     last_hidden1 = outputs.last_hidden_state[:batch_size]
     last_hidden2 = outputs.last_hidden_state[batch_size:]
+    if outputs.pooler_output is not None:
+        pooler_output1 = outputs.pooler_output[:batch_size]
+        pooler_output2 = outputs.pooler_output[batch_size:]
     if outputs.hidden_states is not None:
         hidden_states1 = outputs.hidden_states[:batch_size]
         hidden_states2 = outputs.hidden_states[batch_size:]
     else:
         hidden_states1, hidden_states2 = None, None
     outputs1 = BaseModelOutputWithPoolingAndCrossAttentions(
-        last_hidden_state=last_hidden1, hidden_states=hidden_states1
+        pooler_output=pooler_output1,
+        last_hidden_state=last_hidden1,
+        hidden_states=hidden_states1,
     )
     outputs2 = BaseModelOutputWithPoolingAndCrossAttentions(
-        last_hidden_state=last_hidden2, hidden_states=hidden_states2
+        pooler_output=pooler_output2,
+        last_hidden_state=last_hidden2,
+        hidden_states=hidden_states2,
     )
     return outputs1, outputs2
 
@@ -260,76 +259,13 @@ def sentemb_forward(
     return cls.pooler(attention_mask, outputs)
 
 
-class BertForCL(BertPreTrainedModel):
-    _keys_to_ignore_on_load_missing = [r"position_ids"]
-
-    def __init__(self, config, *args, **kwargs):
-        super().__init__(config)
-        self.model_args = kwargs["model_args"]
-        self.bert = BertModel(config)
-
-        if self.model_args.do_mlm:
-            self.lm_head = BertLMPredictionHead(config)
-
-        cl_init(self, config)
-
-    def forward(
-        self,
-        input_ids=None,
-        attention_mask=None,
-        token_type_ids=None,
-        position_ids=None,
-        head_mask=None,
-        inputs_embeds=None,
-        labels=None,
-        output_attentions=None,
-        output_hidden_states=None,
-        return_dict=None,
-        sent_emb=False,
-        mlm_input_ids=None,
-        mlm_labels=None,
-    ):
-        if sent_emb:
-            return sentemb_forward(
-                self,
-                self.bert,
-                input_ids=input_ids,
-                attention_mask=attention_mask,
-                token_type_ids=token_type_ids,
-                position_ids=position_ids,
-                head_mask=head_mask,
-                inputs_embeds=inputs_embeds,
-                labels=labels,
-                output_attentions=output_attentions,
-                output_hidden_states=output_hidden_states,
-                return_dict=return_dict,
-            )
-        else:
-            return cl_forward(
-                self,
-                self.bert,
-                input_ids=input_ids,
-                attention_mask=attention_mask,
-                token_type_ids=token_type_ids,
-                position_ids=position_ids,
-                head_mask=head_mask,
-                inputs_embeds=inputs_embeds,
-                labels=labels,
-                output_attentions=output_attentions,
-                output_hidden_states=output_hidden_states,
-                return_dict=return_dict,
-                mlm_input_ids=mlm_input_ids,
-                mlm_labels=mlm_labels,
-            )
-
-
 class RobertaForCL(RobertaPreTrainedModel):
     _keys_to_ignore_on_load_missing = [r"position_ids"]
 
     def __init__(self, config, *model_args, **model_kargs):
         super().__init__(config)
         self.model_args = model_kargs["model_args"]
-        self.roberta = RobertaModel(config, add_pooling_layer=False)
+        self.roberta = RobertaModel(config)
 
         if self.model_args.do_mlm:
             self.lm_head = RobertaLMHead(config)
