@@ -33,14 +33,12 @@ def batcher(inputs: List[Input], param: Dict) -> np.ndarray:
     batch2 = {k: v.to(param["device"]) for k, v in batch2.items()}
     with torch.no_grad():
         outputs1 = param["model"](
-            **batch1, output_hidden_states=True, return_dict=True,
+            **batch1, output_hidden_states=True, return_dict=True
         )
         outputs2 = param["model"](
-            **batch2, output_hidden_states=True, return_dict=True,
+            **batch2, output_hidden_states=True, return_dict=True
         )
         outputs1 = outputs1.last_hidden_state[:, 0, :]
         outputs2 = outputs2.last_hidden_state[:, 0, :]
-        # outputs1 = outputs1.pooler_output
-        # outputs2 = outputs2.pooler_output
         score = F.cosine_similarity(outputs1, outputs2, dim=1)
         return score.cpu().numpy()

@@ -1,11 +1,12 @@
+import logging
+from typing import Callable, List, Tuple
+
 import torch
 import torch.distributed as dist
 import torch.nn as nn
+import torch.nn.functional as F
 from torch import Tensor
-from transformers.modeling_outputs import (
-    BaseModelOutputWithPoolingAndCrossAttentions,
-    SequenceClassifierOutput,
-)
+from transformers.modeling_outputs import BaseModelOutputWithPoolingAndCrossAttentions
 from transformers.models.bert.modeling_bert import (
     BertLMPredictionHead,
     BertModel,
@@ -17,6 +18,8 @@ from transformers.models.roberta.modeling_roberta import (
     RobertaPreTrainedModel,
 )
 
+logger = logging.getLogger(__name__)
+
 
 class MLPLayer(nn.Module):
     def __init__(self, dim_in: int, dim_out: int):
@@ -27,29 +30,8 @@ class MLPLayer(nn.Module):
         return self.layer(features)
 
 
-class TemperatureSimilarity(nn.Module):
-    def __init__(self, temp: float):
-        super().__init__()
-        self.cos = nn.CosineSimilarity(dim=2)
-        self.temp = temp
-
-    def forward(self, x: Tensor, y: Tensor) -> Tensor:
-        """Compute cosine similarity and apply temperature smoothing.
-        The tensor could be broadcastable.
-
-        :param x: First tensor
-        :type x: Tensor(d1, d2, d3)
-        :param y: Second tensor
-        :type y: Tensor(d1, d2, d3)
-        :return: Cosine similarity
-        :rtype: Tensor(d1, d2)
-        """
-        return self.cos(x, y) / self.temp
-
-
 class Pooler(nn.Module):
-    """
-    Parameter-free poolers to get the sentence embedding
+    """Poolers to get the sentence embedding
     'cls': [CLS] representation with BERT/RoBERTa's MLP pooler.
     'cls_before_pooler': [CLS] representation without the original MLP pooler.
     'avg': average of the last layers' hidden states at each token.
@@ -57,9 +39,10 @@ class Pooler(nn.Module):
     'avg_first_last': average of the first and the last layers.
     """
 
-    def __init__(self, pooler_type: str):
+    def __init__(self, pooler_type: str, hidden_size: int):
         super().__init__()
         self.pooler_type = pooler_type
+        self.layer = MLPLayer(hidden_size, hidden_size)
         assert self.pooler_type in [
             "cls",
             "cls_before_pooler",
@@ -74,10 +57,12 @@ class Pooler(nn.Module):
         outputs: BaseModelOutputWithPoolingAndCrossAttentions,
     ) -> Tensor:
         if self.pooler_type == "cls":
-            return outputs.pooler_output
-        if self.pooler_type == "cls_before_pooler":
-            last_hidden = outputs.last_hidden_state
-            return last_hidden[:, 0]
+            if self.training:
+                return self.layer(outputs.last_hidden_state[:, 0])
+            else:
+                return outputs.last_hidden_state[:, 0]
+        elif self.pooler_type == "cls_before_pooler":
+            return outputs.last_hidden_state[:, 0]
         elif self.pooler_type == "avg":
             last_hidden = outputs.last_hidden_state
             attention_mask = attention_mask[:, :, None]
@@ -110,8 +95,7 @@ def cl_init(cls, config):
     Contrastive learning class init function.
     """
     cls.pooler_type = cls.model_args.pooler_type
-    cls.pooler = Pooler(cls.model_args.pooler_type)
-    cls.sim = TemperatureSimilarity(temp=cls.model_args.temp)
+    cls.pooler = Pooler(cls.model_args.pooler_type, config.hidden_size)
     cls.init_weights()
 
 
@@ -133,189 +117,147 @@ def dist_all_gather(x: Tensor) -> Tensor:
 
 
 def compute_loss_simclr(
-    cls,
-    outputs: BaseModelOutputWithPoolingAndCrossAttentions,
-    attention_mask,
-    batch_size: int,
-    num_sent: int,
-):
-    # Pooling
-    output = cls.pooler(attention_mask, outputs)
-    output = output.view(batch_size, num_sent, output.size(-1))
-    # (batch_size, num_sent, hidden)
+    output1: BaseModelOutputWithPoolingAndCrossAttentions,
+    output2: BaseModelOutputWithPoolingAndCrossAttentions,
+    attention_mask: Tensor,
+    pooler_fn: Callable,
+    temp: float,
+    is_training: bool,
+) -> Tensor:
+    """Compute SimCLR loss in sentence-level
 
-    # Separate representation
-    z1, z2 = output[:, 0], output[:, 1]
-    if num_sent == 3:
-        # Hard negative
-        z3 = output[:, 2]
-
+    :param output1: Model output for first view
+    :type output1: BaseModelOutputWithPoolingAndCrossAttentions
+    :param output2: Model output for second view
+    :type output2: BaseModelOutputWithPoolingAndCrossAttentions
+    :param attention_mask: Attention mask
+    :type attention_mask: FloatTensor(batch_size, seq_len)
+    :param pooler_fn: Function for extracting sentence representation
+    :type pooler_fn: Callable[[BaseModelOutputWithPoolingAndCrossAttentions],
+                              FloatTensor(batch_size, hidden_dim)]
+    :param temp: Temperature for cosine similarity
+    :type temp: float
+    :param is_training: Flag indicating whether is training or not
+    :type is_training: bool
+    :return: Scalar loss
+    :rtype: FloatTensor()
+    """
+    output1 = pooler_fn(attention_mask, output1)
+    output2 = pooler_fn(attention_mask, output2)
     # Gather all embeddings if using distributed training
-    if dist.is_initialized() and cls.training:
-        z1, z2 = dist_all_gather(z1), dist_all_gather(z2)
-        # Gather hard negative
-        if num_sent >= 3:
-            z3 = dist_all_gather(z3)
+    if dist.is_initialized() and is_training:
+        output1, output2 = dist_all_gather(output1), dist_all_gather(output2)
 
-    cos_sim = cls.sim(z1.unsqueeze(1), z2.unsqueeze(0))
-    # (batch_size, 1, hidden_dim) x (1, batch_size, hidden_dim) = (batch_size, batch_size)
-    # Hard negative
-    if num_sent >= 3:
-        z1_z3_cos = cls.sim(z1.unsqueeze(1), z3.unsqueeze(0))
-        # (batch_size, 1, hidden_dim) x (1, num_negative, hidden_dim) = (batch_size, num_negative)
-        cos_sim = torch.cat([cos_sim, z1_z3_cos], dim=1)
-        # (batch_size, batch_size + num_negative)
+    sim = F.cosine_similarity(output1[None, :, :], output2[:, None, :], dim=2)
+    sim = sim / temp
+    # (batch_size, batch_size)
+    labels = torch.arange(sim.shape[1], dtype=torch.long, device=sim.device)
+    loss = F.cross_entropy(sim, labels)
+    logger.debug(f"{loss = :.4f}")
+    return loss
 
-    labels = torch.arange(
-        cos_sim.size(0), dtype=torch.long, device=cos_sim.device
-    )
-    loss_fct = nn.CrossEntropyLoss()
 
-    # Calculate loss with hard negatives
-    if num_sent == 3:
-        # Note that weights are actually logits of weights
-        z3_weight = cls.model_args.hard_negative_weight
-        weights = torch.tensor(
-            [
-                [0.0] * (cos_sim.size(-1) - z1_z3_cos.size(-1))
-                + [0.0] * i
-                + [z3_weight]
-                + [0.0] * (z1_z3_cos.size(-1) - i - 1)
-                for i in range(z1_z3_cos.size(-1))
-            ],
-            device=cos_sim.device,
+def compute_loss_simclr_token(
+    output1: Tensor, output2: Tensor, pair: List[Tensor], temp: float
+) -> Tensor:
+    """Compute SimCLR loss in token-level
+
+    :param output1: Bert output for the first sentence
+    :type output1: FloatTensor(batch_size, seq_len, hidden_dim)
+    :param ouptut2: Bert output for the second sentence
+    :type output2: FloatTensor(batch_size, seq_len, hidden_dim)
+    :param pair: Pair for computing similarity between token
+    :type pair: List[LongTensor(2, num_pairs)]
+    :param temp: Temperature for cosine similarity
+    :type temp: float
+    :return: Scalar loss
+    :rtype: FloatTensor()
+    """
+    assert output1.shape[0] == output2.shape[0] == len(pair)
+    batch_idx = [torch.full((x.shape[1],), i) for i, x in enumerate(pair)]
+    seq_idx1 = [x[0] for x in pair]
+    seq_idx2 = [x[1] for x in pair]
+    batch_idx = torch.cat(batch_idx)
+    seq_idx1 = torch.cat(seq_idx1)
+    seq_idx2 = torch.cat(seq_idx2)
+    output1 = output1[batch_idx, seq_idx1]
+    output2 = output2[batch_idx, seq_idx2]
+    # (num_pairs, hidden_dim)
+    sim = F.cosine_similarity(output1[None, :, :], output2[:, None, :], dim=2)
+    sim = sim / temp  # Apply temperature
+    # (num_pairs, num_pairs)
+    label = torch.arange(sim.shape[1], dtype=torch.long, device=sim.device)
+    loss = F.cross_entropy(sim, label)
+    logger.debug(f"{loss = :.4f}")
+    return loss
+
+
+def compute_representation(
+    encoder: Callable,
+    input_ids: Tensor,
+    attention_mask: Tensor,
+    token_type_ids: Tensor,
+) -> Tuple[
+    BaseModelOutputWithPoolingAndCrossAttentions,
+    BaseModelOutputWithPoolingAndCrossAttentions,
+]:
+    """Compute bert contextual representation for contrastive learning"""
+    batch_size = input_ids.shape[0]
+    input_ids = torch.cat([input_ids[:, 0], input_ids[:, 1]])
+    attention_mask = torch.cat([attention_mask[:, 0], attention_mask[:, 1]])
+    if token_type_ids is not None:
+        token_type_ids = torch.cat(
+            [token_type_ids[:, 0], token_type_ids[:, 1]]
         )
-        cos_sim = cos_sim + weights
-
-    loss = loss_fct(cos_sim, labels)
-    return loss, cos_sim
+    outputs = encoder(
+        input_ids,
+        attention_mask=attention_mask,
+        token_type_ids=token_type_ids,
+        return_dict=True,
+    )
+    last_hidden1 = outputs.last_hidden_state[:batch_size]
+    last_hidden2 = outputs.last_hidden_state[batch_size:]
+    if outputs.hidden_states is not None:
+        hidden_states1 = outputs.hidden_states[:batch_size]
+        hidden_states2 = outputs.hidden_states[batch_size:]
+    else:
+        hidden_states1, hidden_states2 = None, None
+    outputs1 = BaseModelOutputWithPoolingAndCrossAttentions(
+        last_hidden_state=last_hidden1, hidden_states=hidden_states1
+    )
+    outputs2 = BaseModelOutputWithPoolingAndCrossAttentions(
+        last_hidden_state=last_hidden2, hidden_states=hidden_states2
+    )
+    return outputs1, outputs2
 
 
 def cl_forward(
-    cls,
-    encoder,
-    input_ids=None,
-    attention_mask=None,
-    token_type_ids=None,
-    position_ids=None,
-    head_mask=None,
-    inputs_embeds=None,
-    labels=None,
-    output_attentions=None,
-    output_hidden_states=None,
-    return_dict=None,
-    mlm_input_ids=None,
-    mlm_labels=None,
-):
-    # Number of sentences in one instance
-    # 2: pair instance; 3: pair instance with a hard negative
-    batch_size, num_sent, seq_len = input_ids.shape
-
-    mlm_outputs = None
-    # Flatten input for encoding (bs * num_sent, len)
-    input_ids = input_ids.view(-1, seq_len)
-    attention_mask = attention_mask.view(-1, seq_len)
-    if token_type_ids is not None:
-        token_type_ids = token_type_ids.view(-1, seq_len)
-
-    # Get raw embeddings
-    outputs = encoder(
-        input_ids,
-        attention_mask=attention_mask,
-        token_type_ids=token_type_ids,
-        position_ids=position_ids,
-        head_mask=head_mask,
-        inputs_embeds=inputs_embeds,
-        output_attentions=output_attentions,
-        return_dict=True,
+    cls, encoder, input_ids=None, attention_mask=None, token_type_ids=None
+) -> Tuple[Tensor]:
+    outputs1, outputs2 = compute_representation(
+        encoder, input_ids, attention_mask, token_type_ids
     )
-
-    # MLM auxiliary objective
-    if mlm_input_ids is not None:
-        mlm_input_ids = mlm_input_ids.view(-1, seq_len)
-        mlm_outputs = encoder(
-            mlm_input_ids,
-            attention_mask=attention_mask,
-            token_type_ids=token_type_ids,
-            position_ids=position_ids,
-            head_mask=head_mask,
-            inputs_embeds=inputs_embeds,
-            output_attentions=output_attentions,
-            output_hidden_states=output_hidden_states,
-            return_dict=True,
-        )
-
-    loss, logits = compute_loss_simclr(
-        cls, outputs, attention_mask, batch_size, num_sent
+    loss = compute_loss_simclr(
+        outputs1,
+        outputs2,
+        attention_mask,
+        cls.pooler,
+        cls.model_args.temp,
+        cls.training,
     )
-
-    # Calculate loss for MLM
-    if mlm_outputs is not None and mlm_labels is not None:
-        mlm_labels = mlm_labels.view(-1, mlm_labels.size(-1))
-        prediction_scores = cls.lm_head(mlm_outputs.last_hidden_state)
-        masked_lm_loss = loss_fct(
-            prediction_scores.view(-1, cls.config.vocab_size),
-            mlm_labels.view(-1),
-        )
-        loss = loss + cls.model_args.mlm_weight * masked_lm_loss
-
-    return_dict = (
-        return_dict if return_dict is not None else cls.config.use_return_dict
-    )
-    if not return_dict:
-        output = (logits,) + outputs[2:]
-        return ((loss,) + output) if loss is not None else output
-    return SequenceClassifierOutput(
-        loss=loss,
-        logits=logits,
-        hidden_states=outputs.hidden_states,
-        attentions=outputs.attentions,
-    )
+    return (loss,)
 
 
 def sentemb_forward(
-    cls,
-    encoder,
-    input_ids=None,
-    attention_mask=None,
-    token_type_ids=None,
-    position_ids=None,
-    head_mask=None,
-    inputs_embeds=None,
-    labels=None,
-    output_attentions=None,
-    output_hidden_states=None,
-    return_dict=None,
-):
-
-    return_dict = (
-        return_dict if return_dict is not None else cls.config.use_return_dict
-    )
-
+    cls, encoder, input_ids=None, attention_mask=None, token_type_ids=None
+) -> BaseModelOutputWithPoolingAndCrossAttentions:
     outputs = encoder(
         input_ids,
         attention_mask=attention_mask,
         token_type_ids=token_type_ids,
-        position_ids=position_ids,
-        head_mask=head_mask,
-        inputs_embeds=inputs_embeds,
-        output_attentions=output_attentions,
-        output_hidden_states=output_hidden_states,
         return_dict=True,
     )
-
-    pooler_output = cls.pooler(attention_mask, outputs)
-    if cls.pooler_type == "cls" and not cls.model_args.mlp_only_train:
-        pooler_output = cls.mlp(pooler_output)
-
-    if not return_dict:
-        return (outputs[0], pooler_output) + outputs[2:]
-
-    return BaseModelOutputWithPoolingAndCrossAttentions(
-        pooler_output=pooler_output,
-        last_hidden_state=outputs.last_hidden_state,
-        hidden_states=outputs.hidden_states,
-    )
+    return cls.pooler(attention_mask, outputs)
 
 
 class BertForCL(BertPreTrainedModel):
@@ -387,7 +329,7 @@ class RobertaForCL(RobertaPreTrainedModel):
     def __init__(self, config, *model_args, **model_kargs):
         super().__init__(config)
         self.model_args = model_kargs["model_args"]
-        self.roberta = RobertaModel(config)
+        self.roberta = RobertaModel(config, add_pooling_layer=False)
 
         if self.model_args.do_mlm:
             self.lm_head = RobertaLMHead(config)
@@ -399,16 +341,7 @@ class RobertaForCL(RobertaPreTrainedModel):
         input_ids=None,
         attention_mask=None,
         token_type_ids=None,
-        position_ids=None,
-        head_mask=None,
-        inputs_embeds=None,
-        labels=None,
-        output_attentions=None,
-        output_hidden_states=None,
-        return_dict=None,
         sent_emb=False,
-        mlm_input_ids=None,
-        mlm_labels=None,
     ):
         if sent_emb:
             return sentemb_forward(
@@ -417,13 +350,6 @@ class RobertaForCL(RobertaPreTrainedModel):
                 input_ids=input_ids,
                 attention_mask=attention_mask,
                 token_type_ids=token_type_ids,
-                position_ids=position_ids,
-                head_mask=head_mask,
-                inputs_embeds=inputs_embeds,
-                labels=labels,
-                output_attentions=output_attentions,
-                output_hidden_states=output_hidden_states,
-                return_dict=return_dict,
             )
         else:
             return cl_forward(
@@ -432,13 +358,4 @@ class RobertaForCL(RobertaPreTrainedModel):
                 input_ids=input_ids,
                 attention_mask=attention_mask,
                 token_type_ids=token_type_ids,
-                position_ids=position_ids,
-                head_mask=head_mask,
-                inputs_embeds=inputs_embeds,
-                labels=labels,
-                output_attentions=output_attentions,
-                output_hidden_states=output_hidden_states,
-                return_dict=return_dict,
-                mlm_input_ids=mlm_input_ids,
-                mlm_labels=mlm_labels,
             )

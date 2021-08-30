@@ -291,7 +291,10 @@ def main():
     if model_args.model_name_or_path:
         if "roberta" in model_args.model_name_or_path:
             config = AutoConfig.from_pretrained(
-                model_args.model_name_or_path, **config_kwargs
+                model_args.model_name_or_path,
+                hidden_dropout_prob=0.0,
+                attention_probs_dropout_prob=0.0,
+                **config_kwargs,
             )
         else:
             raise NotImplementedError()

@@ -1,16 +1,14 @@
 from typing import Dict, List, Optional
 
+import numpy as np
 import torch
 import torch.nn.functional as F
 from torch.utils.data.dataset import Dataset
 from transformers import Trainer
 from transformers.utils import logging
 
-from sentence_benchmark.evaluate import evaluate_sts
-
-import numpy as np
-
 from sentence_benchmark.data import Input, load_stsb_dev
+from sentence_benchmark.evaluate import evaluate_sts
 
 logger = logging.get_logger(__name__)
 
@@ -40,20 +38,8 @@ class CLTrainer(Trainer):
             batch1 = {k: v.to(self.args.device) for k, v in batch1.items()}
             batch2 = {k: v.to(self.args.device) for k, v in batch2.items()}
             with torch.no_grad():
-                outputs1 = self.model(
-                    **batch1,
-                    output_hidden_states=True,
-                    return_dict=True,
-                    sent_emb=True,
-                )
-                outputs2 = self.model(
-                    **batch2,
-                    output_hidden_states=True,
-                    return_dict=True,
-                    sent_emb=True,
-                )
-                outputs1 = outputs1.pooler_output
-                outputs2 = outputs2.pooler_output
+                outputs1 = self.model(**batch1, sent_emb=True)
+                outputs2 = self.model(**batch2, sent_emb=True)
                 score = F.cosine_similarity(outputs1, outputs2, dim=1)
                 return score.cpu().numpy()
 
