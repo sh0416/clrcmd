@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import sys
@@ -122,6 +123,7 @@ class ModelArguments:
     mlp_only_train: bool = field(
         default=False, metadata={"help": "Use MLP only during training"}
     )
+    dropout_prob: float = field(default=0.1, metadata={"help": "Dropout prob"})
 
 
 @dataclass
@@ -221,11 +223,19 @@ def main():
         and not training_args.overwrite_output_dir
     ):
         raise ValueError(
-            f"Output directory ({training_args.output_dir})"
-            "already exists and is not empty."
-            "Use --overwrite_output_dir to overcome."
+            f"Output directory ({training_args.output_dir}) already exists and"
+            " is not empty. Use --overwrite_output_dir to overcome."
         )
 
+    os.makedirs(training_args.output_dir, exist_ok=True)
+    with open(os.path.join(training_args.output_dir, "model_args.json")) as f:
+        json.dump(training_args, f)
+    with open(os.path.join(training_args.output_dir, "data_args.json")) as f:
+        json.dump(data_args, f)
+    with open(
+        os.path.join(training_args.output_dir, "training_args.json")
+    ) as f:
+        json.dump(training_args, f)
     # Setup logging
     if is_main_process(training_args.local_rank):
         level = logging.INFO
@@ -285,6 +295,7 @@ def main():
         "cache_dir": model_args.cache_dir,
         "revision": model_args.model_revision,
         "use_auth_token": True if model_args.use_auth_token else None,
+        "dropout_prob": model_args.dropout_prob,
     }
     if model_args.pooler_type in ["avg_top2", "avg_first_last"]:
         config_kwargs["output_hidden_states"] = True
