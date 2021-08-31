@@ -6,7 +6,9 @@ import torch.distributed as dist
 import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
-from transformers.modeling_outputs import BaseModelOutputWithPoolingAndCrossAttentions
+from transformers.modeling_outputs import (
+    BaseModelOutputWithPoolingAndCrossAttentions,
+)
 from transformers.models.bert.modeling_bert import (
     BertLMPredictionHead,
     BertModel,
@@ -214,8 +216,8 @@ def compute_representation(
         pooler_output1 = outputs.pooler_output[:batch_size]
         pooler_output2 = outputs.pooler_output[batch_size:]
     if outputs.hidden_states is not None:
-        hidden_states1 = outputs.hidden_states[:batch_size]
-        hidden_states2 = outputs.hidden_states[batch_size:]
+        hidden_states1 = tuple(x[:batch_size] for x in outputs.hidden_states)
+        hidden_states2 = tuple(x[batch_size:] for x in outputs.hidden_states)
     else:
         hidden_states1, hidden_states2 = None, None
     outputs1 = BaseModelOutputWithPoolingAndCrossAttentions(
