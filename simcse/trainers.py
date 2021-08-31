@@ -7,7 +7,16 @@ from torch.utils.data.dataset import Dataset
 from transformers import Trainer
 from transformers.utils import logging
 
-from sentence_benchmark.data import Input, load_stsb_dev
+from sentence_benchmark.data import (
+    Input,
+    load_sts12,
+    load_sts13,
+    load_sts14,
+    load_sts15,
+    load_sts16,
+    load_stsb_dev,
+    load_stsb_test,
+)
 from sentence_benchmark.evaluate import evaluate_sts
 
 logger = logging.get_logger(__name__)
@@ -15,11 +24,7 @@ logger = logging.get_logger(__name__)
 
 class CLTrainer(Trainer):
     def evaluate(
-        self,
-        eval_dataset: Optional[Dataset] = None,
-        ignore_keys: Optional[List[str]] = None,
-        metric_key_prefix: str = "eval",
-        eval_senteval_transfer: bool = False,
+        self, ignore_keys=None, metric_key_prefix="eval", all: bool = False
     ) -> Dict[str, float]:
 
         # SentEval prepare and batcher
@@ -43,19 +48,33 @@ class CLTrainer(Trainer):
                 score = F.cosine_similarity(outputs1, outputs2, dim=1)
                 return score.cpu().numpy()
 
-        # NOTE: I don't know how to evaluate SICK-R because it train something
         self.model.eval()
-        dataset_stsb = load_stsb_dev(".data/STS/STSBenchmark")
-        # dataset_sickr = load_sickr_dev(".data/SICK")
-        result_stsb = evaluate_sts(dataset_stsb, {}, prepare, batcher)
-        # result_sickr = evaluate_sts(dataset_sickr, {}, prepare, batcher)
-
-        stsb_spearman = result_stsb["all"]["spearman"]["mean"]
-        # sickr_spearman = result_sickr["all"]["spearman"][0]
-
-        metrics = {
-            "eval_stsb_spearman": stsb_spearman,
-            #    "eval_sickr_spearman": sickr_spearman,
-        }
+        if all:
+            metrics = {}
+            # STS12
+            dataset = load_sts12(".data/STS/STS12-en-test")
+            metrics["STS12"] = evaluate_sts(dataset, {}, prepare, batcher)
+            # STS13
+            dataset = load_sts13(".data/STS/STS13-en-test")
+            metrics["STS13"] = evaluate_sts(dataset, {}, prepare, batcher)
+            # STS14
+            dataset = load_sts14(".data/STS/STS14-en-test")
+            metrics["STS14"] = evaluate_sts(dataset, {}, prepare, batcher)
+            # STS15
+            dataset = load_sts15(".data/STS/STS15-en-test")
+            metrics["STS15"] = evaluate_sts(dataset, {}, prepare, batcher)
+            # STS16
+            dataset = load_sts16(".data/STS/STS16-en-test")
+            metrics["STS16"] = evaluate_sts(dataset, {}, prepare, batcher)
+            # STSB
+            dataset = load_stsb_dev(".data/STS/STSBenchmark")
+            metrics["STSB-dev"] = evaluate_sts(dataset, {}, prepare, batcher)
+            dataset = load_stsb_test(".data/STS/STSBenchmark")
+            metrics["STSB-test"] = evaluate_sts(dataset, {}, prepare, batcher)
+        else:
+            dataset = load_stsb_dev(".data/STS/STSBenchmark")
+            result = evaluate_sts(dataset, {}, prepare, batcher)
+            stsb_spearman = result["all"]["spearman"]["all"]
+            metrics = {"eval_stsb_spearman": stsb_spearman}
         self.log(metrics)
         return metrics

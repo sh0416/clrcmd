@@ -1,11 +1,10 @@
 import json
-import logging
 import os
-import sys
-from dataclasses import dataclass, field
+import logging
+from dataclasses import dataclass, field, asdict
 from typing import Optional
+from datetime import datetime
 
-import torch
 import transformers
 from datasets import load_dataset
 from transformers import (
@@ -16,17 +15,13 @@ from transformers import (
     TrainingArguments,
     set_seed,
 )
-from transformers.file_utils import (
-    cached_property,
-    is_torch_tpu_available,
-    torch_required,
-)
 from transformers.trainer_utils import is_main_process
 
+from transformers.utils import logging
 from simcse.models import RobertaForCL
 from simcse.trainers import CLTrainer
 
-logger = logging.getLogger(__name__)
+logger = logging.get_logger(__name__)
 MODEL_CONFIG_CLASSES = list(MODEL_FOR_MASKED_LM_MAPPING.keys())
 MODEL_TYPES = tuple(conf.model_type for conf in MODEL_CONFIG_CLASSES)
 
@@ -187,65 +182,45 @@ class DataTrainingArguments:
 
 @dataclass
 class OurTrainingArguments(TrainingArguments):
-    # Evaluation
-    # By default, we evaluate STS (dev) during training (for selecting best
-    # checkpoints) and evaluate both STS and transfer tasks (dev) at the end of
-    # training. Using --eval_transfer will allow evaluating both STS and
-    # transfer tasks (dev) during training.
-    eval_transfer: bool = field(
-        default=False,
-        metadata={"help": "Evaluate transfer task dev sets (in validation)."},
+    output_dir: str = field(
+        default=os.path.join(
+            "result", datetime.now().strftime("%Y%m%d_%H%M%S")
+        ),
+        metadata={
+            "help": "The output directory where the model predictions and checkpoints will be written."
+        },
     )
 
+    def __post_init__(self):
+        if (
+            os.path.exists(self.output_dir)
+            and os.listdir(self.output_dir)
+            and self.do_train
+            and not self.overwrite_output_dir
+        ):
+            raise ValueError(
+                f"Output directory ({self.output_dir}) already exists and"
+                " is not empty. Use --overwrite_output_dir to overcome."
+            )
+        return super().__post_init__()
 
-def main():
-    # See all possible arguments in src/transformers/training_args.py
-    # or by passing the --help flag to this script.
-    # We now keep distinct sets of args, for a cleaner separation of concerns.
 
-    parser = HfArgumentParser(
-        (ModelArguments, DataTrainingArguments, OurTrainingArguments)
-    )
-    if len(sys.argv) == 2 and sys.argv[1].endswith(".json"):
-        # If we pass only one argument to the script
-        # and it's the path to a json file, let's parse
-        # it to get our arguments.
-        json_file = os.path.abspath(sys.argv[1])
-        args = parser.parse_json_file(json_file=json_file)
-    else:
-        args = parser.parse_args_into_dataclasses()
+def train(args):
     model_args, data_args, training_args = args
 
-    if (
-        os.path.exists(training_args.output_dir)
-        and os.listdir(training_args.output_dir)
-        and training_args.do_train
-        and not training_args.overwrite_output_dir
-    ):
-        raise ValueError(
-            f"Output directory ({training_args.output_dir}) already exists and"
-            " is not empty. Use --overwrite_output_dir to overcome."
-        )
-
+    """
+    # Save arguments
     os.makedirs(training_args.output_dir, exist_ok=True)
-    with open(os.path.join(training_args.output_dir, "model_args.json")) as f:
-        json.dump(training_args, f)
-    with open(os.path.join(training_args.output_dir, "data_args.json")) as f:
-        json.dump(data_args, f)
-    with open(
-        os.path.join(training_args.output_dir, "training_args.json")
-    ) as f:
-        json.dump(training_args, f)
-    # Setup logging
-    if is_main_process(training_args.local_rank):
-        level = logging.INFO
-    else:
-        level = logging.WARN
-    logging.basicConfig(
-        format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
-        datefmt="%m/%d/%Y %H:%M:%S",
-        level=level,
-    )
+    filepath = os.path.join(training_args.output_dir, "model_args.json")
+    with open(filepath, "w") as f:
+        json.dump(asdict(model_args), f)
+    filepath = os.path.join(training_args.output_dir, "data_args.json")
+    with open(filepath, "w") as f:
+        json.dump(asdict(data_args), f)
+    filepath = os.path.join(training_args.output_dir, "training_args.json")
+    with open(filepath, "w") as f:
+        json.dump(training_args.to_dict(), f)
+    """
 
     # Log on each process the small summary:
     logger.warning(
@@ -257,10 +232,9 @@ def main():
     )
     # Set the verbosity to info of the Transformers logger
     # (on main process only):
-    if is_main_process(training_args.local_rank):
-        transformers.utils.logging.set_verbosity_info()
-        transformers.utils.logging.enable_default_handler()
-        transformers.utils.logging.enable_explicit_format()
+    transformers.utils.logging.set_verbosity_info()
+    transformers.utils.logging.enable_default_handler()
+    transformers.utils.logging.enable_explicit_format()
     logger.info(f"Training/evaluation parameters {training_args}")
 
     # Set seed before initializing model.
@@ -398,18 +372,14 @@ def main():
         }
         return features
 
-    if training_args.do_train:
-        column_names = datasets["train"].column_names
-        train_dataset = datasets["train"].map(
-            prepare_features,
-            batched=True,
-            num_proc=data_args.preprocessing_num_workers,
-            remove_columns=column_names,
-            load_from_cache_file=not data_args.overwrite_cache,
-        )
-        print(train_dataset[0]["input_ids"])
-    else:
-        raise ValueError("no --do_train is set")
+    column_names = datasets["train"].column_names
+    train_dataset = datasets["train"].map(
+        prepare_features,
+        batched=True,
+        num_proc=data_args.preprocessing_num_workers,
+        remove_columns=column_names,
+        load_from_cache_file=not data_args.overwrite_cache,
+    )
 
     trainer = CLTrainer(
         model=model,
@@ -420,38 +390,45 @@ def main():
     trainer.model_args = model_args
 
     # Training
-    if training_args.do_train:
-        train_result = trainer.train()
+    train_result = trainer.train()
 
-        if trainer.is_world_process_zero():
-            output_train_file = os.path.join(
-                training_args.output_dir, "train_results.txt"
-            )
-            with open(output_train_file, "w") as writer:
-                logger.info("***** Train results *****")
-                for key, value in sorted(train_result.metrics.items()):
-                    logger.info(f"  {key} = {value}")
-                    writer.write(f"{key} = {value}\n")
+    if trainer.is_world_process_zero():
+        output_train_file = os.path.join(
+            training_args.output_dir, "train_results.txt"
+        )
+        with open(output_train_file, "w") as writer:
+            logger.info("***** Train results *****")
+            for key, value in sorted(train_result.metrics.items()):
+                logger.info(f"  {key} = {value}")
+                writer.write(f"{key} = {value}\n")
 
     # Evaluation
-    if training_args.do_eval:
-        logger.info("*** Evaluate ***")
-        results = trainer.evaluate(eval_senteval_transfer=True)
+    logger.info("*** Evaluate ***")
+    results = trainer.evaluate(all=True)
 
-        output_eval_file = os.path.join(
-            training_args.output_dir, "eval_results.txt"
-        )
-        if trainer.is_world_process_zero():
-            with open(output_eval_file, "w") as writer:
-                logger.info("***** Eval results *****")
-                for key, value in sorted(results.items()):
-                    logger.info(f"  {key} = {value}")
-                    writer.write(f"{key} = {value}\n")
+    output_eval_file = os.path.join(
+        training_args.output_dir, "eval_results.txt"
+    )
+    if trainer.is_world_process_zero():
+        with open(output_eval_file, "w") as writer:
+            logger.info("***** Eval results *****")
+            for key, value in sorted(results.items()):
+                logger.info(f"  {key} = {value}")
+                writer.write(f"{key} = {value}\n")
+
+    return results
 
 
-def _mp_fn(index):
-    # For xla_spawn (TPUs)
-    main()
+def main():
+    # See all possible arguments in src/transformers/training_args.py
+    # or by passing the --help flag to this script.
+    # We now keep distinct sets of args, for a cleaner separation of concerns.
+
+    parser = HfArgumentParser(
+        (ModelArguments, DataTrainingArguments, OurTrainingArguments)
+    )
+    args = parser.parse_args_into_dataclasses()
+    train(args)
 
 
 if __name__ == "__main__":
