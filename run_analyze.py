@@ -1,7 +1,8 @@
+import argparse
 import csv
 import itertools
 from collections import defaultdict
-from typing import Dict, List, NamedTuple, Tuple
+from typing import Callable, Dict, List, NamedTuple, Tuple
 
 import matplotlib.pyplot as plt
 import torch
@@ -16,11 +17,14 @@ class TextRepresentation(NamedTuple):
     string: List[str]  # Unicode representation
 
 
-def create_representation(text: str) -> TextRepresentation:
-    tokens = text.split()
-    bytes = "".join(tokens)
-    string = tokenizer.convert_tokens_to_string(bytes)
-    return TextRepresentation(tokens=tokens, bytes=bytes, string=string)
+def create_create_representation(tokenizer: RobertaTokenizer) -> Callable:
+    def create_representation(text: str) -> TextRepresentation:
+        tokens = text.split()
+        bytes = "".join(tokens)
+        string = tokenizer.convert_tokens_to_string(bytes)
+        return TextRepresentation(tokens=tokens, bytes=bytes, string=string)
+
+    return create_representation
 
 
 Pair = Tuple[int, int]
@@ -97,31 +101,31 @@ def distance(x: Tensor, y: Tensor) -> float:
     return torch.pow(x - y, 2).sum().item()
 
 
-if __name__ == "__main__":
-    with open(
-        ".data/wiki1m_for_simcse.txt_bpedropout_0.01_roberta-base.csv",
-        newline="",
-    ) as f:
+parser = argparse.ArgumentParser(
+    formatter_class=argparse.ArgumentDefaultsHelpFormatter
+)
+parser.add_argument(
+    "--data-path",
+    type=str,
+    default=".data/wiki1m_for_simcse.txt_bpedropout_0.01_roberta-base.csv",
+    help="data path",
+)
+parser.add_argument("--data-size", type=int, default=1000, help="data size")
+parser.add_argument(
+    "--checkpoint", type=str, default="roberta-base", help="checkpoint"
+)
+
+
+def main(args: argparse.Namespace):
+    with open(args.data_path, newline="") as f:
         reader = csv.DictReader(f)
         reader = filter(lambda x: x["input_strs"] != x["input_strs2"], reader)
-        reader = itertools.islice(reader, 1000)
+        reader = itertools.islice(reader, args.data_size)
         data = list(reader)
 
-    tokenizer = RobertaTokenizer.from_pretrained("roberta-base")
+    tokenizer = RobertaTokenizer.from_pretrained(args.checkpoint)
 
-    for idx, row in enumerate(data):
-        inputs_token = row["input_strs"].split()
-        inputs_byte = "".join(inputs_token)
-        inputs_str = tokenizer.convert_tokens_to_string(inputs_byte)
-
-        text_str = row["text"]
-        text_byte = "".join(
-            [tokenizer.byte_encoder[b] for b in row["text"].encode("utf-8")]
-        )
-
-        assert "".join(inputs_token) == inputs_byte
-        assert inputs_byte == text_byte
-
+    create_representation = create_create_representation(tokenizer)
     text1 = list(map(lambda x: create_representation(x["input_strs"]), data))
     text2 = list(map(lambda x: create_representation(x["input_strs2"]), data))
     align1 = list(map(lambda x: create_alignment(x.bytes, x.tokens), text1))
@@ -143,19 +147,23 @@ if __name__ == "__main__":
         map(index_pair, first_diff, interval2idx1, interval2idx2)
     )
 
-    model = RobertaModel.from_pretrained("roberta-base")
+    model = RobertaModel.from_pretrained(
+        "./result/my-unsup-simcse-roberta-base-0.0-0.00001-32-42/checkpoint-1000"
+    )
     model.eval()
 
     token_diff_dict = defaultdict(list)
     for x in zip(text1, text2, overlap_perfect_idx, first_diff_idx):
         x1, x2, overlap_perfect_idxes, first_diff_pos = x
+        if first_diff_pos[0] > 32:
+            continue
         sent_features = tokenizer.batch_encode_plus(
             [
                 tokenizer.convert_tokens_to_ids(x1.tokens),
                 tokenizer.convert_tokens_to_ids(x2.tokens),
             ],
             is_split_into_words=True,
-            max_length=64,
+            max_length=32,
             truncation=True,
             padding="max_length",
             return_tensors="pt",
@@ -163,11 +171,12 @@ if __name__ == "__main__":
 
         outputs = model(**sent_features)
 
+        # Due to the special ID [CLS], idx is right shifted by one
         overlap_perfect_idxes = [
             (x[0] + 1, x[1] + 1) for x in overlap_perfect_idxes
         ]
         overlap_perfect_idxes = list(
-            filter(lambda x: x[0] < 64 and x[1] < 64, overlap_perfect_idxes)
+            filter(lambda x: x[0] < 32 and x[1] < 32, overlap_perfect_idxes)
         )
         token_diff = [
             distance(
@@ -191,3 +200,8 @@ if __name__ == "__main__":
     ax.tick_params(axis="x", labelsize=13, rotation=90)
     ax.tick_params(axis="y", labelsize=13)
     plt.savefig("analysis-token-diff-relative-pos.png")
+
+
+if __name__ == "__main__":
+    args = parser.parse_args()
+    main(args)
