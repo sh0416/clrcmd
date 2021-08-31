@@ -6,9 +6,7 @@ import torch.distributed as dist
 import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
-from transformers.modeling_outputs import (
-    BaseModelOutputWithPoolingAndCrossAttentions,
-)
+from transformers.modeling_outputs import BaseModelOutputWithPoolingAndCrossAttentions
 from transformers.models.bert.modeling_bert import (
     BertLMPredictionHead,
     BertModel,
@@ -111,7 +109,8 @@ def dist_all_gather(x: Tensor) -> Tensor:
 def compute_loss_simclr(
     output1: BaseModelOutputWithPoolingAndCrossAttentions,
     output2: BaseModelOutputWithPoolingAndCrossAttentions,
-    attention_mask: Tensor,
+    attention_mask1: Tensor,
+    attention_mask2: Tensor,
     pooler_fn: Callable,
     temp: float,
     is_training: bool,
@@ -122,8 +121,10 @@ def compute_loss_simclr(
     :type output1: BaseModelOutputWithPoolingAndCrossAttentions
     :param output2: Model output for second view
     :type output2: BaseModelOutputWithPoolingAndCrossAttentions
-    :param attention_mask: Attention mask
-    :type attention_mask: FloatTensor(batch_size, seq_len)
+    :param attention_mask1: Attention mask
+    :type attention_mask1: FloatTensor(batch_size, seq_len)
+    :param attention_mask2: Attention mask
+    :type attention_mask2: FloatTensor(batch_size, seq_len)
     :param pooler_fn: Function for extracting sentence representation
     :type pooler_fn: Callable[[BaseModelOutputWithPoolingAndCrossAttentions],
                               FloatTensor(batch_size, hidden_dim)]
@@ -134,8 +135,8 @@ def compute_loss_simclr(
     :return: Scalar loss
     :rtype: FloatTensor()
     """
-    output1 = pooler_fn(attention_mask, output1)
-    output2 = pooler_fn(attention_mask, output2)
+    output1 = pooler_fn(attention_mask1, output1)
+    output2 = pooler_fn(attention_mask2, output2)
     # Gather all embeddings if using distributed training
     if dist.is_initialized() and is_training:
         output1, output2 = dist_all_gather(output1), dist_all_gather(output2)
@@ -236,10 +237,13 @@ def cl_forward(
     outputs1, outputs2 = compute_representation(
         encoder, input_ids, attention_mask, token_type_ids
     )
+    attention_mask1 = attention_mask[:, 0, :]
+    attention_mask2 = attention_mask[:, 1, :]
     loss = compute_loss_simclr(
         outputs1,
         outputs2,
-        attention_mask,
+        attention_mask1,
+        attention_mask2,
         cls.pooler,
         cls.model_args.temp,
         cls.training,
