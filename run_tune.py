@@ -60,7 +60,7 @@ def cleanup_trial(trial: Trial, output: Dict) -> float:
             else:
                 trial.set_user_attr(f"{prefix}_{k}", v)
 
-    f(output)
+    f(output, "")
     return output["STSB-dev"]["all"]["spearman"]["all"]
 
 
