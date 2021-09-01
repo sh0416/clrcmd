@@ -269,7 +269,7 @@ def train(args):
         "cache_dir": model_args.cache_dir,
         "revision": model_args.model_revision,
         "use_auth_token": True if model_args.use_auth_token else None,
-        "dropout_prob": model_args.dropout_prob,
+        "hidden_dropout_prob": model_args.hidden_dropout_prob,
     }
     if model_args.pooler_type in ["avg_top2", "avg_first_last"]:
         config_kwargs["output_hidden_states"] = True
