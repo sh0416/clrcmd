@@ -234,7 +234,12 @@ def compute_representation(
 
 
 def cl_forward(
-    cls, encoder, input_ids=None, attention_mask=None, token_type_ids=None
+    cls,
+    encoder,
+    input_ids=None,
+    attention_mask=None,
+    token_type_ids=None,
+    pairs=None,
 ) -> Tuple[Tensor]:
     outputs1, outputs2 = compute_representation(
         encoder, input_ids, attention_mask, token_type_ids
@@ -250,6 +255,15 @@ def cl_forward(
         cls.model_args.temp,
         cls.training,
     )
+    if cls.model_args.loss_token:
+        assert pairs is not None
+        loss += cls.model_args.coeff_loss_token * compute_loss_simclr_token(
+            outputs1.last_hidden_state,
+            outputs2.last_hidden_state,
+            pairs,
+            cls.model_args.temp,
+        )
+
     return (loss,)
 
 
@@ -268,13 +282,10 @@ def sentemb_forward(
 class RobertaForCL(RobertaPreTrainedModel):
     _keys_to_ignore_on_load_missing = [r"position_ids"]
 
-    def __init__(self, config, *model_args, **model_kargs):
+    def __init__(self, config, *model_args, **model_kwargs):
         super().__init__(config)
-        self.model_args = model_kargs["model_args"]
+        self.model_args = model_kwargs["model_args"]
         self.roberta = RobertaModel(config)
-
-        if self.model_args.do_mlm:
-            self.lm_head = RobertaLMHead(config)
 
         cl_init(self, config)
 
@@ -283,6 +294,7 @@ class RobertaForCL(RobertaPreTrainedModel):
         input_ids=None,
         attention_mask=None,
         token_type_ids=None,
+        pairs=None,
         sent_emb=False,
     ):
         if sent_emb:
@@ -300,4 +312,5 @@ class RobertaForCL(RobertaPreTrainedModel):
                 input_ids=input_ids,
                 attention_mask=attention_mask,
                 token_type_ids=token_type_ids,
+                pairs=pairs,
             )

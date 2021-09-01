@@ -1,9 +1,11 @@
 import os
 import logging
 from dataclasses import dataclass, field
+from simcse.data import create_perfect_overlap_pairs_from_tokens
 from typing import Optional
 from datetime import datetime
 
+import torch
 import transformers
 from datasets import load_dataset
 from transformers import (
@@ -35,52 +37,72 @@ class ModelArguments:
     model_name_or_path: Optional[str] = field(
         default=None,
         metadata={
-            "help": "The model checkpoint for weights initialization."
-            "Don't set if you want to train a model from scratch."
+            "help": (
+                "The model checkpoint for weights initialization."
+                "Don't set if you want to train a model from scratch."
+            )
         },
     )
     model_type: Optional[str] = field(
         default=None,
         metadata={
-            "help": "If training from scratch, pass a model type from the list: "
+            "help": (
+                "If training from scratch, pass a model type from the list: "
+            )
             + ", ".join(MODEL_TYPES)
         },
     )
     config_name: Optional[str] = field(
         default=None,
         metadata={
-            "help": "Pretrained config name or path if not the same as model_name"
+            "help": (
+                "Pretrained config name or path if not the same as model_name"
+            )
         },
     )
     tokenizer_name: Optional[str] = field(
         default=None,
         metadata={
-            "help": "Pretrained tokenizer name or path if not the same as model_name"
+            "help": (
+                "Pretrained tokenizer name or path if not the same as"
+                " model_name"
+            )
         },
     )
     cache_dir: Optional[str] = field(
         default=None,
         metadata={
-            "help": "Where do you want to store the pretrained models downloaded from huggingface.co"
+            "help": (
+                "Where do you want to store the pretrained models downloaded"
+                " from huggingface.co"
+            )
         },
     )
     use_fast_tokenizer: bool = field(
         default=True,
         metadata={
-            "help": "Whether to use one of the fast tokenizer (backed by the tokenizers library) or not."
+            "help": (
+                "Whether to use one of the fast tokenizer (backed by the"
+                " tokenizers library) or not."
+            )
         },
     )
     model_revision: str = field(
         default="main",
         metadata={
-            "help": "The specific model version to use (can be a branch name, tag name or commit id)."
+            "help": (
+                "The specific model version to use (can be a branch name, tag"
+                " name or commit id)."
+            )
         },
     )
     use_auth_token: bool = field(
         default=False,
         metadata={
-            "help": "Will use the token generated when running `transformers-cli login` (necessary to use this script "
-            "with private models)."
+            "help": (
+                "Will use the token generated when running `transformers-cli"
+                " login` (necessary to use this script with private models)."
+            )
         },
     )
 
@@ -97,26 +119,30 @@ class ModelArguments:
             )
         },
     )
-    hard_negative_weight: float = field(
-        default=0,
+    loss_token: bool = field(
+        default=False,
         metadata={
-            "help": "The **logit** of weight for hard negatives (only effective if hard negatives are used)."
+            "help": (
+                "Whether to use token alignment contrastive learning"
+                " objective."
+            )
         },
     )
-    do_mlm: bool = field(
-        default=False,
-        metadata={"help": "Whether to use MLM auxiliary objective."},
-    )
-    mlm_weight: float = field(
+    coeff_loss_token: float = field(
         default=0.1,
         metadata={
-            "help": "Weight for MLM auxiliary objective (only effective if --do_mlm)."
+            "help": (
+                "Coefficient for token alignment contrastive learning"
+                " objective (only effective if --loss_token)."
+            )
         },
     )
     mlp_only_train: bool = field(
         default=False, metadata={"help": "Use MLP only during training"}
     )
-    dropout_prob: float = field(default=0.1, metadata={"help": "Dropout prob"})
+    hidden_dropout_prob: float = field(
+        default=0.1, metadata={"help": "Dropout prob"}
+    )
 
 
 @dataclass
@@ -129,7 +155,10 @@ class DataTrainingArguments:
     dataset_config_name: Optional[str] = field(
         default=None,
         metadata={
-            "help": "The configuration name of the dataset to use (via the datasets library)."
+            "help": (
+                "The configuration name of the dataset to use (via the"
+                " datasets library)."
+            )
         },
     )
     overwrite_cache: bool = field(
@@ -139,7 +168,10 @@ class DataTrainingArguments:
     validation_split_percentage: Optional[int] = field(
         default=5,
         metadata={
-            "help": "The percentage of the train set used as validation set in case there's no validation split"
+            "help": (
+                "The percentage of the train set used as validation set in"
+                " case there's no validation split"
+            )
         },
     )
     preprocessing_num_workers: Optional[int] = field(
@@ -157,14 +189,10 @@ class DataTrainingArguments:
     max_seq_length: Optional[int] = field(
         default=32,
         metadata={
-            "help": "The maximum total input sequence length after tokenization. Sequences longer "
-            "than this will be truncated."
-        },
-    )
-    mlm_probability: float = field(
-        default=0.15,
-        metadata={
-            "help": "Ratio of tokens to mask for MLM (only effective if --do_mlm)"
+            "help": (
+                "The maximum total input sequence length after tokenization."
+                " Sequences longer than this will be truncated."
+            )
         },
     )
 
@@ -185,7 +213,10 @@ class OurTrainingArguments(TrainingArguments):
             "result", datetime.now().strftime("%Y%m%d_%H%M%S")
         ),
         metadata={
-            "help": "The output directory where the model predictions and checkpoints will be written."
+            "help": (
+                "The output directory where the model predictions and"
+                " checkpoints will be written."
+            )
         },
     )
 
@@ -340,14 +371,17 @@ def train(args):
             if examples[sent1_cname][idx] is None:
                 examples[sent1_cname][idx] = " "
 
-        sentences1 = [
-            tokenizer.convert_tokens_to_ids(x.split())
-            for x in examples[sent0_cname]
+        tokens1 = [x.split() for x in examples[sent0_cname]]
+        tokens2 = [x.split() for x in examples[sent1_cname]]
+        pairs = [
+            torch.tensor(
+                create_perfect_overlap_pairs_from_tokens(x, y),
+                dtype=torch.long,
+            )
+            for x, y in zip(tokens1, tokens2)
         ]
-        sentences2 = [
-            tokenizer.convert_tokens_to_ids(x.split())
-            for x in examples[sent1_cname]
-        ]
+        sentences1 = [tokenizer.convert_tokens_to_ids(x) for x in tokens1]
+        sentences2 = [tokenizer.convert_tokens_to_ids(x) for x in tokens2]
         text1 = tokenizer.batch_decode(sentences1)
         text2 = tokenizer.batch_decode(sentences2)
         for x, y in zip(text1, text2):
@@ -363,13 +397,10 @@ def train(args):
             return_tensors="pt",
         )
 
-        features = {
-            key: [
-                [sent_features[key][i], sent_features[key][i + total]]
-                for i in range(total)
-            ]
-            for key in sent_features
-        }
+        features = {}
+        for k, v in sent_features.items():
+            features[k] = [(v[i], v[i + total]) for i in range(total)]
+        features["pairs"] = pairs
         return features
 
     column_names = datasets["train"].column_names
