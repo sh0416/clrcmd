@@ -1,7 +1,6 @@
-import json
 import os
 import logging
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field
 from typing import Optional
 from datetime import datetime
 
@@ -17,11 +16,10 @@ from transformers import (
 )
 from transformers.trainer_utils import is_main_process
 
-from transformers.utils import logging
 from simcse.models import RobertaForCL
 from simcse.trainers import CLTrainer
 
-logger = logging.get_logger(__name__)
+logger = logging.getLogger(__name__)
 MODEL_CONFIG_CLASSES = list(MODEL_FOR_MASKED_LM_MAPPING.keys())
 MODEL_TYPES = tuple(conf.model_type for conf in MODEL_CONFIG_CLASSES)
 
@@ -230,11 +228,13 @@ def train(args):
         f"distributed training: {bool(training_args.local_rank != -1)}, "
         f"16-bits training: {training_args.fp16} "
     )
+
     # Set the verbosity to info of the Transformers logger
     # (on main process only):
-    transformers.utils.logging.set_verbosity_info()
-    transformers.utils.logging.enable_default_handler()
-    transformers.utils.logging.enable_explicit_format()
+    if is_main_process(training_args.local_rank):
+        transformers.utils.logging.set_verbosity_info()
+        transformers.utils.logging.enable_default_handler()
+        transformers.utils.logging.enable_explicit_format()
     logger.info(f"Training/evaluation parameters {training_args}")
 
     # Set seed before initializing model.
