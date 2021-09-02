@@ -153,7 +153,7 @@ def compute_loss_simclr(
 
 
 def compute_loss_simclr_token(
-    output1: Tensor, output2: Tensor, pair: List[Tensor], temp: float
+    output1: Tensor, output2: Tensor, pairs: List[Tensor], temp: float
 ) -> Tensor:
     """Compute SimCLR loss in token-level
 
@@ -161,20 +161,21 @@ def compute_loss_simclr_token(
     :type output1: FloatTensor(batch_size, seq_len, hidden_dim)
     :param ouptut2: Bert output for the second sentence
     :type output2: FloatTensor(batch_size, seq_len, hidden_dim)
-    :param pair: Pair for computing similarity between token
-    :type pair: List[LongTensor(2, num_pairs)]
+    :param pairs: Pair for computing similarity between token
+    :type pairs: List[LongTensor(num_pairs, 2)]
     :param temp: Temperature for cosine similarity
     :type temp: float
     :return: Scalar loss
     :rtype: FloatTensor()
     """
-    assert output1.shape[0] == output2.shape[0] == len(pair)
-    batch_idx = [torch.full((x.shape[1],), i) for i, x in enumerate(pair)]
-    seq_idx1 = [x[0] for x in pair]
-    seq_idx2 = [x[1] for x in pair]
+    assert output1.shape[0] == output2.shape[0] == len(pairs)
+    batch_idx = [torch.full((x.shape[0],), i) for i, x in enumerate(pairs)]
+    seq_idx1 = [x[:, 0] for x in pairs]
+    seq_idx2 = [x[:, 1] for x in pairs]
     batch_idx = torch.cat(batch_idx)
     seq_idx1 = torch.cat(seq_idx1)
     seq_idx2 = torch.cat(seq_idx2)
+    assert batch_idx.shape == seq_idx1.shape == seq_idx2.shape
     output1 = output1[batch_idx, seq_idx1]
     output2 = output2[batch_idx, seq_idx2]
     # (num_pairs, hidden_dim)

@@ -1,5 +1,9 @@
-from typing import List, Tuple
+from typing import List, Tuple, Dict, Any, Union, Optional
 import itertools
+import torch
+from dataclasses import dataclass
+from transformers import DataCollatorWithPadding, PreTrainedTokenizerBase
+from transformers.data.data_collator import PaddingStrategy
 
 Pair = Tuple[int, int]
 
@@ -56,3 +60,38 @@ def create_perfect_overlap_pairs_from_tokens(
     # Index pair
     pairs = [(interval2idx1[x], interval2idx2[y]) for x, y in pairs]
     return pairs
+
+
+@dataclass
+class PairDataCollator(DataCollatorWithPadding):
+    tokenizer: PreTrainedTokenizerBase
+    padding: Union[bool, str, PaddingStrategy] = True
+    max_length: Optional[int] = None
+    pad_to_multiple_of: Optional[int] = None
+    return_tensors: str = "pt"
+
+    def __call__(self, features: List[Dict[str, Any]]) -> Dict[str, Any]:
+        pairs = []
+        for x in features:
+            _pairs = [
+                y
+                for y in x["pairs"]
+                if y[0] < self.max_length and y[1] < self.max_length
+            ]
+            pairs.append(torch.tensor(_pairs, dtype=torch.long))
+            del x["pairs"]
+        batch = self.tokenizer.pad(
+            features,
+            padding=self.padding,
+            max_length=self.max_length,
+            pad_to_multiple_of=self.pad_to_multiple_of,
+            return_tensors=self.return_tensors,
+        )
+        batch["pairs"] = pairs
+        if "label" in batch:
+            batch["labels"] = batch["label"]
+            del batch["label"]
+        if "label_ids" in batch:
+            batch["labels"] = batch["label_ids"]
+            del batch["label_ids"]
+        return batch

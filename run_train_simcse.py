@@ -1,7 +1,11 @@
 import os
 import logging
 from dataclasses import dataclass, field
-from simcse.data import create_perfect_overlap_pairs_from_tokens
+
+from simcse.data import (
+    PairDataCollator,
+    create_perfect_overlap_pairs_from_tokens,
+)
 from typing import Optional
 from datetime import datetime
 
@@ -414,6 +418,9 @@ def train(args):
 
     trainer = CLTrainer(
         model=model,
+        data_collator=PairDataCollator(
+            tokenizer, max_length=data_args.max_seq_length
+        ),
         args=training_args,
         train_dataset=train_dataset,
         tokenizer=tokenizer,

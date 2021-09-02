@@ -75,9 +75,9 @@ def main():
         training_args.output_dir = os.path.join(
             "result", datetime.now().strftime("%Y%m%d_%H%M")
         )
-        training_args.per_device_train_batch_size = 128
+        training_args.per_device_train_batch_size = 64
         training_args.per_device_eval_batch_size = 128
-        training_args.gradient_accumulation_steps = 1
+        training_args.gradient_accumulation_steps = 2
 
         # Search hyperparameters
         training_args.seed = trial.suggest_categorical(
@@ -96,16 +96,17 @@ def main():
         )
         return model_args, data_args, training_args
 
-    n_trials = 20
+    n_trials = 40
     target_fn = search_hparams(sample_configuration, train, cleanup_trial)
-    study_name = "study1"
-    storage = f"sqlite:///{study_name}.db"
+    study_name = "study_loss_token"
+    storage = f"sqlite:///study1.db"
     if dist.get_rank() == 0:
         study = optuna.create_study(
             study_name=study_name,
             storage=storage,
             load_if_exists=True,
             direction="maximize",
+            sampler=optuna.samplers.RandomSampler(0),
         )
         study.optimize(target_fn, n_trials=n_trials)
         df = study.trials_dataframe()
