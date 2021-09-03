@@ -73,7 +73,7 @@ class PairDataCollator(DataCollatorWithPadding):
     def __call__(self, features: List[Dict[str, Any]]) -> Dict[str, Any]:
         pairs = []
         for x in features:
-            _pairs = [
+            _pairs = [(0, 0)] + [
                 y
                 for y in x["pairs"]
                 if y[0] < self.max_length and y[1] < self.max_length

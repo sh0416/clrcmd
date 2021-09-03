@@ -157,10 +157,20 @@ def compute_loss_simclr(
 
 
 def compute_loss_simclr_token(
-    output1: Tensor, output2: Tensor, pairs: List[Tensor], temp: float
+    input1: Tensor,
+    input2: Tensor,
+    output1: Tensor,
+    output2: Tensor,
+    pairs: List[Tensor],
+    temp: float,
+    is_training: bool,
 ) -> Tensor:
     """Compute SimCLR loss in token-level
 
+    :param input1: Bert input for the first sentence
+    :type input1: LongTensor(batch_size, seq_len)
+    :param input2: Bert input for the second sentence
+    :type input2: LongTensor(batch_size, seq_len)
     :param output1: Bert output for the first sentence
     :type output1: FloatTensor(batch_size, seq_len, hidden_dim)
     :param ouptut2: Bert output for the second sentence
@@ -169,10 +179,18 @@ def compute_loss_simclr_token(
     :type pairs: List[LongTensor(num_pairs, 2)]
     :param temp: Temperature for cosine similarity
     :type temp: float
+    :param is_training: indicator whether training or not
+    :type is_training: bool
     :return: Scalar loss
     :rtype: FloatTensor()
     """
+    # Gather all embeddings if using distributed training
+    # if dist.is_initialized() and is_training:
+    #    output1, output2 = dist_all_gather(output1), dist_all_gather(output2)
+    assert input1.shape[0] == input2.shape[0] == len(pairs)
     assert output1.shape[0] == output2.shape[0] == len(pairs)
+    assert input1.shape[1] == output1.shape[1]
+    assert input2.shape[1] == output2.shape[1]
     batch_idx = [torch.full((x.shape[0],), i) for i, x in enumerate(pairs)]
     seq_idx1 = [x[:, 0] for x in pairs]
     seq_idx2 = [x[:, 1] for x in pairs]
@@ -180,14 +198,43 @@ def compute_loss_simclr_token(
     seq_idx1 = torch.cat(seq_idx1)
     seq_idx2 = torch.cat(seq_idx2)
     assert batch_idx.shape == seq_idx1.shape == seq_idx2.shape
+    input1, input2 = input1[batch_idx, seq_idx1], input2[batch_idx, seq_idx2]
+    # (num_pairs,)
     output1 = output1[batch_idx, seq_idx1]
     output2 = output2[batch_idx, seq_idx2]
     # (num_pairs, hidden_dim)
-    sim = F.cosine_similarity(output1[None, :, :], output2[:, None, :], dim=2)
-    sim = sim / temp  # Apply temperature
-    # (num_pairs, num_pairs)
-    label = torch.arange(sim.shape[1], dtype=torch.long, device=sim.device)
-    loss = F.cross_entropy(sim, label)
+    assert torch.equal(input1, input2), "Different input pair is not supported"
+    sorted_token, sorted_indice = torch.sort(input1)
+    batch_idx = batch_idx[sorted_indice]
+    output1 = output1[sorted_indice]
+    output2 = output2[sorted_indice]
+    val, counts = torch.unique(sorted_token, sorted=True, return_counts=True)
+    counts = counts.tolist()
+    batch_idx = torch.split(batch_idx, counts)
+    output1 = torch.split(output1, counts)
+    output2 = torch.split(output2, counts)
+    # print(f"val: {val}\ncounts: {counts}")
+    # print(f"sorted_token: {sorted_token}")
+    # output1 = [x for x in output1 if x.shape[0] > 63]
+    # output2 = [x for x in output2 if x.shape[0] > 63]
+    # batch_idx = [x for x in batch_idx if x.shape[0] > 63]
+    # list(FloatTensor(num_pairs_per_symbol, hidden_dim))
+    batch_idx = batch_idx[0:2]
+    output1 = output1[0:2]
+    output2 = output2[0:2]
+    # print(f"{batch_idx = }")
+    # Calculate temperature aware cosine similarity
+    sim = [
+        F.cosine_similarity(x1[None, :, :], x2[:, None, :], dim=2) / temp
+        for x1, x2 in zip(output1, output2)
+    ]
+    # list(FloatTensor(num_pairs_per_symbol, num_pairs_per_symbol))
+    label = [
+        torch.arange(x.shape[1], dtype=torch.long, device=x.device)
+        for x in sim
+    ]
+    loss = torch.stack([F.cross_entropy(x, l) for x, l in zip(sim, label)])
+    loss = loss.mean()
     # loss = F.mse_loss(output1, output2)
     # logger.info(f"{loss = :.4f}")
     return loss
@@ -245,9 +292,9 @@ def cl_forward(
     token_type_ids=None,
     pairs=None,
 ) -> Tuple[Tensor]:
+    input_ids1 = input_ids[:, 0]
+    input_ids2 = input_ids[:, 1]
     if pairs is not None:
-        input_ids1 = input_ids[:, 0]
-        input_ids2 = input_ids[:, 1]
         batch_idx = [torch.full((x.shape[0],), i) for i, x in enumerate(pairs)]
         batch_idx = torch.cat(batch_idx)
         seq_idx1 = torch.cat([x[:, 0] for x in pairs])
@@ -260,6 +307,7 @@ def cl_forward(
     )
     attention_mask1 = attention_mask[:, 0, :]
     attention_mask2 = attention_mask[:, 1, :]
+    """
     loss = compute_loss_simclr(
         outputs1,
         outputs2,
@@ -269,13 +317,18 @@ def cl_forward(
         cls.model_args.temp,
         cls.training,
     )
+    """
+    loss = 0
     if cls.model_args.loss_token:
         assert pairs is not None
         loss += cls.model_args.coeff_loss_token * compute_loss_simclr_token(
+            input_ids1,
+            input_ids2,
             outputs1.token_output,
             outputs2.token_output,
             pairs,
             cls.model_args.temp,
+            cls.training,
         )
 
     return (loss,)
