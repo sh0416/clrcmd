@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import logging
 from typing import Callable, List, Tuple
 
@@ -6,21 +7,20 @@ import torch.distributed as dist
 import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
-from transformers.modeling_outputs import (
-    BaseModelOutputWithPoolingAndCrossAttentions,
-)
-from transformers.models.bert.modeling_bert import (
-    BertLMPredictionHead,
-    BertModel,
-    BertPreTrainedModel,
-)
+from transformers.modeling_outputs import BaseModelOutput
 from transformers.models.roberta.modeling_roberta import (
-    RobertaLMHead,
     RobertaModel,
     RobertaPreTrainedModel,
 )
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class BaseModelOutputWithHead(BaseModelOutput):
+    last_hidden_state: torch.FloatTensor = None
+    hidden_states: Tuple[torch.FloatTensor] = None
+    token_output: torch.FloatTensor = None
 
 
 class Pooler(nn.Module):
@@ -46,11 +46,11 @@ class Pooler(nn.Module):
     def forward(
         self,
         attention_mask: Tensor,
-        outputs: BaseModelOutputWithPoolingAndCrossAttentions,
+        outputs: BaseModelOutputWithHead,
     ) -> Tensor:
         if self.pooler_type == "cls":
             if self.training:
-                return outputs.pooler_output
+                return outputs.token_output[:, 0]
             else:
                 return outputs.last_hidden_state[:, 0]
         elif self.pooler_type == "cls_before_pooler":
@@ -88,6 +88,10 @@ def cl_init(cls, config):
     """
     cls.pooler_type = cls.model_args.pooler_type
     cls.pooler = Pooler(cls.model_args.pooler_type)
+    cls.mlp = nn.Sequential(
+        nn.Linear(config.hidden_size, config.hidden_size),
+        nn.Tanh(),
+    )
     cls.init_weights()
 
 
@@ -109,8 +113,8 @@ def dist_all_gather(x: Tensor) -> Tensor:
 
 
 def compute_loss_simclr(
-    output1: BaseModelOutputWithPoolingAndCrossAttentions,
-    output2: BaseModelOutputWithPoolingAndCrossAttentions,
+    output1: BaseModelOutputWithHead,
+    output2: BaseModelOutputWithHead,
     attention_mask1: Tensor,
     attention_mask2: Tensor,
     pooler_fn: Callable,
@@ -120,15 +124,15 @@ def compute_loss_simclr(
     """Compute SimCLR loss in sentence-level
 
     :param output1: Model output for first view
-    :type output1: BaseModelOutputWithPoolingAndCrossAttentions
+    :type output1: BaseModelOutputWithPooling
     :param output2: Model output for second view
-    :type output2: BaseModelOutputWithPoolingAndCrossAttentions
+    :type output2: BaseModelOutputWithPooling
     :param attention_mask1: Attention mask
     :type attention_mask1: FloatTensor(batch_size, seq_len)
     :param attention_mask2: Attention mask
     :type attention_mask2: FloatTensor(batch_size, seq_len)
     :param pooler_fn: Function for extracting sentence representation
-    :type pooler_fn: Callable[[BaseModelOutputWithPoolingAndCrossAttentions],
+    :type pooler_fn: Callable[[Tensor, BaseModelOutputWithHead],
                               FloatTensor(batch_size, hidden_dim)]
     :param temp: Temperature for cosine similarity
     :type temp: float
@@ -184,19 +188,18 @@ def compute_loss_simclr_token(
     # (num_pairs, num_pairs)
     label = torch.arange(sim.shape[1], dtype=torch.long, device=sim.device)
     loss = F.cross_entropy(sim, label)
-    logger.debug(f"{loss = :.4f}")
+    # loss = F.mse_loss(output1, output2)
+    # logger.info(f"{loss = :.4f}")
     return loss
 
 
 def compute_representation(
     encoder: Callable,
+    mlp: nn.Module,
     input_ids: Tensor,
     attention_mask: Tensor,
     token_type_ids: Tensor,
-) -> Tuple[
-    BaseModelOutputWithPoolingAndCrossAttentions,
-    BaseModelOutputWithPoolingAndCrossAttentions,
-]:
+) -> Tuple[BaseModelOutputWithHead, BaseModelOutputWithHead]:
     """Compute bert contextual representation for contrastive learning"""
     batch_size = input_ids.shape[0]
     input_ids = torch.cat([input_ids[:, 0], input_ids[:, 1]])
@@ -211,25 +214,25 @@ def compute_representation(
         token_type_ids=token_type_ids,
         return_dict=True,
     )
+    token_output = mlp(outputs.last_hidden_state)
+    token_output1 = token_output[:batch_size]
+    token_output2 = token_output[batch_size:]
     last_hidden1 = outputs.last_hidden_state[:batch_size]
     last_hidden2 = outputs.last_hidden_state[batch_size:]
-    if outputs.pooler_output is not None:
-        pooler_output1 = outputs.pooler_output[:batch_size]
-        pooler_output2 = outputs.pooler_output[batch_size:]
     if outputs.hidden_states is not None:
         hidden_states1 = tuple(x[:batch_size] for x in outputs.hidden_states)
         hidden_states2 = tuple(x[batch_size:] for x in outputs.hidden_states)
     else:
         hidden_states1, hidden_states2 = None, None
-    outputs1 = BaseModelOutputWithPoolingAndCrossAttentions(
-        pooler_output=pooler_output1,
+    outputs1 = BaseModelOutputWithHead(
         last_hidden_state=last_hidden1,
         hidden_states=hidden_states1,
+        token_output=token_output1,
     )
-    outputs2 = BaseModelOutputWithPoolingAndCrossAttentions(
-        pooler_output=pooler_output2,
+    outputs2 = BaseModelOutputWithHead(
         last_hidden_state=last_hidden2,
         hidden_states=hidden_states2,
+        token_output=token_output2,
     )
     return outputs1, outputs2
 
@@ -242,8 +245,18 @@ def cl_forward(
     token_type_ids=None,
     pairs=None,
 ) -> Tuple[Tensor]:
+    if pairs is not None:
+        input_ids1 = input_ids[:, 0]
+        input_ids2 = input_ids[:, 1]
+        batch_idx = [torch.full((x.shape[0],), i) for i, x in enumerate(pairs)]
+        batch_idx = torch.cat(batch_idx)
+        seq_idx1 = torch.cat([x[:, 0] for x in pairs])
+        seq_idx2 = torch.cat([x[:, 1] for x in pairs])
+        pair_left = input_ids1[batch_idx, seq_idx1]
+        pair_right = input_ids2[batch_idx, seq_idx2]
+        assert torch.equal(pair_left, pair_right)
     outputs1, outputs2 = compute_representation(
-        encoder, input_ids, attention_mask, token_type_ids
+        encoder, cls.mlp, input_ids, attention_mask, token_type_ids
     )
     attention_mask1 = attention_mask[:, 0, :]
     attention_mask2 = attention_mask[:, 1, :]
@@ -259,8 +272,8 @@ def cl_forward(
     if cls.model_args.loss_token:
         assert pairs is not None
         loss += cls.model_args.coeff_loss_token * compute_loss_simclr_token(
-            outputs1.last_hidden_state,
-            outputs2.last_hidden_state,
+            outputs1.token_output,
+            outputs2.token_output,
             pairs,
             cls.model_args.temp,
         )
@@ -270,7 +283,7 @@ def cl_forward(
 
 def sentemb_forward(
     cls, encoder, input_ids=None, attention_mask=None, token_type_ids=None
-) -> BaseModelOutputWithPoolingAndCrossAttentions:
+) -> Tensor:
     outputs = encoder(
         input_ids,
         attention_mask=attention_mask,

@@ -7,7 +7,6 @@ from optuna import Trial
 from typing import Callable, Dict, Tuple
 
 import torch
-import torch.multiprocessing as mp
 import torch.distributed as dist
 from transformers.hf_argparser import HfArgumentParser
 from run_train_simcse import (
@@ -98,8 +97,8 @@ def main():
 
     n_trials = 40
     target_fn = search_hparams(sample_configuration, train, cleanup_trial)
-    study_name = "study_loss_token"
-    storage = f"sqlite:///study1.db"
+    study_name = "study_loss_token_with_token_head_shared_simclr"
+    storage = "sqlite:///study1.db"
     if dist.get_rank() == 0:
         study = optuna.create_study(
             study_name=study_name,
