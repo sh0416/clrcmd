@@ -205,9 +205,11 @@ def compute_loss_simclr_token(
     # (num_pairs, hidden_dim)
     assert torch.equal(input1, input2), "Different input pair is not supported"
     sorted_token, sorted_indice = torch.sort(input1)
-    batch_idx = batch_idx[sorted_indice]
-    output1 = output1[sorted_indice]
-    output2 = output2[sorted_indice]
+    sorted_token_mask = sorted_token < 10
+    sorted_token = sorted_token[sorted_token_mask]
+    batch_idx = batch_idx[sorted_indice][sorted_token_mask]
+    output1 = output1[sorted_indice][sorted_token_mask, :]
+    output2 = output2[sorted_indice][sorted_token_mask, :]
     val, counts = torch.unique(sorted_token, sorted=True, return_counts=True)
     counts = counts.tolist()
     batch_idx = torch.split(batch_idx, counts)
@@ -215,13 +217,13 @@ def compute_loss_simclr_token(
     output2 = torch.split(output2, counts)
     # print(f"val: {val}\ncounts: {counts}")
     # print(f"sorted_token: {sorted_token}")
-    # output1 = [x for x in output1 if x.shape[0] > 63]
-    # output2 = [x for x in output2 if x.shape[0] > 63]
-    # batch_idx = [x for x in batch_idx if x.shape[0] > 63]
+    # output1 = [x for x in output1 if x.shape[0] > 20]
+    # output2 = [x for x in output2 if x.shape[0] > 20]
+    # batch_idx = [x for x in batch_idx if x.shape[0] > 20]
     # list(FloatTensor(num_pairs_per_symbol, hidden_dim))
-    batch_idx = batch_idx[0:2]
-    output1 = output1[0:2]
-    output2 = output2[0:2]
+    # batch_idx = batch_idx[0:1]
+    # output1 = output1[0:1]
+    # output2 = output2[0:1]
     # print(f"{batch_idx = }")
     # Calculate temperature aware cosine similarity
     sim = [
@@ -336,14 +338,20 @@ def cl_forward(
 
 def sentemb_forward(
     cls, encoder, input_ids=None, attention_mask=None, token_type_ids=None
-) -> Tensor:
+) -> BaseModelOutputWithHead:
     outputs = encoder(
         input_ids,
         attention_mask=attention_mask,
         token_type_ids=token_type_ids,
         return_dict=True,
     )
-    return cls.pooler(attention_mask, outputs)
+    token_output = cls.mlp(outputs.last_hidden_state)
+    outputs = BaseModelOutputWithHead(
+        last_hidden_state=outputs.last_hidden_state,
+        hidden_states=outputs.hidden_states,
+        token_output=token_output,
+    )
+    return outputs
 
 
 class RobertaForCL(RobertaPreTrainedModel):

@@ -1,6 +1,7 @@
 import os
+import json
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 
 from simcse.data import (
     PairDataCollator,
@@ -241,7 +242,6 @@ class OurTrainingArguments(TrainingArguments):
 def train(args):
     model_args, data_args, training_args = args
 
-    """
     # Save arguments
     os.makedirs(training_args.output_dir, exist_ok=True)
     filepath = os.path.join(training_args.output_dir, "model_args.json")
@@ -253,7 +253,6 @@ def train(args):
     filepath = os.path.join(training_args.output_dir, "training_args.json")
     with open(filepath, "w") as f:
         json.dump(training_args.to_dict(), f)
-    """
 
     # Log on each process the small summary:
     logger.warning(

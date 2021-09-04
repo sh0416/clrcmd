@@ -45,7 +45,33 @@ class CLTrainer(Trainer):
             with torch.no_grad():
                 outputs1 = self.model(**batch1, sent_emb=True)
                 outputs2 = self.model(**batch2, sent_emb=True)
-                score = F.cosine_similarity(outputs1, outputs2, dim=1)
+                input_ids1 = batch1["input_ids"]
+                input_ids2 = batch2["input_ids"]
+                pad_id = self.tokenizer.convert_tokens_to_ids(
+                    self.tokenizer.pad_token
+                )
+                input_ids1_valid = input_ids1 != pad_id
+                input_ids1_valid = input_ids1_valid & (input_ids1 < 10)
+                input_ids2_valid = input_ids2 != pad_id
+                input_ids2_valid = input_ids2_valid & (input_ids2 < 10)
+                input_mask = input_ids1[:, :, None] == input_ids2[:, None, :]
+                input_mask = input_mask & input_ids1_valid[:, :, None]
+                input_mask = input_mask & input_ids2_valid[:, None, :]
+                assert torch.all(input_mask[:, 0, 0])
+                # (batch_size, seq_len, seq_len)
+                outputs1 = outputs1.last_hidden_state
+                outputs2 = outputs2.last_hidden_state
+                # (batch_size, seq_len, hidden_size)
+                score_pair = F.cosine_similarity(
+                    outputs1[:, :, None, :], outputs2[:, None, :, :], dim=3
+                )
+                # (batch_size, seq_len, seq_len)
+                input_mask = input_mask.view(input_mask.shape[0], -1).float()
+                score_pair = score_pair.view(score_pair.shape[0], -1)
+                # (batch_size, seq_len*seq_len)
+                score = (score_pair * input_mask).sum(dim=1)
+                score = score / input_mask.sum(dim=1)
+                # score = score_pair[:, 0]
                 return score.cpu().numpy()
 
         self.model.eval()
