@@ -98,18 +98,40 @@ def cl_init(cls, config):
 def dist_all_gather(x: Tensor) -> Tensor:
     """Boilerplate code for all gather in distributed setting
 
+    The first dimension could be different
+
     :param x: Tensor to be gathered
     :type x: Tensor
     :return: Tensor after gathered. For the gradient flow, current rank is
              replaced to original tensor
     :rtype: Tensor
     """
-    xlist = [torch.zeros_like(x) for _ in range(dist.get_world_size())]
-    dist.all_gather(tensor_list=xlist, tensor=x.contiguous())
+    assert dist.is_initialized(), "The process is not in DDP setting"
+    # 1. Get size acroess processes
+    x_numel_list = [
+        torch.tensor(x.numel(), device=x.device)
+        for _ in range(dist.get_world_size())
+    ]
+    dist.all_gather(x_numel_list, torch.tensor(x.numel(), device=x.device))
+    # 2. Infer maximum size
+    max_size = max(x.item() for x in x_numel_list)
+    # 3. Communitcate tensor with padded version
+    _x_list = [
+        torch.empty((max_size,), device=x.device)
+        for _ in range(dist.get_world_size())
+    ]
+    _x = torch.cat(
+        (x.view(-1), torch.empty((max_size - x.numel(),), device=x.device))
+    )
+    dist.all_gather(_x_list, _x)
+    # 4. Remove padded data to change original shape
+    x_list = [
+        _x[:n].view(-1, *x.shape[1:]) for n, _x in zip(x_numel_list, _x_list)
+    ]
     # Since `all_gather` results do not have gradients, we replace the
     # current process's corresponding embeddings with original tensors
-    xlist[dist.get_rank()] = x
-    return torch.cat(xlist, dim=0)
+    x_list[dist.get_rank()] = x
+    return torch.cat(x_list, dim=0)
 
 
 def compute_loss_simclr(
@@ -184,48 +206,45 @@ def compute_loss_simclr_token(
     :return: Scalar loss
     :rtype: FloatTensor()
     """
-    # Gather all embeddings if using distributed training
-    # if dist.is_initialized() and is_training:
-    #    output1, output2 = dist_all_gather(output1), dist_all_gather(output2)
+    # NOTE: Keep in mind that this code should be compatible in DDP setting
+    # Assertion: Batch size is equal for all tensor
     assert input1.shape[0] == input2.shape[0] == len(pairs)
     assert output1.shape[0] == output2.shape[0] == len(pairs)
+    # Assertion: Sequence length is equal for input and output
     assert input1.shape[1] == output1.shape[1]
     assert input2.shape[1] == output2.shape[1]
+    # 1. Create index array for pairing tokens
     batch_idx = [torch.full((x.shape[0],), i) for i, x in enumerate(pairs)]
-    seq_idx1 = [x[:, 0] for x in pairs]
-    seq_idx2 = [x[:, 1] for x in pairs]
+    seq_idx1, seq_idx2 = [x[:, 0] for x in pairs], [x[:, 1] for x in pairs]
     batch_idx = torch.cat(batch_idx)
-    seq_idx1 = torch.cat(seq_idx1)
-    seq_idx2 = torch.cat(seq_idx2)
+    seq_idx1, seq_idx2 = torch.cat(seq_idx1), torch.cat(seq_idx2)
     assert batch_idx.shape == seq_idx1.shape == seq_idx2.shape
-    input1, input2 = input1[batch_idx, seq_idx1], input2[batch_idx, seq_idx2]
-    # (num_pairs,)
+    # 2. Index input and output tensor
+    input1 = input1[batch_idx, seq_idx1]
+    input2 = input2[batch_idx, seq_idx2]
+    assert torch.equal(input1, input2), "Different input pair is not supported"
     output1 = output1[batch_idx, seq_idx1]
     output2 = output2[batch_idx, seq_idx2]
-    # (num_pairs, hidden_dim)
-    assert torch.equal(input1, input2), "Different input pair is not supported"
-    sorted_token, sorted_indice = torch.sort(input1)
-    sorted_token_mask = sorted_token < 10
-    sorted_token = sorted_token[sorted_token_mask]
-    batch_idx = batch_idx[sorted_indice][sorted_token_mask]
-    output1 = output1[sorted_indice][sorted_token_mask, :]
-    output2 = output2[sorted_indice][sorted_token_mask, :]
-    val, counts = torch.unique(sorted_token, sorted=True, return_counts=True)
+    # (num_pairs,), (num_pairs, hidden_dim)
+    # 3. Remain valid pair
+    input1_mask, input2_mask = input1 < 1, input2 < 1
+    input1, input2 = input1[input1_mask], input2[input2_mask]
+    output1, output2 = output1[input1_mask, :], output2[input2_mask, :]
+    # 4. (Optional) Gather all embeddings if using distributed training
+    if dist.is_initialized() and is_training:
+        input1 = dist_all_gather(input1)
+        output1, output2 = dist_all_gather(output1), dist_all_gather(output2)
+    # (valid_num_pairs,), (valid_num_pairs, hidden_dim)
+    # 5. Sort and split output tensor based on input
+    sorted_val, sorted_indice = torch.sort(input1)
+    output1, output2 = output1[sorted_indice], output2[sorted_indice]
+    # (valid_num_pairs,), (valid_num_pairs, hidden_dim)
+    _, counts = torch.unique(sorted_val, sorted=True, return_counts=True)
     counts = counts.tolist()
-    batch_idx = torch.split(batch_idx, counts)
     output1 = torch.split(output1, counts)
     output2 = torch.split(output2, counts)
-    # print(f"val: {val}\ncounts: {counts}")
-    # print(f"sorted_token: {sorted_token}")
-    # output1 = [x for x in output1 if x.shape[0] > 20]
-    # output2 = [x for x in output2 if x.shape[0] > 20]
-    # batch_idx = [x for x in batch_idx if x.shape[0] > 20]
-    # list(FloatTensor(num_pairs_per_symbol, hidden_dim))
-    # batch_idx = batch_idx[0:1]
-    # output1 = output1[0:1]
-    # output2 = output2[0:1]
-    # print(f"{batch_idx = }")
-    # Calculate temperature aware cosine similarity
+    # list(torch.FloatTensor(valid_num_pairs_per_token, hidden_dim))
+    # 6. Calculate temperature aware cosine similarity
     sim = [
         F.cosine_similarity(x1[None, :, :], x2[:, None, :], dim=2) / temp
         for x1, x2 in zip(output1, output2)
@@ -237,8 +256,6 @@ def compute_loss_simclr_token(
     ]
     loss = torch.stack([F.cross_entropy(x, l) for x, l in zip(sim, label)])
     loss = loss.mean()
-    # loss = F.mse_loss(output1, output2)
-    # logger.info(f"{loss = :.4f}")
     return loss
 
 

@@ -51,9 +51,9 @@ class CLTrainer(Trainer):
                     self.tokenizer.pad_token
                 )
                 input_ids1_valid = input_ids1 != pad_id
-                input_ids1_valid = input_ids1_valid & (input_ids1 < 10)
+                input_ids1_valid = input_ids1_valid & (input_ids1 < 1)
                 input_ids2_valid = input_ids2 != pad_id
-                input_ids2_valid = input_ids2_valid & (input_ids2 < 10)
+                input_ids2_valid = input_ids2_valid & (input_ids2 < 1)
                 input_mask = input_ids1[:, :, None] == input_ids2[:, None, :]
                 input_mask = input_mask & input_ids1_valid[:, :, None]
                 input_mask = input_mask & input_ids2_valid[:, None, :]

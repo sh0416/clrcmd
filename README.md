@@ -1,6 +1,15 @@
 Sentence Benchmark
 ==================
 
+```
+CUDA_VISIBLE_DEVICES=0,1,2,3 python -m torch.distributed.launch --np$
+oc_per_node 4 --master_port 10001 run_train_simcse.py --model_name_or_path roberta-base --train_file .data/wiki1m_for_simcs$
+.txt_bpedropout_0.0_roberta-base.csv --dataloader_drop_last --evaluation_strategy steps --eval_steps 125 --metric_for_best_$
+odel stsb_spearman --load_best_model_at_end --mlp_only_train --temp 0.05 --do_train --do_eval --fp16 --num_train_epochs 1 -$
+save_total_limit 1 --loss_token --coeff_loss_token 1 --per_device_train_batch_size 64 --per_device_eval_batch_size 128 --gr$
+dient_accumulation_steps 2 --learning_rate 1e-5 --hidden_dropout_prob 0.1
+```
+
 STS12, STS13, STS14, STS15, STS16, STS-B, SICK-R를 평가할 수 있는 벤치마크를 구성한다.
 
 많은 부분 SentEval 레포지토리를 따라하지만 SentEval과 다르게 데이터셋을 쉽게 추가할 수 있게 만든다.
