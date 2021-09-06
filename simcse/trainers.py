@@ -47,13 +47,16 @@ class CLTrainer(Trainer):
                 outputs2 = self.model(**batch2, sent_emb=True)
                 input_ids1 = batch1["input_ids"]
                 input_ids2 = batch2["input_ids"]
-                pad_id = self.tokenizer.convert_tokens_to_ids(
-                    self.tokenizer.pad_token
-                )
+                """
                 input_ids1_valid = input_ids1 != pad_id
-                input_ids1_valid = input_ids1_valid & (input_ids1 < 1)
+                input_ids1_valid = input_ids1_valid & (input_ids1 != unk_id)
+                input_ids1_valid = input_ids1_valid & (input_ids1 < 10)
                 input_ids2_valid = input_ids2 != pad_id
-                input_ids2_valid = input_ids2_valid & (input_ids2 < 1)
+                input_ids2_valid = input_ids2_valid & (input_ids2 != unk_id)
+                input_ids2_valid = input_ids2_valid & (input_ids2 < 10)
+                """
+                input_ids1_valid = input_ids1 == 0
+                input_ids2_valid = input_ids2 == 0
                 input_mask = input_ids1[:, :, None] == input_ids2[:, None, :]
                 input_mask = input_mask & input_ids1_valid[:, :, None]
                 input_mask = input_mask & input_ids2_valid[:, None, :]

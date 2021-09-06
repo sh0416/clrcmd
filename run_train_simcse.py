@@ -148,6 +148,11 @@ class ModelArguments:
     hidden_dropout_prob: float = field(
         default=0.1, metadata={"help": "Dropout prob"}
     )
+    loss_mlm: bool = field(default=False, metadata={"help": "Add MLM loss"})
+    coeff_loss_mlm: float = field(
+        default=0.1,
+        metadata={"help": "Coefficient for masked language model objective"},
+    )
 
 
 @dataclass
@@ -265,6 +270,7 @@ def train(args):
 
     # Set the verbosity to info of the Transformers logger
     # (on main process only):
+    logger.info(f"{training_args.local_rank = }")
     if is_main_process(training_args.local_rank):
         transformers.utils.logging.set_verbosity_info()
         transformers.utils.logging.enable_default_handler()
@@ -418,7 +424,9 @@ def train(args):
     trainer = CLTrainer(
         model=model,
         data_collator=PairDataCollator(
-            tokenizer, max_length=data_args.max_seq_length
+            tokenizer,
+            max_length=data_args.max_seq_length,
+            mlm=model_args.loss_mlm,
         ),
         args=training_args,
         train_dataset=train_dataset,

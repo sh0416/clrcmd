@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import logging
+from re import I
 from typing import Callable, List, Tuple
 
 import torch
@@ -9,6 +10,7 @@ import torch.nn.functional as F
 from torch import Tensor
 from transformers.modeling_outputs import BaseModelOutput
 from transformers.models.roberta.modeling_roberta import (
+    RobertaLMHead,
     RobertaModel,
     RobertaPreTrainedModel,
 )
@@ -121,7 +123,10 @@ def dist_all_gather(x: Tensor) -> Tensor:
         for _ in range(dist.get_world_size())
     ]
     _x = torch.cat(
-        (x.view(-1), torch.empty((max_size - x.numel(),), device=x.device))
+        (
+            x.contiguous().view(-1),
+            torch.empty((max_size - x.numel(),), device=x.device),
+        )
     )
     dist.all_gather(_x_list, _x)
     # 4. Remove padded data to change original shape
@@ -135,24 +140,19 @@ def dist_all_gather(x: Tensor) -> Tensor:
 
 
 def compute_loss_simclr(
-    output1: BaseModelOutputWithHead,
-    output2: BaseModelOutputWithHead,
-    attention_mask1: Tensor,
-    attention_mask2: Tensor,
+    outputs: BaseModelOutputWithHead,
+    token_outputs: Tensor,
+    attention_mask: Tensor,
     pooler_fn: Callable,
     temp: float,
     is_training: bool,
 ) -> Tensor:
     """Compute SimCLR loss in sentence-level
 
-    :param output1: Model output for first view
-    :type output1: BaseModelOutputWithPooling
-    :param output2: Model output for second view
-    :type output2: BaseModelOutputWithPooling
-    :param attention_mask1: Attention mask
-    :type attention_mask1: FloatTensor(batch_size, seq_len)
-    :param attention_mask2: Attention mask
-    :type attention_mask2: FloatTensor(batch_size, seq_len)
+    :param outputs: Model output for first view
+    :type outputs: BaseModelOutputWithPooling
+    :param attention_mask: Attention mask
+    :type attention_mask: FloatTensor(batch_size, 2, seq_len)
     :param pooler_fn: Function for extracting sentence representation
     :type pooler_fn: Callable[[Tensor, BaseModelOutputWithHead],
                               FloatTensor(batch_size, hidden_dim)]
@@ -163,6 +163,23 @@ def compute_loss_simclr(
     :return: Scalar loss
     :rtype: FloatTensor()
     """
+    attention_mask1 = attention_mask[:, 0, :]
+    attention_mask2 = attention_mask[:, 1, :]
+    if outputs.hidden_states is not None:
+        hidden_states1 = outputs.hidden_states[:, 0, :]
+        hidden_states2 = outputs.hidden_states[:, 1, :]
+    else:
+        hidden_states1, hidden_states2 = None, None
+    output1 = BaseModelOutputWithHead(
+        last_hidden_state=outputs.last_hidden_state[:, 0, :],
+        hidden_states=hidden_states1,
+        token_output=token_outputs[:, 0, :, :],
+    )
+    output2 = BaseModelOutputWithHead(
+        last_hidden_state=outputs.last_hidden_state[:, 1, :],
+        hidden_states=hidden_states2,
+        token_output=token_outputs[:, 1, :, :],
+    )
     output1 = pooler_fn(attention_mask1, output1)
     output2 = pooler_fn(attention_mask2, output2)
     # Gather all embeddings if using distributed training
@@ -179,26 +196,20 @@ def compute_loss_simclr(
 
 
 def compute_loss_simclr_token(
-    input1: Tensor,
-    input2: Tensor,
-    output1: Tensor,
-    output2: Tensor,
+    inputs: Tensor,
+    outputs: Tensor,
     pairs: List[Tensor],
     temp: float,
     is_training: bool,
 ) -> Tensor:
     """Compute SimCLR loss in token-level
 
-    :param input1: Bert input for the first sentence
-    :type input1: LongTensor(batch_size, seq_len)
-    :param input2: Bert input for the second sentence
-    :type input2: LongTensor(batch_size, seq_len)
-    :param output1: Bert output for the first sentence
-    :type output1: FloatTensor(batch_size, seq_len, hidden_dim)
-    :param ouptut2: Bert output for the second sentence
-    :type output2: FloatTensor(batch_size, seq_len, hidden_dim)
+    :param inputs: Bert input for the first sentence
+    :type inputs: LongTensor(batch_size, 2, seq_len)
+    :param outputs: Bert output for the first sentence
+    :type outputs: FloatTensor(batch_size, 2, seq_len, hidden_dim)
     :param pairs: Pair for computing similarity between token
-    :type pairs: List[LongTensor(num_pairs, 2)]
+    :type pairs: List[LongTensor(num_pairs, 2, 2)]
     :param temp: Temperature for cosine similarity
     :type temp: float
     :param is_training: indicator whether training or not
@@ -208,43 +219,31 @@ def compute_loss_simclr_token(
     """
     # NOTE: Keep in mind that this code should be compatible in DDP setting
     # Assertion: Batch size is equal for all tensor
-    assert input1.shape[0] == input2.shape[0] == len(pairs)
-    assert output1.shape[0] == output2.shape[0] == len(pairs)
-    # Assertion: Sequence length is equal for input and output
-    assert input1.shape[1] == output1.shape[1]
-    assert input2.shape[1] == output2.shape[1]
-    # 1. Create index array for pairing tokens
-    batch_idx = [torch.full((x.shape[0],), i) for i, x in enumerate(pairs)]
-    seq_idx1, seq_idx2 = [x[:, 0] for x in pairs], [x[:, 1] for x in pairs]
-    batch_idx = torch.cat(batch_idx)
-    seq_idx1, seq_idx2 = torch.cat(seq_idx1), torch.cat(seq_idx2)
-    assert batch_idx.shape == seq_idx1.shape == seq_idx2.shape
-    # 2. Index input and output tensor
-    input1 = input1[batch_idx, seq_idx1]
-    input2 = input2[batch_idx, seq_idx2]
+    assert inputs.shape[0:3] == outputs.shape[0:3]
+    # 1. Index input and output tensor
+    input1 = inputs[pairs[:, 0], 0, pairs[:, 1]]
+    input2 = inputs[pairs[:, 0], 1, pairs[:, 2]]
     assert torch.equal(input1, input2), "Different input pair is not supported"
-    output1 = output1[batch_idx, seq_idx1]
-    output2 = output2[batch_idx, seq_idx2]
+    output1 = outputs[pairs[:, 0], 0, pairs[:, 1]]
+    output2 = outputs[pairs[:, 0], 1, pairs[:, 2]]
     # (num_pairs,), (num_pairs, hidden_dim)
-    # 3. Remain valid pair
-    input1_mask, input2_mask = input1 < 1, input2 < 1
-    input1, input2 = input1[input1_mask], input2[input2_mask]
-    output1, output2 = output1[input1_mask, :], output2[input2_mask, :]
-    # 4. (Optional) Gather all embeddings if using distributed training
+    # 2. (Optional) Gather all embeddings if using distributed training
     if dist.is_initialized() and is_training:
         input1 = dist_all_gather(input1)
         output1, output2 = dist_all_gather(output1), dist_all_gather(output2)
     # (valid_num_pairs,), (valid_num_pairs, hidden_dim)
-    # 5. Sort and split output tensor based on input
+    # 3. Sort and split output tensor based on input
     sorted_val, sorted_indice = torch.sort(input1)
     output1, output2 = output1[sorted_indice], output2[sorted_indice]
     # (valid_num_pairs,), (valid_num_pairs, hidden_dim)
-    _, counts = torch.unique(sorted_val, sorted=True, return_counts=True)
+    val, counts = torch.unique(sorted_val, sorted=True, return_counts=True)
     counts = counts.tolist()
     output1 = torch.split(output1, counts)
     output2 = torch.split(output2, counts)
+    output1 = [x for x in output1 if x.shape[0] > 20]
+    output2 = [x for x in output2 if x.shape[0] > 20]
     # list(torch.FloatTensor(valid_num_pairs_per_token, hidden_dim))
-    # 6. Calculate temperature aware cosine similarity
+    # 4. Calculate temperature aware cosine similarity
     sim = [
         F.cosine_similarity(x1[None, :, :], x2[:, None, :], dim=2) / temp
         for x1, x2 in zip(output1, output2)
@@ -261,46 +260,33 @@ def compute_loss_simclr_token(
 
 def compute_representation(
     encoder: Callable,
-    mlp: nn.Module,
     input_ids: Tensor,
     attention_mask: Tensor,
     token_type_ids: Tensor,
 ) -> Tuple[BaseModelOutputWithHead, BaseModelOutputWithHead]:
     """Compute bert contextual representation for contrastive learning"""
-    batch_size = input_ids.shape[0]
-    input_ids = torch.cat([input_ids[:, 0], input_ids[:, 1]])
-    attention_mask = torch.cat([attention_mask[:, 0], attention_mask[:, 1]])
+    input_ids = input_ids.view(-1, input_ids.shape[2])
+    attention_mask = attention_mask.view(-1, attention_mask.shape[2])
     if token_type_ids is not None:
-        token_type_ids = torch.cat(
-            [token_type_ids[:, 0], token_type_ids[:, 1]]
-        )
+        token_type_ids = token_type_ids.view(-1, token_type_ids.shape[2])
     outputs = encoder(
         input_ids,
         attention_mask=attention_mask,
         token_type_ids=token_type_ids,
         return_dict=True,
     )
-    token_output = mlp(outputs.last_hidden_state)
-    token_output1 = token_output[:batch_size]
-    token_output2 = token_output[batch_size:]
-    last_hidden1 = outputs.last_hidden_state[:batch_size]
-    last_hidden2 = outputs.last_hidden_state[batch_size:]
+    dims = outputs.last_hidden_state.shape[1:]
+    last_hidden = outputs.last_hidden_state.view(-1, 2, *dims)
     if outputs.hidden_states is not None:
-        hidden_states1 = tuple(x[:batch_size] for x in outputs.hidden_states)
-        hidden_states2 = tuple(x[batch_size:] for x in outputs.hidden_states)
+        dims = outputs.hidden_states.shape[1:]
+        hidden_states = outputs.hidden_states.view(-1, 2, *dims)
     else:
-        hidden_states1, hidden_states2 = None, None
-    outputs1 = BaseModelOutputWithHead(
-        last_hidden_state=last_hidden1,
-        hidden_states=hidden_states1,
-        token_output=token_output1,
+        hidden_states = None
+    outputs = BaseModelOutput(
+        last_hidden_state=last_hidden,
+        hidden_states=hidden_states,
     )
-    outputs2 = BaseModelOutputWithHead(
-        last_hidden_state=last_hidden2,
-        hidden_states=hidden_states2,
-        token_output=token_output2,
-    )
-    return outputs1, outputs2
+    return outputs
 
 
 def cl_forward(
@@ -310,46 +296,37 @@ def cl_forward(
     attention_mask=None,
     token_type_ids=None,
     pairs=None,
+    input_ids_mlm=None,
+    labels_mlm=None,
 ) -> Tuple[Tensor]:
-    input_ids1 = input_ids[:, 0]
-    input_ids2 = input_ids[:, 1]
-    if pairs is not None:
-        batch_idx = [torch.full((x.shape[0],), i) for i, x in enumerate(pairs)]
-        batch_idx = torch.cat(batch_idx)
-        seq_idx1 = torch.cat([x[:, 0] for x in pairs])
-        seq_idx2 = torch.cat([x[:, 1] for x in pairs])
-        pair_left = input_ids1[batch_idx, seq_idx1]
-        pair_right = input_ids2[batch_idx, seq_idx2]
-        assert torch.equal(pair_left, pair_right)
-    outputs1, outputs2 = compute_representation(
-        encoder, cls.mlp, input_ids, attention_mask, token_type_ids
+    outputs = compute_representation(
+        encoder, input_ids, attention_mask, token_type_ids
     )
-    attention_mask1 = attention_mask[:, 0, :]
-    attention_mask2 = attention_mask[:, 1, :]
-    """
+    token_outputs = cls.mlp(outputs.last_hidden_state)
     loss = compute_loss_simclr(
-        outputs1,
-        outputs2,
-        attention_mask1,
-        attention_mask2,
+        outputs,
+        token_outputs,
+        attention_mask,
         cls.pooler,
         cls.model_args.temp,
         cls.training,
     )
-    """
-    loss = 0
+    if cls.model_args.loss_mlm:
+        outputs_mlm = compute_representation(
+            encoder, input_ids_mlm, attention_mask, token_type_ids
+        )
+        last_hidden = outputs_mlm.last_hidden_state
+        last_hidden = last_hidden.view(-1, *last_hidden.shape[2:])
+        logits_mlm = cls.lm_head(last_hidden)
+        logits_mlm = logits_mlm.view(-1, cls.config.vocab_size)
+        labels_mlm = labels_mlm.view(-1)
+        loss_mlm = F.cross_entropy(logits_mlm, labels_mlm)
+        loss += cls.model_args.coeff_loss_mlm * loss_mlm
     if cls.model_args.loss_token:
         assert pairs is not None
         loss += cls.model_args.coeff_loss_token * compute_loss_simclr_token(
-            input_ids1,
-            input_ids2,
-            outputs1.token_output,
-            outputs2.token_output,
-            pairs,
-            cls.model_args.temp,
-            cls.training,
+            input_ids, token_outputs, pairs, cls.model_args.temp, cls.training
         )
-
     return (loss,)
 
 
@@ -378,7 +355,8 @@ class RobertaForCL(RobertaPreTrainedModel):
         super().__init__(config)
         self.model_args = model_kwargs["model_args"]
         self.roberta = RobertaModel(config)
-
+        if self.model_args.loss_mlm:
+            self.lm_head = RobertaLMHead(config)
         cl_init(self, config)
 
     def forward(
@@ -387,6 +365,8 @@ class RobertaForCL(RobertaPreTrainedModel):
         attention_mask=None,
         token_type_ids=None,
         pairs=None,
+        input_ids_mlm=None,
+        labels_mlm=None,
         sent_emb=False,
     ):
         if sent_emb:
@@ -405,4 +385,6 @@ class RobertaForCL(RobertaPreTrainedModel):
                 attention_mask=attention_mask,
                 token_type_ids=token_type_ids,
                 pairs=pairs,
+                input_ids_mlm=input_ids_mlm,
+                labels_mlm=labels_mlm,
             )
