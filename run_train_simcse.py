@@ -268,13 +268,6 @@ def train(args):
         f"16-bits training: {training_args.fp16} "
     )
 
-    # Set the verbosity to info of the Transformers logger
-    # (on main process only):
-    logger.info(f"{training_args.local_rank = }")
-    if is_main_process(training_args.local_rank):
-        transformers.utils.logging.set_verbosity_info()
-        transformers.utils.logging.enable_default_handler()
-        transformers.utils.logging.enable_explicit_format()
     logger.info(f"Training/evaluation parameters {training_args}")
 
     # Set seed before initializing model.
@@ -473,6 +466,16 @@ def main():
         (ModelArguments, DataTrainingArguments, OurTrainingArguments)
     )
     args = parser.parse_args_into_dataclasses()
+
+    _, _, training_args = args
+    # Set the verbosity to info of the Transformers logger
+    # (on main process only):
+    logger.info(f"{training_args.local_rank = }")
+    if is_main_process(training_args.local_rank):
+        transformers.utils.logging.set_verbosity_info()
+        transformers.utils.logging.enable_default_handler()
+        transformers.utils.logging.enable_explicit_format()
+
     train(args)
 
 
