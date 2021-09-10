@@ -58,14 +58,6 @@ def main():
     #       So, we don't have to call it manually
     args: Arguments = parser.parse_args_into_dataclasses()
 
-    # Setup logging
-    if dist.get_rank() == 0:
-        logging.basicConfig(
-            format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
-            datefmt="%m/%d/%Y %H:%M:%S",
-            level=logging.INFO,
-        )
-
     def sample_configuration(trial: Trial) -> Arguments:
         model_args, data_args, training_args = args
 
