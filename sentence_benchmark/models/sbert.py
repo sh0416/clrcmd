@@ -17,11 +17,7 @@ def prepare(inputs: List[Input], param: Dict) -> Dict:
 
 def batcher(inputs: List[Input], param: Dict) -> np.ndarray:
     model = param["model"]
-    x1 = model.encode(
-        [" ".join(x.text1) for x in inputs], 4, show_progress_bar=False
-    )
-    x2 = model.encode(
-        [" ".join(x.text2) for x in inputs], 4, show_progress_bar=False
-    )
+    x1 = model.encode([x[0] for x in inputs], 4, show_progress_bar=False)
+    x2 = model.encode([x[1] for x in inputs], 4, show_progress_bar=False)
     x = list(map(lambda x: cos(x[0], x[1]), zip(x1, x2)))
     return np.asarray(x)

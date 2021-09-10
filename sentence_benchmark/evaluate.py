@@ -19,7 +19,7 @@ def evaluate_sts(
     for name, _dataset in dataset.items():
         scores, labels = [], []
         param = prepare([x.input for x in _dataset], param)
-        for examples in batch(_dataset, 4):
+        for examples in batch(_dataset, param["batch_size"]):
             scores.append(batcher([x.input for x in examples], param))
             labels.append([x.score for x in examples])
         scores, labels = np.concatenate(scores), np.concatenate(labels)

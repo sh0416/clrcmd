@@ -5,7 +5,7 @@ from sentence_benchmark.data import (
     load_sickr_dev,
     load_sickr_test,
     load_sickr_train,
-    load_sources,
+    load_sources_sts,
     load_sts12,
     load_sts13,
     load_sts14,
@@ -20,9 +20,7 @@ from sentence_benchmark.evaluate import evaluate_sts
 logger = logging.getLogger(__name__)
 
 
-parser = argparse.ArgumentParser(
-    formatter_class=argparse.ArgumentDefaultsHelpFormatter
-)
+parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument(
     "--method",
     type=str,
@@ -31,7 +29,9 @@ parser.add_argument(
     help="method",
 )
 parser.add_argument(
-    "--checkpoint", type=str, help="checkpoint",
+    "--checkpoint",
+    type=str,
+    help="checkpoint",
 )
 parser.add_argument(
     "--dataset",
@@ -54,11 +54,10 @@ parser.add_argument(
     help="dataset",
 )
 parser.add_argument(
-    "--data-dir", type=str, default=".data/STS/STS12-en-test", help="data dir",
+    "--data-dir", type=str, default=".data/STS/STS12-en-test", help="data dir"
 )
-parser.add_argument(
-    "--sources", type=str, nargs="*", help="sources",
-)
+parser.add_argument("--sources", type=str, nargs="*", help="sources")
+parser.add_argument("--batch-size", type=int, default=32, help="batch size")
 
 
 if __name__ == "__main__":
@@ -92,7 +91,7 @@ if __name__ == "__main__":
     elif args.dataset == "SICKR-test":
         load_fn = load_sickr_test
     elif args.dataset == "custom":
-        load_fn = load_sources
+        load_fn = load_sources_sts
     else:
         raise argparse.ArgumentError("Invalid --dataset")
     if args.dataset == "custom":
@@ -124,15 +123,7 @@ if __name__ == "__main__":
     logger.info("  all")
     logger.info(f"    pearson  (all): {result['all']['pearson']['all']:.4f}")
     logger.info(f"    spearman (all): {result['all']['spearman']['all']:.4f}")
-    logger.info(
-        f"    pearson  (average): {result['all']['pearson']['mean']:.4f}"
-    )
-    logger.info(
-        f"    spearman (average): {result['all']['spearman']['mean']:.4f}"
-    )
-    logger.info(
-        f"    pearson  (waverage): {result['all']['pearson']['wmean']:.4f}"
-    )
-    logger.info(
-        f"    spearman (waverage): {result['all']['spearman']['wmean']:.4f}"
-    )
+    logger.info(f"    pearson  (average): {result['all']['pearson']['mean']:.4f}")
+    logger.info(f"    spearman (average): {result['all']['spearman']['mean']:.4f}")
+    logger.info(f"    pearson  (waverage): {result['all']['pearson']['wmean']:.4f}")
+    logger.info(f"    spearman (waverage): {result['all']['spearman']['wmean']:.4f}")

@@ -8,17 +8,16 @@ import numpy as np
 from sentence_benchmark.data import Input
 from sentence_benchmark.utils import cos
 
-FASTTEXT_PATH = ".data/fasttext/crawl-300d-2M.vec"
-
 
 def prepare(inputs: List[Input], param: Dict) -> Dict:
-    stream1 = itertools.chain.from_iterable((x.text1 for x in inputs))
-    stream2 = itertools.chain.from_iterable((x.text2 for x in inputs))
-    words = Counter(itertools.chain(stream1, stream2))
+    sentences = itertools.chain.from_iterable(inputs)
+    tokens = itertools.chain.from_iterable(map(lambda x: x.split(), sentences))
+    words = Counter(tokens)
 
     # Load word2vec
+    fasttext_path = param.get("fasttext_path", ".data/fasttext/crawl-300d-2M.vec")
     word2vec = {}
-    with open(FASTTEXT_PATH) as f:
+    with open(fasttext_path) as f:
         for line in f:
             word, vec = line.split(" ", 1)
             if word in words:
@@ -29,14 +28,14 @@ def prepare(inputs: List[Input], param: Dict) -> Dict:
 
 def batcher(inputs: List[Input], param: Dict) -> np.ndarray:
     def _compute(x: List[str]) -> np.ndarray:
-        x = map(param["word2vec"].get, x)
+        x = map(param["word2vec"].get, x.split())
         x = filter(lambda x: x is not None, x)
         x = list(x)
         x = np.mean(np.stack(list(x), axis=0), axis=0)
         assert x.shape[0] == 300
         return x
 
-    x = map(lambda x: (_compute(x.text1), _compute(x.text2)), inputs)
+    x = map(lambda x: (_compute(x[0]), _compute(x[1])), inputs)
     x = map(lambda x: cos(x[0], x[1]), x)
     x = list(x)
     return np.asarray(x)
