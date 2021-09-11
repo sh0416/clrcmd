@@ -6,3 +6,5 @@ scipy
 transformers
 datasets
 sentence-transformers
+jupyter
+notebook
