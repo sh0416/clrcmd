@@ -1,7 +1,6 @@
-from dataclasses import dataclass
 import logging
-from re import I
-from typing import Callable, List, Tuple
+from dataclasses import dataclass
+from typing import Callable, List, NamedTuple, Optional, Tuple
 
 import torch
 import torch.distributed as dist
@@ -11,7 +10,7 @@ from torch import Tensor
 from transformers.modeling_outputs import BaseModelOutput
 from transformers.models.roberta.modeling_roberta import (
     RobertaLMHead,
-    RobertaModel,
+    RobertaForTokenClassification,
     RobertaPreTrainedModel,
 )
 
@@ -65,6 +64,7 @@ class Pooler(nn.Module):
             masked_sum = attention_mask.sum(dim=1)
             return pooled_sum / masked_sum
         elif self.pooler_type == "avg_first_last":
+            assert outputs.hidden_states is not None
             hidden_states = outputs.hidden_states
             attention_mask = attention_mask[:, :, None]
             hidden = (hidden_states[0] + hidden_states[-1]) / 2.0
@@ -73,6 +73,7 @@ class Pooler(nn.Module):
             masked_sum = attention_mask.sum(dim=1)
             return pooled_sum / masked_sum
         elif self.pooler_type == "avg_top2":
+            assert outputs.hidden_states is not None
             hidden_states = outputs.hidden_states
             attention_mask = attention_mask[:, :, None]
             hidden = (hidden_states[-1] + hidden_states[-2]) / 2.0
@@ -82,19 +83,6 @@ class Pooler(nn.Module):
             return pooled_sum / masked_sum
         else:
             raise NotImplementedError()
-
-
-def cl_init(cls, config):
-    """
-    Contrastive learning class init function.
-    """
-    cls.pooler_type = cls.model_args.pooler_type
-    cls.pooler = Pooler(cls.model_args.pooler_type)
-    cls.mlp = nn.Sequential(
-        nn.Linear(config.hidden_size, config.hidden_size),
-        nn.Tanh(),
-    )
-    cls.init_weights()
 
 
 def dist_all_gather(x: Tensor) -> Tensor:
@@ -111,16 +99,14 @@ def dist_all_gather(x: Tensor) -> Tensor:
     assert dist.is_initialized(), "The process is not in DDP setting"
     # 1. Get size acroess processes
     x_numel_list = [
-        torch.tensor(x.numel(), device=x.device)
-        for _ in range(dist.get_world_size())
+        torch.tensor(x.numel(), device=x.device) for _ in range(dist.get_world_size())
     ]
     dist.all_gather(x_numel_list, torch.tensor(x.numel(), device=x.device))
     # 2. Infer maximum size
     max_size = max(x.item() for x in x_numel_list)
     # 3. Communitcate tensor with padded version
     _x_list = [
-        torch.empty((max_size,), device=x.device)
-        for _ in range(dist.get_world_size())
+        torch.empty((max_size,), device=x.device) for _ in range(dist.get_world_size())
     ]
     _x = torch.cat(
         (
@@ -130,9 +116,7 @@ def dist_all_gather(x: Tensor) -> Tensor:
     )
     dist.all_gather(_x_list, _x)
     # 4. Remove padded data to change original shape
-    x_list = [
-        _x[:n].view(-1, *x.shape[1:]) for n, _x in zip(x_numel_list, _x_list)
-    ]
+    x_list = [_x[:n].view(-1, *x.shape[1:]) for n, _x in zip(x_numel_list, _x_list)]
     # Since `all_gather` results do not have gradients, we replace the
     # current process's corresponding embeddings with original tensors
     x_list[dist.get_rank()] = x
@@ -140,7 +124,7 @@ def dist_all_gather(x: Tensor) -> Tensor:
 
 
 def compute_loss_simclr(
-    outputs: BaseModelOutputWithHead,
+    outputs: BaseModelOutput,
     token_outputs: Tensor,
     attention_mask: Tensor,
     pooler_fn: Callable,
@@ -249,10 +233,7 @@ def compute_loss_simclr_token(
         for x1, x2 in zip(output1, output2)
     ]
     # list(FloatTensor(num_pairs_per_symbol, num_pairs_per_symbol))
-    label = [
-        torch.arange(x.shape[1], dtype=torch.long, device=x.device)
-        for x in sim
-    ]
+    label = [torch.arange(x.shape[1], dtype=torch.long, device=x.device) for x in sim]
     loss = torch.stack([F.cross_entropy(x, l) for x, l in zip(sim, label)])
     loss = loss.mean()
     return loss
@@ -263,7 +244,7 @@ def compute_representation(
     input_ids: Tensor,
     attention_mask: Tensor,
     token_type_ids: Tensor,
-) -> Tuple[BaseModelOutputWithHead, BaseModelOutputWithHead]:
+) -> BaseModelOutput:
     """Compute bert contextual representation for contrastive learning"""
     input_ids = input_ids.view(-1, input_ids.shape[2])
     attention_mask = attention_mask.view(-1, attention_mask.shape[2])
@@ -289,102 +270,81 @@ def compute_representation(
     return outputs
 
 
-def cl_forward(
-    cls,
-    encoder,
-    input_ids=None,
-    attention_mask=None,
-    token_type_ids=None,
-    pairs=None,
-    input_ids_mlm=None,
-    labels_mlm=None,
-) -> Tuple[Tensor]:
-    outputs = compute_representation(
-        encoder, input_ids, attention_mask, token_type_ids
-    )
-    token_outputs = cls.mlp(outputs.last_hidden_state)
-    loss = compute_loss_simclr(
-        outputs,
-        token_outputs,
-        attention_mask,
-        cls.pooler,
-        cls.model_args.temp,
-        cls.training,
-    )
-    if cls.model_args.loss_mlm:
-        outputs_mlm = compute_representation(
-            encoder, input_ids_mlm, attention_mask, token_type_ids
-        )
-        last_hidden = outputs_mlm.last_hidden_state
-        last_hidden = last_hidden.view(-1, *last_hidden.shape[2:])
-        logits_mlm = cls.lm_head(last_hidden)
-        logits_mlm = logits_mlm.view(-1, cls.config.vocab_size)
-        labels_mlm = labels_mlm.view(-1)
-        loss_mlm = F.cross_entropy(logits_mlm, labels_mlm)
-        loss += cls.model_args.coeff_loss_mlm * loss_mlm
-    if cls.model_args.loss_token:
-        assert pairs is not None
-        loss += cls.model_args.coeff_loss_token * compute_loss_simclr_token(
-            input_ids, token_outputs, pairs, cls.model_args.temp, cls.training
-        )
-    return (loss,)
+class BaseModelInput(NamedTuple):
+    input_ids: Tensor
+    attention_mask: Optional[Tensor]
+    token_type_ids: Optional[Tensor]
+    labels: Optional[Tensor]
 
 
-def sentemb_forward(
-    cls, encoder, input_ids=None, attention_mask=None, token_type_ids=None
-) -> BaseModelOutputWithHead:
-    outputs = encoder(
-        input_ids,
-        attention_mask=attention_mask,
-        token_type_ids=token_type_ids,
-        return_dict=True,
-    )
-    token_output = cls.mlp(outputs.last_hidden_state)
-    outputs = BaseModelOutputWithHead(
-        last_hidden_state=outputs.last_hidden_state,
-        hidden_states=outputs.hidden_states,
-        token_output=token_output,
-    )
-    return outputs
-
-
-class RobertaForCL(RobertaPreTrainedModel):
-    _keys_to_ignore_on_load_missing = [r"position_ids"]
-
-    def __init__(self, config, *model_args, **model_kwargs):
+class RobertaForTokenContrastiveLearning(RobertaForTokenClassification):
+    def __init__(self, config, pooler_type: str, loss_mlm: bool):
         super().__init__(config)
-        self.model_args = model_kwargs["model_args"]
-        self.roberta = RobertaModel(config)
-        if self.model_args.loss_mlm:
+        self.pooler = Pooler(pooler_type)
+        if loss_mlm:
             self.lm_head = RobertaLMHead(config)
-        cl_init(self, config)
+        self.init_weights()
 
     def forward(
         self,
-        input_ids=None,
-        attention_mask=None,
-        token_type_ids=None,
-        pairs=None,
-        input_ids_mlm=None,
-        labels_mlm=None,
-        sent_emb=False,
-    ):
-        if sent_emb:
-            return sentemb_forward(
-                self,
-                self.roberta,
-                input_ids=input_ids,
-                attention_mask=attention_mask,
-                token_type_ids=token_type_ids,
+        inputs: BaseModelInput,
+        inputs_mlm: Optional[BaseModelInput] = None,
+        pairs: Optional[Tensor] = None,
+    ) -> Tuple[Tensor]:
+        outputs = compute_representation(
+            self.roberta,
+            inputs.input_ids,
+            inputs.attention_mask,
+            inputs.token_type_ids,
+        )
+        token_outputs = self.mlp(outputs.last_hidden_state)
+        loss = compute_loss_simclr(
+            outputs,
+            token_outputs,
+            attention_mask,
+            self.pooler,
+            self.model_args.temp,
+            self.training,
+        )
+        if cls.model_args.loss_mlm:
+            outputs_mlm = compute_representation(
+                encoder, input_ids_mlm, attention_mask, token_type_ids
             )
-        else:
-            return cl_forward(
-                self,
-                self.roberta,
-                input_ids=input_ids,
-                attention_mask=attention_mask,
-                token_type_ids=token_type_ids,
-                pairs=pairs,
-                input_ids_mlm=input_ids_mlm,
-                labels_mlm=labels_mlm,
+            last_hidden = outputs_mlm.last_hidden_state
+            last_hidden = last_hidden.view(-1, *last_hidden.shape[2:])
+            logits_mlm = cls.lm_head(last_hidden)
+            logits_mlm = logits_mlm.view(-1, cls.config.vocab_size)
+            labels_mlm = labels_mlm.view(-1)
+            loss_mlm = F.cross_entropy(logits_mlm, labels_mlm)
+            loss += cls.model_args.coeff_loss_mlm * loss_mlm
+        if cls.model_args.loss_token:
+            assert pairs is not None
+            loss += cls.model_args.coeff_loss_token * compute_loss_simclr_token(
+                input_ids,
+                token_outputs,
+                pairs,
+                cls.model_args.temp,
+                cls.training,
             )
+        return (loss,)
+
+    def compute_sentence_representation(self, inputs: BaseModelInput):
+        outputs = self.roberta(
+            inputs.input_ids,
+            attention_mask=inputs.attention_mask,
+            token_type_ids=inputs.token_type_ids,
+            return_dict=True,
+        )
+        token_output = self.mlp(outputs.last_hidden_state)
+        outputs = BaseModelOutputWithHead(
+            last_hidden_state=outputs.last_hidden_state,
+            hidden_states=outputs.hidden_states,
+            token_output=token_output,
+        )
+        outputs = self.pooler(inputs.attention_mask, outputs)
+        return outputs
+
+    def compute_similarity(
+        self, inputs1: BaseModelInput, inputs2: BaseModelInput
+    ) -> Tensor:
+        pass

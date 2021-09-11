@@ -1,8 +1,9 @@
-from typing import List, Tuple, Dict, Any, Union, Optional
 import itertools
+from dataclasses import dataclass
+from typing import Any, Dict, List, Optional, Tuple, Union
+
 import torch
 from torch import Tensor
-from dataclasses import dataclass
 from transformers import DataCollatorWithPadding, PreTrainedTokenizerBase
 from transformers.data.data_collator import PaddingStrategy
 
@@ -102,12 +103,6 @@ class PairDataCollator(DataCollatorWithPadding):
             batch["input_ids_mlm"] = input_ids_mlm.view(-1, 2, seq_len)
             batch["labels_mlm"] = labels_mlm.view(-1, 2, seq_len)
 
-        if "label" in batch:
-            batch["labels"] = batch["label"]
-            del batch["label"]
-        if "label_ids" in batch:
-            batch["labels"] = batch["label_ids"]
-            del batch["label_ids"]
         return batch
 
     def mask_tokens(
@@ -129,9 +124,7 @@ class PairDataCollator(DataCollatorWithPadding):
                 )
                 for val in labels.tolist()
             ]
-            special_tokens_mask = torch.tensor(
-                special_tokens_mask, dtype=torch.bool
-            )
+            special_tokens_mask = torch.tensor(special_tokens_mask, dtype=torch.bool)
         else:
             special_tokens_mask = special_tokens_mask.bool()
 
@@ -141,8 +134,7 @@ class PairDataCollator(DataCollatorWithPadding):
 
         # 80% of the time, we replace masked input tokens with tokenizer.mask_token ([MASK])
         indices_replaced = (
-            torch.bernoulli(torch.full(labels.shape, 0.8)).bool()
-            & masked_indices
+            torch.bernoulli(torch.full(labels.shape, 0.8)).bool() & masked_indices
         )
         inputs[indices_replaced] = self.tokenizer.convert_tokens_to_ids(
             self.tokenizer.mask_token

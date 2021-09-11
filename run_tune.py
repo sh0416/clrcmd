@@ -1,17 +1,18 @@
-import os
-import optuna
 import logging
+import os
 from argparse import Namespace
 from datetime import datetime
-from optuna import Trial
 from typing import Callable, Dict, Tuple
 
+import optuna
 import torch
 import torch.distributed as dist
+from optuna import Trial
 from transformers.hf_argparser import HfArgumentParser
+
 from run_train_simcse import (
-    ModelArguments,
     DataTrainingArguments,
+    ModelArguments,
     OurTrainingArguments,
     train,
 )

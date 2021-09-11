@@ -1,14 +1,10 @@
-import os
+import enum
 import json
 import logging
-from dataclasses import dataclass, field, asdict
-
-from simcse.data import (
-    PairDataCollator,
-    create_perfect_overlap_pairs_from_tokens,
-)
-from typing import Optional
+import os
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
+from typing import Optional
 
 import torch
 import transformers
@@ -23,7 +19,8 @@ from transformers import (
 )
 from transformers.trainer_utils import is_main_process
 
-from simcse.models import RobertaForCL
+from simcse.data import PairDataCollator, create_perfect_overlap_pairs_from_tokens
+from simcse.models import RobertaForTokenContrastiveLearning
 from simcse.trainers import CLTrainer
 
 logger = logging.getLogger(__name__)
@@ -33,88 +30,13 @@ MODEL_TYPES = tuple(conf.model_type for conf in MODEL_CONFIG_CLASSES)
 
 @dataclass
 class ModelArguments:
-    """
-    Arguments pertaining to which model/config/tokenizer we are going to
-    fine-tune, or train from scratch.
-    """
-
-    # Huggingface's original arguments
     model_name_or_path: Optional[str] = field(
-        default=None,
-        metadata={
-            "help": (
-                "The model checkpoint for weights initialization."
-                "Don't set if you want to train a model from scratch."
-            )
-        },
-    )
-    model_type: Optional[str] = field(
-        default=None,
-        metadata={
-            "help": (
-                "If training from scratch, pass a model type from the list: "
-            )
-            + ", ".join(MODEL_TYPES)
-        },
-    )
-    config_name: Optional[str] = field(
-        default=None,
-        metadata={
-            "help": (
-                "Pretrained config name or path if not the same as model_name"
-            )
-        },
-    )
-    tokenizer_name: Optional[str] = field(
-        default=None,
-        metadata={
-            "help": (
-                "Pretrained tokenizer name or path if not the same as"
-                " model_name"
-            )
-        },
-    )
-    cache_dir: Optional[str] = field(
-        default=None,
-        metadata={
-            "help": (
-                "Where do you want to store the pretrained models downloaded"
-                " from huggingface.co"
-            )
-        },
-    )
-    use_fast_tokenizer: bool = field(
-        default=True,
-        metadata={
-            "help": (
-                "Whether to use one of the fast tokenizer (backed by the"
-                " tokenizers library) or not."
-            )
-        },
-    )
-    model_revision: str = field(
-        default="main",
-        metadata={
-            "help": (
-                "The specific model version to use (can be a branch name, tag"
-                " name or commit id)."
-            )
-        },
-    )
-    use_auth_token: bool = field(
-        default=False,
-        metadata={
-            "help": (
-                "Will use the token generated when running `transformers-cli"
-                " login` (necessary to use this script with private models)."
-            )
-        },
+        default="roberta-base",
+        metadata={"help": "The model checkpoint for weights initialization."},
     )
 
     # SimCSE's arguments
-    temp: float = field(
-        default=0.05, metadata={"help": "Temperature for softmax."}
-    )
+    temp: float = field(default=0.05, metadata={"help": "Temperature for softmax."})
     pooler_type: str = field(
         default="cls",
         metadata={
@@ -128,8 +50,7 @@ class ModelArguments:
         default=False,
         metadata={
             "help": (
-                "Whether to use token alignment contrastive learning"
-                " objective."
+                "Whether to use token alignment contrastive learning" " objective."
             )
         },
     )
@@ -145,9 +66,7 @@ class ModelArguments:
     mlp_only_train: bool = field(
         default=False, metadata={"help": "Use MLP only during training"}
     )
-    hidden_dropout_prob: float = field(
-        default=0.1, metadata={"help": "Dropout prob"}
-    )
+    hidden_dropout_prob: float = field(default=0.1, metadata={"help": "Dropout prob"})
     loss_mlm: bool = field(default=False, metadata={"help": "Add MLM loss"})
     coeff_loss_mlm: float = field(
         default=0.1,
@@ -186,9 +105,7 @@ class DataTrainingArguments:
     )
     preprocessing_num_workers: Optional[int] = field(
         default=None,
-        metadata={
-            "help": "The number of processes to use for the preprocessing."
-        },
+        metadata={"help": "The number of processes to use for the preprocessing."},
     )
 
     # SimCSE's arguments
@@ -219,9 +136,7 @@ class DataTrainingArguments:
 @dataclass
 class OurTrainingArguments(TrainingArguments):
     output_dir: str = field(
-        default=os.path.join(
-            "result", datetime.now().strftime("%Y%m%d_%H%M%S")
-        ),
+        default=os.path.join("result", datetime.now().strftime("%Y%m%d_%H%M%S")),
         metadata={
             "help": (
                 "The output directory where the model predictions and"
@@ -299,50 +214,22 @@ def train(args):
     # The .from_pretrained methods guarantee that only one local process can
     # concurrently download model & vocab.
     config_kwargs = {
-        "cache_dir": model_args.cache_dir,
-        "revision": model_args.model_revision,
-        "use_auth_token": True if model_args.use_auth_token else None,
         "hidden_dropout_prob": model_args.hidden_dropout_prob,
     }
     if model_args.pooler_type in ["avg_top2", "avg_first_last"]:
         config_kwargs["output_hidden_states"] = True
     if model_args.model_name_or_path:
         if "roberta" in model_args.model_name_or_path:
+            tokenizer = RobertaTokenizer.from_pretrained(model_args.model_name_or_path)
             config = AutoConfig.from_pretrained(
-                model_args.model_name_or_path,
-                **config_kwargs,
+                model_args.model_name_or_path, **config_kwargs
             )
-        else:
-            raise NotImplementedError()
-    else:
-        raise NotImplementedError()
-
-    tokenizer_kwargs = {
-        "cache_dir": model_args.cache_dir,
-        "use_fast": model_args.use_fast_tokenizer,
-        "revision": model_args.model_revision,
-        "use_auth_token": True if model_args.use_auth_token else None,
-    }
-    if model_args.model_name_or_path:
-        if "roberta" in model_args.model_name_or_path:
-            tokenizer = RobertaTokenizer.from_pretrained(
-                model_args.model_name_or_path, **tokenizer_kwargs
-            )
-        else:
-            raise NotImplementedError()
-    else:
-        raise NotImplementedError()
-
-    if model_args.model_name_or_path:
-        if "roberta" in model_args.model_name_or_path:
-            model = RobertaForCL.from_pretrained(
+            print(f"{config = }")
+            model = RobertaForTokenContrastiveLearning.from_pretrained(
                 model_args.model_name_or_path,
-                from_tf=bool(".ckpt" in model_args.model_name_or_path),
                 config=config,
-                cache_dir=model_args.cache_dir,
-                revision=model_args.model_revision,
-                use_auth_token=True if model_args.use_auth_token else None,
-                model_args=model_args,
+                pooler_type=model_args.pooler_type,
+                loss_mlm=model_args.loss_mlm,
             )
         else:
             raise NotImplementedError()
@@ -353,25 +240,15 @@ def train(args):
     model.resize_token_embeddings(len(tokenizer))
 
     # Prepare features
-    sent0_cname = "input_strs"
-    sent1_cname = "input_strs2"
+    sent0_cname, sent1_cname = "input_strs", "input_strs2"
 
     def prepare_features(examples):
-        # padding = longest (default)
-        #   If no sentence in the batch exceed the max length, then use
-        #   the max sentence length in the batch, otherwise use the
-        #   max sentence length in the argument and truncate those that
-        #   exceed the max length.
-        # padding = max_length (when pad_to_max_length, for pressure test)
-        #   All sentences are padded/truncated to data_args.max_seq_length.
-        total = len(examples[sent0_cname])
+        for idx, text in enumerate(examples[sent0_cname]):
+            assert text is not None, f"Example {idx = } is None"
+        for idx, text in enumerate(examples[sent1_cname]):
+            assert text is not None, f"Example {idx = } is None"
 
-        # Avoid "None" fields
-        for idx in range(total):
-            if examples[sent0_cname][idx] is None:
-                examples[sent0_cname][idx] = " "
-            if examples[sent1_cname][idx] is None:
-                examples[sent1_cname][idx] = " "
+        total = len(examples[sent0_cname])
 
         tokens1 = [x.split() for x in examples[sent0_cname]]
         tokens2 = [x.split() for x in examples[sent1_cname]]
@@ -431,9 +308,7 @@ def train(args):
     train_result = trainer.train()
 
     if trainer.is_world_process_zero():
-        output_train_file = os.path.join(
-            training_args.output_dir, "train_results.txt"
-        )
+        output_train_file = os.path.join(training_args.output_dir, "train_results.txt")
         with open(output_train_file, "w") as writer:
             logger.info("***** Train results *****")
             for key, value in sorted(train_result.metrics.items()):
@@ -444,9 +319,7 @@ def train(args):
     logger.info("*** Evaluate ***")
     results = trainer.evaluate(all=True)
 
-    output_eval_file = os.path.join(
-        training_args.output_dir, "eval_results.txt"
-    )
+    output_eval_file = os.path.join(training_args.output_dir, "eval_results.txt")
     if trainer.is_world_process_zero():
         with open(output_eval_file, "w") as writer:
             logger.info("***** Eval results *****")

@@ -1,9 +1,8 @@
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 import numpy as np
 import torch
 import torch.nn.functional as F
-from torch.utils.data.dataset import Dataset
 from transformers import Trainer
 from transformers.utils import logging
 
@@ -45,18 +44,22 @@ class CLTrainer(Trainer):
             with torch.no_grad():
                 outputs1 = self.model(**batch1, sent_emb=True)
                 outputs2 = self.model(**batch2, sent_emb=True)
+                score = F.cosine_similarity(outputs1, outputs2)
+                """
+                pad_id = self.tokenizer.convert_tokens_to_ids(
+                    self.tokenizer.pad_token
+                )
+                unk_id = self.tokenizer.convert_tokens_to_ids(
+                    self.tokenizer.unk_token
+                )
                 input_ids1 = batch1["input_ids"]
                 input_ids2 = batch2["input_ids"]
-                """
                 input_ids1_valid = input_ids1 != pad_id
                 input_ids1_valid = input_ids1_valid & (input_ids1 != unk_id)
                 input_ids1_valid = input_ids1_valid & (input_ids1 < 10)
                 input_ids2_valid = input_ids2 != pad_id
                 input_ids2_valid = input_ids2_valid & (input_ids2 != unk_id)
                 input_ids2_valid = input_ids2_valid & (input_ids2 < 10)
-                """
-                input_ids1_valid = input_ids1 == 0
-                input_ids2_valid = input_ids2 == 0
                 input_mask = input_ids1[:, :, None] == input_ids2[:, None, :]
                 input_mask = input_mask & input_ids1_valid[:, :, None]
                 input_mask = input_mask & input_ids2_valid[:, None, :]
@@ -75,6 +78,7 @@ class CLTrainer(Trainer):
                 score = (score_pair * input_mask).sum(dim=1)
                 score = score / input_mask.sum(dim=1)
                 # score = score_pair[:, 0]
+                """
                 return score.cpu().numpy()
 
         self.model.eval()
