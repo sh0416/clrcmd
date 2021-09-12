@@ -7,4 +7,4 @@ result/
 res/fasttext/crawl-300d-2M.vec.zip
 res/fasttext/crawl-300d-2M.vec
 res/glove.840B.300d.zip
-study1.db
+res/study1.db
