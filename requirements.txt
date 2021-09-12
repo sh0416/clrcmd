@@ -2,6 +2,7 @@ black
 isort
 flake8
 numpy
+pandas
 scipy
 transformers
 datasets
