@@ -28,16 +28,23 @@ class CLTrainer(Trainer):
 
         # SentEval prepare and batcher
         def prepare(inputs: List[Input], param: Dict) -> Dict:
+            param["batch_size"] = 64
             return param
 
         def batcher(inputs: List[Input], param: Dict) -> np.ndarray:
-            text1 = [" ".join(x.text1) for x in inputs]
-            text2 = [" ".join(x.text2) for x in inputs]
             batch1 = self.tokenizer.batch_encode_plus(
-                text1, return_tensors="pt", padding=True
+                [x[0] for x in inputs],
+                return_tensors="pt",
+                max_length=32,
+                padding="max_length",
+                truncation=True,
             )
             batch2 = self.tokenizer.batch_encode_plus(
-                text2, return_tensors="pt", padding=True
+                [x[1] for x in inputs],
+                return_tensors="pt",
+                max_length=32,
+                padding="max_length",
+                truncation=True,
             )
             batch1 = {k: v.to(self.args.device) for k, v in batch1.items()}
             batch2 = {k: v.to(self.args.device) for k, v in batch2.items()}
