@@ -14,12 +14,7 @@ def is_overlap(interval1: Pair, interval2: Pair) -> bool:
     assert interval1[0] < interval1[1]
     assert interval2[0] < interval2[1]
     l = sorted(
-        [
-            (interval1[0], 0),
-            (interval1[1], 1),
-            (interval2[0], 0),
-            (interval2[1], 1),
-        ],
+        [(interval1[0], 0), (interval1[1], 1), (interval2[0], 0), (interval2[1], 1),],
         key=lambda x: (x[0], 1 - x[1]),
     )
     l = list(map(lambda x: x[1], l))

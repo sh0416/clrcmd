@@ -36,9 +36,7 @@ class PairDataCollator(DataCollatorWithPadding):
         return batch
 
     def mask_tokens(
-        self,
-        inputs: Tensor,
-        special_tokens_mask: Optional[Tensor] = None,
+        self, inputs: Tensor, special_tokens_mask: Optional[Tensor] = None,
     ) -> Tuple[Tensor, Tensor]:
         """
         Prepare masked tokens inputs/labels for masked language modeling: 80% MASK, 10% random, 10% original.

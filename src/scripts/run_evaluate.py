@@ -30,9 +30,7 @@ parser.add_argument(
 )
 parser.add_argument("--pooler_type", type=str, choices=["avg", "rwmd"], default="avg")
 parser.add_argument(
-    "--checkpoint",
-    type=str,
-    help="checkpoint",
+    "--checkpoint", type=str, help="checkpoint",
 )
 parser.add_argument(
     "--dataset",

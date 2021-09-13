@@ -73,9 +73,7 @@ def main():
         model_args.pooler_type = "cls"
 
         # Search hyperparameters
-        training_args.seed = trial.suggest_categorical(
-            "seed", [0, 1, 2, 3, 4, 5]
-        )
+        training_args.seed = trial.suggest_categorical("seed", [0, 1, 2, 3, 4, 5])
         training_args.learning_rate = trial.suggest_categorical(
             "learning_rate", [5e-6, 1e-5, 5e-5, 1e-4]
         )
@@ -87,9 +85,7 @@ def main():
         model_args.hidden_dropout_prob = trial.suggest_categorical(
             "hidden_dropout_prob", [0.01, 0.05, 0.1, 0.15]
         )
-        model_args.temp = trial.suggest_categorical(
-            "temp", [0.05, 0.1, 0.2, 0.5, 1]
-        )
+        model_args.temp = trial.suggest_categorical("temp", [0.05, 0.1, 0.2, 0.5, 1])
         return model_args, data_args, training_args
 
     n_trials = 40

@@ -41,14 +41,10 @@ def batcher(inputs: List[Input], param: Dict) -> np.ndarray:
 
         if param["pooler_type"] == "avg":
             outputs1 = masked_mean(
-                outputs1.last_hidden_state,
-                batch1["attention_mask"][:, :, None],
-                dim=1,
+                outputs1.last_hidden_state, batch1["attention_mask"][:, :, None], dim=1,
             )
             outputs2 = masked_mean(
-                outputs2.last_hidden_state,
-                batch2["attention_mask"][:, :, None],
-                dim=1,
+                outputs2.last_hidden_state, batch2["attention_mask"][:, :, None], dim=1,
             )
             score = F.cosine_similarity(outputs1, outputs2, dim=1)
         elif param["pooler_type"] == "rwmd":

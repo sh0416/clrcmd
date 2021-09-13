@@ -80,9 +80,7 @@ class SimCSE(object):
             )
             for batch_id in tqdm(range(total_batch)):
                 inputs = self.tokenizer(
-                    sentence[
-                        batch_id * batch_size : (batch_id + 1) * batch_size
-                    ],
+                    sentence[batch_id * batch_size : (batch_id + 1) * batch_size],
                     padding=True,
                     truncation=True,
                     max_length=max_length,
@@ -97,9 +95,7 @@ class SimCSE(object):
                 else:
                     raise NotImplementedError
                 if normalize_to_unit:
-                    embeddings = embeddings / embeddings.norm(
-                        dim=1, keepdim=True
-                    )
+                    embeddings = embeddings / embeddings.norm(dim=1, keepdim=True)
                 embedding_list.append(embeddings.cpu())
         embeddings = torch.cat(embedding_list, 0)
 
@@ -173,9 +169,7 @@ class SimCSE(object):
         if isinstance(sentences_or_file_path, str):
             sentences = []
             with open(sentences_or_file_path, "r") as f:
-                logging.info(
-                    "Loading sentences from %s ..." % (sentences_or_file_path)
-                )
+                logging.info("Loading sentences from %s ..." % (sentences_or_file_path))
                 for line in tqdm(f):
                     sentences.append(line.rstrip())
             sentences_or_file_path = sentences
@@ -217,9 +211,7 @@ class SimCSE(object):
             if faiss_fast:
                 index.train(embeddings.astype(np.float32))
             index.add(embeddings.astype(np.float32))
-            index.nprobe = min(
-                self.num_cells_in_search, len(sentences_or_file_path)
-            )
+            index.nprobe = min(self.num_cells_in_search, len(sentences_or_file_path))
             self.is_faiss_index = True
         else:
             index = embeddings
@@ -243,19 +235,16 @@ class SimCSE(object):
                     combined_results.append(results)
                 return combined_results
 
-            similarities = self.similarity(
-                queries, self.index["index"]
-            ).tolist()
+            similarities = self.similarity(queries, self.index["index"]).tolist()
             id_and_score = []
             for i, s in enumerate(similarities):
                 if s >= threshold:
                     id_and_score.append((i, s))
-            id_and_score = sorted(
-                id_and_score, key=lambda x: x[1], reverse=True
-            )[:top_k]
+            id_and_score = sorted(id_and_score, key=lambda x: x[1], reverse=True)[
+                :top_k
+            ]
             results = [
-                (self.index["sentences"][idx], score)
-                for idx, score in id_and_score
+                (self.index["sentences"][idx], score) for idx, score in id_and_score
             ]
             return results
         else:
@@ -319,9 +308,7 @@ if __name__ == "__main__":
     for i, result in enumerate(results):
         print("Retrieval results for query: {}".format(example_queries[i]))
         for sentence, score in result:
-            print(
-                "    {}  (cosine similarity: {:.4f})".format(sentence, score)
-            )
+            print("    {}  (cosine similarity: {:.4f})".format(sentence, score))
         print("")
 
     print("\n=========Search with Faiss backend============\n")
@@ -330,7 +317,5 @@ if __name__ == "__main__":
     for i, result in enumerate(results):
         print("Retrieval results for query: {}".format(example_queries[i]))
         for sentence, score in result:
-            print(
-                "    {}  (cosine similarity: {:.4f})".format(sentence, score)
-            )
+            print("    {}  (cosine similarity: {:.4f})".format(sentence, score))
         print("")

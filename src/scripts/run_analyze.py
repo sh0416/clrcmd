@@ -41,12 +41,7 @@ def is_overlap(interval1: Pair, interval2: Pair) -> bool:
     assert interval1[0] < interval1[1]
     assert interval2[0] < interval2[1]
     l = sorted(
-        [
-            (interval1[0], 0),
-            (interval1[1], 1),
-            (interval2[0], 0),
-            (interval2[1], 1),
-        ],
+        [(interval1[0], 0), (interval1[1], 1), (interval2[0], 0), (interval2[1], 1),],
         key=lambda x: (x[0], 1 - x[1]),
     )
     l = list(map(lambda x: x[1], l))
@@ -90,9 +85,7 @@ def index_pair_list(
 
 
 def index_pair(
-    pair: Tuple[Pair, Pair],
-    pair2idx1: Dict[Pair, int],
-    pair2idx2: Dict[Pair, int],
+    pair: Tuple[Pair, Pair], pair2idx1: Dict[Pair, int], pair2idx2: Dict[Pair, int],
 ) -> Tuple[int, int]:
     return (pair2idx1[pair[0]], pair2idx2[pair[1]])
 
@@ -101,9 +94,7 @@ def distance(x: Tensor, y: Tensor) -> float:
     return torch.pow(x - y, 2).sum().item()
 
 
-parser = argparse.ArgumentParser(
-    formatter_class=argparse.ArgumentDefaultsHelpFormatter
-)
+parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument(
     "--data-path",
     type=str,
@@ -111,9 +102,7 @@ parser.add_argument(
     help="data path",
 )
 parser.add_argument("--data-size", type=int, default=1000, help="data size")
-parser.add_argument(
-    "--checkpoint", type=str, default="roberta-base", help="checkpoint"
-)
+parser.add_argument("--checkpoint", type=str, default="roberta-base", help="checkpoint")
 
 
 def main(args: argparse.Namespace):
@@ -137,15 +126,11 @@ def main(args: argparse.Namespace):
     overlap_perfect = list(map(create_perfect_overlap_pair, align1, align2))
     first_diff = list(map(get_first_diff_position, align1, align2))
 
-    overlap_idx = list(
-        map(index_pair_list, overlap, interval2idx1, interval2idx2)
-    )
+    overlap_idx = list(map(index_pair_list, overlap, interval2idx1, interval2idx2))
     overlap_perfect_idx = list(
         map(index_pair_list, overlap_perfect, interval2idx1, interval2idx2)
     )
-    first_diff_idx = list(
-        map(index_pair, first_diff, interval2idx1, interval2idx2)
-    )
+    first_diff_idx = list(map(index_pair, first_diff, interval2idx1, interval2idx2))
 
     model = RobertaModel.from_pretrained(
         "./result/my-unsup-simcse-roberta-base-0.0-0.00001-32-42/checkpoint-1000"
@@ -172,17 +157,12 @@ def main(args: argparse.Namespace):
         outputs = model(**sent_features)
 
         # Due to the special ID [CLS], idx is right shifted by one
-        overlap_perfect_idxes = [
-            (x[0] + 1, x[1] + 1) for x in overlap_perfect_idxes
-        ]
+        overlap_perfect_idxes = [(x[0] + 1, x[1] + 1) for x in overlap_perfect_idxes]
         overlap_perfect_idxes = list(
             filter(lambda x: x[0] < 32 and x[1] < 32, overlap_perfect_idxes)
         )
         token_diff = [
-            distance(
-                outputs.last_hidden_state[0, i],
-                outputs.last_hidden_state[1, j],
-            )
+            distance(outputs.last_hidden_state[0, i], outputs.last_hidden_state[1, j],)
             for i, j in overlap_perfect_idxes
         ]
         print(f"{token_diff = }")

@@ -17,7 +17,7 @@ from transformers import (
 from transformers.trainer_utils import is_main_process
 
 from simcse.data.dataset import ContrastiveLearningDataset, collate_fn
-from simcse.models import RobertaForTokenContrastiveLearning
+from simcse.models import RobertaForContrastiveLearning
 from simcse.trainers import CLTrainer
 
 logger = logging.getLogger(__name__)
@@ -105,8 +105,7 @@ class DataTrainingArguments:
 
     # SimCSE's arguments
     train_file: str = field(
-        default=None,
-        metadata={"help": "The training data file (.txt or .csv)."},
+        default=None, metadata={"help": "The training data file (.txt or .csv)."},
     )
     max_seq_length: Optional[int] = field(
         default=32,
@@ -199,7 +198,7 @@ def train(args):
                 model_args.model_name_or_path, **config_kwargs
             )
             config.num_labels = config.hidden_size
-            model = RobertaForTokenContrastiveLearning.from_pretrained(
+            model = RobertaForContrastiveLearning.from_pretrained(
                 model_args.model_name_or_path,
                 config=config,
                 pooler_type=model_args.pooler_type,
@@ -213,6 +212,7 @@ def train(args):
 
     # For the case where the tokenizer and model is different
     model.resize_token_embeddings(len(tokenizer))
+    model.train()
 
     train_dataset = ContrastiveLearningDataset(data_args.train_file, tokenizer)
     trainer = CLTrainer(

@@ -31,11 +31,7 @@ def get_priority(pair, dropped_ranks, bpe_ranks):
     :return: Priority
     :rtype: float
     """
-    return (
-        float("inf")
-        if pair in dropped_ranks
-        else bpe_ranks.get(pair, float("inf"))
-    )
+    return float("inf") if pair in dropped_ranks else bpe_ranks.get(pair, float("inf"))
 
 
 class RobertaTokenizerDropout(RobertaTokenizer):
@@ -54,9 +50,7 @@ class RobertaTokenizerDropout(RobertaTokenizer):
         word = tuple(token)
         pairs = get_pairs(word)
         dropped_ranks = set(
-            filter(
-                lambda x: np.random.binomial(1, self.bpe_dropout_prob), pairs
-            )
+            filter(lambda x: np.random.binomial(1, self.bpe_dropout_prob), pairs)
         )
         observed_ranks = set(pairs)
 
@@ -82,11 +76,7 @@ class RobertaTokenizerDropout(RobertaTokenizer):
                     new_word.extend(word[i:j])
                     i = j
 
-                if (
-                    word[i] == first
-                    and i < len(word) - 1
-                    and word[i + 1] == second
-                ):
+                if word[i] == first and i < len(word) - 1 and word[i + 1] == second:
                     new_word.append(first + second)
                     i += 2
                 else:

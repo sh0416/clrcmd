@@ -6,9 +6,10 @@ import torch.distributed as dist
 import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
-from transformers.modeling_outputs import TokenClassifierOutput
+from transformers.modeling_outputs import BaseModelOutputWithPoolingAndCrossAttentions
 from transformers.models.roberta.modeling_roberta import (
     RobertaLMHead,
+    RobertaModel,
     RobertaForTokenClassification,
 )
 
@@ -35,16 +36,20 @@ class Pooler(nn.Module):
             "avg_first_last",
         ], f"unrecognized pooling type {self.pooler_type}"
 
-    def forward(self, attention_mask: Tensor, outputs: TokenClassifierOutput) -> Tensor:
+    def forward(
+        self,
+        attention_mask: Tensor,
+        outputs: BaseModelOutputWithPoolingAndCrossAttentions,
+    ) -> Tensor:
         if self.pooler_type == "cls":
             if self.training:
-                return outputs.logits[:, 0]
+                return outputs.pooler_output[:, 0]
             else:
-                return outputs.hidden_states[-1][:, 0]
+                return outputs.last_hidden_state[:, 0]
         elif self.pooler_type == "cls_before_pooler":
             return outputs.last_hidden_state[:, 0]
         elif self.pooler_type == "avg":
-            last_hidden = outputs.hidden_states[-1]
+            last_hidden = outputs.last_hidden_state
             attention_mask = attention_mask[:, :, None]
             hidden = last_hidden * attention_mask
             pooled_sum = hidden.sum(dim=1)
@@ -111,8 +116,8 @@ def dist_all_gather(x: Tensor) -> Tensor:
 
 
 def compute_loss_simclr(
-    outputs1: TokenClassifierOutput,
-    outputs2: TokenClassifierOutput,
+    outputs1: BaseModelOutputWithPoolingAndCrossAttentions,
+    outputs2: BaseModelOutputWithPoolingAndCrossAttentions,
     attention_mask1: Tensor,
     attention_mask2: Tensor,
     pooler_fn: Callable,
@@ -208,11 +213,14 @@ def compute_loss_simclr_token(
     return loss
 
 
-class RobertaForTokenContrastiveLearning(RobertaForTokenClassification):
+class RobertaForContrastiveLearning(RobertaModel):
     def __init__(self, config, pooler_type: str, loss_mlm: bool, temp: float):
-        super().__init__(config)
+        super().__init__(config, add_pooling_layer=False)
         self.temp = temp
-        self.pooler = Pooler(pooler_type)
+        self.cl_head = nn.Sequential(
+            nn.Linear(config.hidden_size, config.hidden_size), nn.Tanh()
+        )
+        self._pooler = Pooler(pooler_type)
         if loss_mlm:
             self.lm_head = RobertaLMHead(config)
         self.init_weights()
@@ -227,17 +235,30 @@ class RobertaForTokenContrastiveLearning(RobertaForTokenClassification):
         input_ids = torch.cat((input_ids1, input_ids2))
         attention_mask = torch.cat((attention_mask1, attention_mask2))
         outputs = super().forward(input_ids, attention_mask)
-        logits1, logits2 = torch.chunk(outputs.logits, 2)
+        pooler_output1, pooler_output2 = torch.chunk(
+            self.cl_head(outputs.last_hidden_state), 2
+        )
+        last_hidden_state1, last_hidden_state2 = torch.chunk(
+            outputs.last_hidden_state, 2
+        )
         hidden_states1 = tuple(torch.chunk(x, 2)[0] for x in outputs.hidden_states)
         hidden_states2 = tuple(torch.chunk(x, 2)[1] for x in outputs.hidden_states)
-        outputs1 = TokenClassifierOutput(logits=logits1, hidden_states=hidden_states1)
-        outputs2 = TokenClassifierOutput(logits=logits2, hidden_states=hidden_states2)
+        outputs1 = BaseModelOutputWithPoolingAndCrossAttentions(
+            last_hidden_state=last_hidden_state1,
+            hidden_states=hidden_states1,
+            pooler_output=pooler_output1,
+        )
+        outputs2 = BaseModelOutputWithPoolingAndCrossAttentions(
+            last_hidden_state=last_hidden_state2,
+            hidden_states=hidden_states2,
+            pooler_output=pooler_output2,
+        )
         loss = compute_loss_simclr(
             outputs1,
             outputs2,
             attention_mask1,
             attention_mask2,
-            self.pooler,
+            self._pooler,
             self.temp,
             self.training,
         )
@@ -253,12 +274,25 @@ class RobertaForTokenContrastiveLearning(RobertaForTokenClassification):
         input_ids = torch.cat((input_ids1, input_ids2))
         attention_mask = torch.cat((attention_mask1, attention_mask2))
         outputs = super().forward(input_ids, attention_mask)
+        pooler_output1, pooler_output2 = torch.chunk(
+            self.cl_head(outputs.last_hidden_state), 2
+        )
+        last_hidden_state1, last_hidden_state2 = torch.chunk(
+            outputs.last_hidden_state, 2
+        )
         hidden_states1 = tuple(torch.chunk(x, 2)[0] for x in outputs.hidden_states)
         hidden_states2 = tuple(torch.chunk(x, 2)[1] for x in outputs.hidden_states)
-        pairwise_sim = F.cosine_similarity(
-            hidden_states1[-1][:, :, None, :], hidden_states2[-1][:, None, :, :], dim=3
+        outputs1 = BaseModelOutputWithPoolingAndCrossAttentions(
+            last_hidden_state=last_hidden_state1,
+            hidden_states=hidden_states1,
+            pooler_output=pooler_output1,
         )
-        output1 = torch.max(pairwise_sim, dim=2)[0].mean(dim=1)
-        output2 = torch.max(pairwise_sim, dim=1)[0].mean(dim=1)
-        score = torch.where(output1 > output2, output1, output2)
+        outputs2 = BaseModelOutputWithPoolingAndCrossAttentions(
+            last_hidden_state=last_hidden_state2,
+            hidden_states=hidden_states2,
+            pooler_output=pooler_output2,
+        )
+        outputs1 = self._pooler(attention_mask1, outputs1)
+        outputs2 = self._pooler(attention_mask2, outputs2)
+        score = F.cosine_similarity(outputs1, outputs2)
         return score

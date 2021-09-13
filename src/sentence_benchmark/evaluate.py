@@ -47,11 +47,7 @@ def evaluate_sts(
     spearman_wavg = np.average(list_spr, weights=weights)
 
     results["all"] = {
-        "pearson": {
-            "all": pearson_all,
-            "mean": pearson_avg,
-            "wmean": pearson_wavg,
-        },
+        "pearson": {"all": pearson_all, "mean": pearson_avg, "wmean": pearson_wavg,},
         "spearman": {
             "all": spearman_all,
             "mean": spearman_avg,

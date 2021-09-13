@@ -33,18 +33,10 @@ class CLTrainer(Trainer):
 
         def batcher(inputs: List[Input], param: Dict) -> np.ndarray:
             batch1 = self.tokenizer.batch_encode_plus(
-                [x[0] for x in inputs],
-                return_tensors="pt",
-                max_length=32,
-                padding="max_length",
-                truncation=True,
+                [x[0] for x in inputs], return_tensors="pt"
             )
             batch2 = self.tokenizer.batch_encode_plus(
-                [x[1] for x in inputs],
-                return_tensors="pt",
-                max_length=32,
-                padding="max_length",
-                truncation=True,
+                [x[1] for x in inputs], return_tensors="pt"
             )
             batch1 = {k: v.to(self.args.device) for k, v in batch1.items()}
             batch2 = {k: v.to(self.args.device) for k, v in batch2.items()}
