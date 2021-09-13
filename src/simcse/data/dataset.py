@@ -1,20 +1,22 @@
 import csv
-import itertools
+import logging
 from torch.utils.data import Dataset
 from transformers import RobertaTokenizer
+
+logger = logging.getLogger(__name__)
 
 
 class ContrastiveLearningDataset(Dataset):
     def __init__(self, filepath: str, tokenizer: RobertaTokenizer):
         self.tokenizer = tokenizer
         with open(filepath) as f:
-            reader = csv.DictReader(f, quoting=csv.QUOTE_NONE)
+            reader = csv.DictReader(f)
             self.data = list(reader)
 
     def __getitem__(self, index):
         def f(x):
-            return self.tokenizer(
-                x,
+            return self.tokenizer.encode_plus(
+                self.tokenizer.convert_tokens_to_ids(x.split()),
                 is_split_into_words=True,
                 truncation=True,
                 padding="max_length",

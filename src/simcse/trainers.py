@@ -32,14 +32,17 @@ class CLTrainer(Trainer):
             return param
 
         def batcher(inputs: List[Input], param: Dict) -> np.ndarray:
-            batch1 = self.tokenizer.batch_encode_plus(
-                [x[0] for x in inputs], return_tensors="pt"
+            sentence = [x[0] for x in inputs] + [x[1] for x in inputs]
+            batch = self.tokenizer.batch_encode_plus(
+                sentence, return_tensors="pt", padding=True
             )
-            batch2 = self.tokenizer.batch_encode_plus(
-                [x[1] for x in inputs], return_tensors="pt"
-            )
-            batch1 = {k: v.to(self.args.device) for k, v in batch1.items()}
-            batch2 = {k: v.to(self.args.device) for k, v in batch2.items()}
+            batch1 = {
+                k: v[: len(inputs)].to(self.args.device) for k, v in batch.items()
+            }
+            batch2 = {
+                k: v[len(inputs) :].to(self.args.device) for k, v in batch.items()
+            }
+            self.model.eval()
             with torch.no_grad():
                 score = self.model.compute_similarity(
                     input_ids1=batch1["input_ids"],
@@ -47,7 +50,8 @@ class CLTrainer(Trainer):
                     attention_mask1=batch1["attention_mask"],
                     attention_mask2=batch2["attention_mask"],
                 )
-                return score.cpu().numpy()
+            self.model.train()
+            return score.cpu().numpy()
 
         self.model.eval()
         if all:

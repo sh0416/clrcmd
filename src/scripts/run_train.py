@@ -105,7 +105,8 @@ class DataTrainingArguments:
 
     # SimCSE's arguments
     train_file: str = field(
-        default=None, metadata={"help": "The training data file (.txt or .csv)."},
+        default=None,
+        metadata={"help": "The training data file (.txt or .csv)."},
     )
     max_seq_length: Optional[int] = field(
         default=32,
@@ -197,7 +198,6 @@ def train(args):
             config = AutoConfig.from_pretrained(
                 model_args.model_name_or_path, **config_kwargs
             )
-            config.num_labels = config.hidden_size
             model = RobertaForContrastiveLearning.from_pretrained(
                 model_args.model_name_or_path,
                 config=config,

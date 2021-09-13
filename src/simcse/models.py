@@ -43,7 +43,7 @@ class Pooler(nn.Module):
     ) -> Tensor:
         if self.pooler_type == "cls":
             if self.training:
-                return outputs.pooler_output[:, 0]
+                return outputs.pooler_output
             else:
                 return outputs.last_hidden_state[:, 0]
         elif self.pooler_type == "cls_before_pooler":
@@ -145,11 +145,11 @@ def compute_loss_simclr(
     # Gather all embeddings if using distributed training
     if dist.is_initialized() and is_training:
         outputs1, outputs2 = dist_all_gather(outputs1), dist_all_gather(outputs2)
-    sim = F.cosine_similarity(outputs1[None, :, :], outputs2[:, None, :], dim=2) / temp
+    sim = F.cosine_similarity(outputs1[:, None, :], outputs2[None, :, :], dim=2) / temp
     # (batch_size, batch_size)
     labels = torch.arange(sim.shape[1], dtype=torch.long, device=sim.device)
     loss = F.cross_entropy(sim, labels)
-    logger.debug(f"{loss = :.4f}")
+    logger.info(f"{loss = :.4f}")
     return loss
 
 
@@ -236,7 +236,7 @@ class RobertaForContrastiveLearning(RobertaModel):
         attention_mask = torch.cat((attention_mask1, attention_mask2))
         outputs = super().forward(input_ids, attention_mask)
         pooler_output1, pooler_output2 = torch.chunk(
-            self.cl_head(outputs.last_hidden_state), 2
+            self.cl_head(outputs.last_hidden_state[:, 0]), 2
         )
         last_hidden_state1, last_hidden_state2 = torch.chunk(
             outputs.last_hidden_state, 2
