@@ -9,7 +9,7 @@ class ContrastiveLearningDataset(Dataset):
         self.tokenizer = tokenizer
         with open(filepath) as f:
             reader = csv.DictReader(f, quoting=csv.QUOTE_NONE)
-            self.data = list(itertools.islice(reader, 1024))
+            self.data = list(reader)
 
     def __getitem__(self, index):
         def f(x):

@@ -241,45 +241,24 @@ class RobertaForTokenContrastiveLearning(RobertaForTokenClassification):
             self.temp,
             self.training,
         )
-        """
-        if cls.model_args.loss_mlm:
-            outputs_mlm = compute_representation(
-                encoder, input_ids_mlm, attention_mask, token_type_ids
-            )
-            last_hidden = outputs_mlm.last_hidden_state
-            last_hidden = last_hidden.view(-1, *last_hidden.shape[2:])
-            logits_mlm = cls.lm_head(last_hidden)
-            logits_mlm = logits_mlm.view(-1, cls.config.vocab_size)
-            labels_mlm = labels_mlm.view(-1)
-            loss_mlm = F.cross_entropy(logits_mlm, labels_mlm)
-            loss += cls.model_args.coeff_loss_mlm * loss_mlm
-        if cls.model_args.loss_token:
-            assert pairs is not None
-            loss += cls.model_args.coeff_loss_token * compute_loss_simclr_token(
-                input_ids,
-                token_outputs,
-                pairs,
-                cls.model_args.temp,
-                cls.training,
-            )
-        """
         return (loss,)
 
-    def compute_sentence_representation(self, inputs):
-        outputs = self.roberta(
-            inputs.input_ids,
-            attention_mask=inputs.attention_mask,
-            token_type_ids=inputs.token_type_ids,
-            return_dict=True,
+    def compute_similarity(
+        self,
+        input_ids1: Tensor,
+        input_ids2: Tensor,
+        attention_mask1: Tensor,
+        attention_mask2: Tensor,
+    ) -> Tuple[Tensor]:
+        input_ids = torch.cat((input_ids1, input_ids2))
+        attention_mask = torch.cat((attention_mask1, attention_mask2))
+        outputs = super().forward(input_ids, attention_mask)
+        hidden_states1 = tuple(torch.chunk(x, 2)[0] for x in outputs.hidden_states)
+        hidden_states2 = tuple(torch.chunk(x, 2)[1] for x in outputs.hidden_states)
+        pairwise_sim = F.cosine_similarity(
+            hidden_states1[-1][:, :, None, :], hidden_states2[-1][:, None, :, :], dim=3
         )
-        token_output = self.mlp(outputs.last_hidden_state)
-        outputs = BaseModelOutputWithHead(
-            last_hidden_state=outputs.last_hidden_state,
-            hidden_states=outputs.hidden_states,
-            token_output=token_output,
-        )
-        outputs = self.pooler(inputs.attention_mask, outputs)
-        return outputs
-
-    def compute_similarity(self, inputs1, inputs2) -> Tensor:
-        pass
+        output1 = torch.max(pairwise_sim, dim=2)[0].mean(dim=1)
+        output2 = torch.max(pairwise_sim, dim=1)[0].mean(dim=1)
+        score = torch.where(output1 > output2, output1, output2)
+        return score
