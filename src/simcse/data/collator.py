@@ -1,67 +1,8 @@
-import itertools
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import torch
 from torch import Tensor
-from transformers import DataCollatorWithPadding, PreTrainedTokenizerBase
-from transformers.data.data_collator import PaddingStrategy
-
-Pair = Tuple[int, int]
-
-
-def create_intervals(tokens: List[str]) -> List[Pair]:
-    start_pos = itertools.accumulate(map(len, tokens), initial=0)
-    length = map(len, tokens)
-    return list(map(lambda x: (x[0], x[0] + x[1]), zip(start_pos, length)))
-
-
-def is_overlap(interval1: Pair, interval2: Pair) -> bool:
-    assert interval1[0] < interval1[1]
-    assert interval2[0] < interval2[1]
-    l = sorted(
-        [
-            (interval1[0], 0),
-            (interval1[1], 1),
-            (interval2[0], 0),
-            (interval2[1], 1),
-        ],
-        key=lambda x: (x[0], 1 - x[1]),
-    )
-    l = list(map(lambda x: x[1], l))
-    # In this case, only two possible cases are yield in this logic,
-    # (0, 0, 1, 1), which is overlapped, or (0, 1, 0, 1), which is exclusive
-    return l == [0, 0, 1, 1]
-
-
-def create_overlap_pairs_from_intervals(
-    intervals1: List[Pair], intervals2: List[Pair]
-) -> List[Tuple[Pair, Pair]]:
-    pipeline = itertools.product(intervals1, intervals2)
-    pipeline = filter(lambda x: is_overlap(x[0], x[1]), pipeline)
-    return list(pipeline)
-
-
-def create_perfect_overlap_pairs_from_intervals(
-    intervals1: List[Pair], intervals2: List[Pair]
-) -> List[Tuple[Pair, Pair]]:
-    pipeline = itertools.product(intervals1, intervals2)
-    pipeline = filter(lambda x: x[0] == x[1], pipeline)
-    return list(pipeline)
-
-
-def create_perfect_overlap_pairs_from_tokens(
-    tokens1: List[str], tokens2: List[str]
-) -> List[Tuple[int, int]]:
-    intervals1 = create_intervals(tokens1)
-    intervals2 = create_intervals(tokens2)
-    # NOTE: Due to the special token, the index starts with 1
-    interval2idx1 = {x: i for i, x in enumerate(intervals1, start=1)}
-    interval2idx2 = {x: i for i, x in enumerate(intervals2, start=1)}
-    pairs = create_perfect_overlap_pairs_from_intervals(intervals1, intervals2)
-    # Index pair
-    pairs = [(interval2idx1[x], interval2idx2[y]) for x, y in pairs]
-    return pairs
 
 
 @dataclass
@@ -75,10 +16,8 @@ class PairDataCollator(DataCollatorWithPadding):
     mlm_prob: float = 0.15
 
     def __call__(self, features: List[Dict[str, Any]]) -> Dict[str, Any]:
-        pairs_list = []
-        for x in features:
-            pairs_list.append(x["pairs"])
-            del x["pairs"]
+        print(features)
+        assert False
         batch = self.tokenizer.pad(
             features,
             padding=self.padding,
@@ -86,15 +25,6 @@ class PairDataCollator(DataCollatorWithPadding):
             pad_to_multiple_of=self.pad_to_multiple_of,
             return_tensors=self.return_tensors,
         )
-        for idx in range(len(pairs_list)):
-            pairs = pairs_list[idx]
-            pairs = filter(lambda x: x[0] < self.max_length, pairs)
-            pairs = filter(lambda x: x[1] < self.max_length, pairs)
-            pairs = [(idx, x, y) for x, y in pairs]
-            pairs = [(idx, 0, 0)] + pairs
-            pairs = torch.tensor(pairs, dtype=torch.long)
-            pairs_list[idx] = pairs
-        batch["pairs"] = torch.cat(pairs_list)
         if self.mlm:
             seq_len = batch["input_ids"].shape[2]
             input_ids_mlm, labels_mlm = self.mask_tokens(

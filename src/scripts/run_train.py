@@ -1,16 +1,13 @@
-import enum
 import json
 import logging
 import os
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from typing import Optional
+from functools import partial
 
-import torch
 import transformers
-from datasets import load_dataset
 from transformers import (
-    MODEL_FOR_MASKED_LM_MAPPING,
     AutoConfig,
     HfArgumentParser,
     RobertaTokenizer,
@@ -19,13 +16,11 @@ from transformers import (
 )
 from transformers.trainer_utils import is_main_process
 
-from simcse.data import PairDataCollator, create_perfect_overlap_pairs_from_tokens
+from simcse.data.dataset import ContrastiveLearningDataset, collate_fn
 from simcse.models import RobertaForTokenContrastiveLearning
 from simcse.trainers import CLTrainer
 
 logger = logging.getLogger(__name__)
-MODEL_CONFIG_CLASSES = list(MODEL_FOR_MASKED_LM_MAPPING.keys())
-MODEL_TYPES = tuple(conf.model_type for conf in MODEL_CONFIG_CLASSES)
 
 
 @dataclass
@@ -183,30 +178,8 @@ def train(args):
         f"16-bits training: {training_args.fp16} "
     )
 
-    logger.info(f"Training/evaluation parameters {training_args}")
-
     # Set seed before initializing model.
     set_seed(training_args.seed)
-
-    # Get the datasets: you can either provide your own CSV/JSON/TXT training
-    # and evaluation files (see below) or just provide the name of one of the
-    # public datasets available on the hub at https://huggingface.co/datasets/
-    # (the dataset will be downloaded automatically from the datasets Hub)
-    #
-    # For CSV/JSON files, this script will use the column called 'text' or the
-    # first column. You can easily tweak this behavior (see below)
-    #
-    # In distributed training, the load_dataset function guarantee that only one
-    # local process can concurrently download the dataset.
-    data_files = {"train": data_args.train_file}
-    ext = os.path.splitext(data_args.train_file)[1]
-    if ext == ".txt":
-        ext = "text"
-    elif ext == ".csv":
-        ext = "csv"
-    elif ext == ".json":
-        ext = "json"
-    datasets = load_dataset(ext, data_files=data_files, cache_dir=".data/")
 
     # Load pretrained model and tokenizer
     #
@@ -215,6 +188,7 @@ def train(args):
     # concurrently download model & vocab.
     config_kwargs = {
         "hidden_dropout_prob": model_args.hidden_dropout_prob,
+        "output_hidden_states": True,
     }
     if model_args.pooler_type in ["avg_top2", "avg_first_last"]:
         config_kwargs["output_hidden_states"] = True
@@ -224,12 +198,13 @@ def train(args):
             config = AutoConfig.from_pretrained(
                 model_args.model_name_or_path, **config_kwargs
             )
-            print(f"{config = }")
+            config.num_labels = config.hidden_size
             model = RobertaForTokenContrastiveLearning.from_pretrained(
                 model_args.model_name_or_path,
                 config=config,
                 pooler_type=model_args.pooler_type,
                 loss_mlm=model_args.loss_mlm,
+                temp=model_args.temp,
             )
         else:
             raise NotImplementedError()
@@ -239,65 +214,10 @@ def train(args):
     # For the case where the tokenizer and model is different
     model.resize_token_embeddings(len(tokenizer))
 
-    # Prepare features
-    sent0_cname, sent1_cname = "input_strs", "input_strs2"
-
-    def prepare_features(examples):
-        for idx, text in enumerate(examples[sent0_cname]):
-            assert text is not None, f"Example {idx = } is None"
-        for idx, text in enumerate(examples[sent1_cname]):
-            assert text is not None, f"Example {idx = } is None"
-
-        total = len(examples[sent0_cname])
-
-        tokens1 = [x.split() for x in examples[sent0_cname]]
-        tokens2 = [x.split() for x in examples[sent1_cname]]
-        pairs = [
-            torch.tensor(
-                create_perfect_overlap_pairs_from_tokens(x, y),
-                dtype=torch.long,
-            )
-            for x, y in zip(tokens1, tokens2)
-        ]
-        sentences1 = [tokenizer.convert_tokens_to_ids(x) for x in tokens1]
-        sentences2 = [tokenizer.convert_tokens_to_ids(x) for x in tokens2]
-        text1 = tokenizer.batch_decode(sentences1)
-        text2 = tokenizer.batch_decode(sentences2)
-        for x, y in zip(text1, text2):
-            assert x == y, f"{x} != {y}"
-        sentences = sentences1 + sentences2
-
-        sent_features = tokenizer.batch_encode_plus(
-            sentences,
-            is_split_into_words=True,
-            max_length=data_args.max_seq_length,
-            truncation=True,
-            padding="max_length",
-            return_tensors="pt",
-        )
-
-        features = {}
-        for k, v in sent_features.items():
-            features[k] = [(v[i], v[i + total]) for i in range(total)]
-        features["pairs"] = pairs
-        return features
-
-    column_names = datasets["train"].column_names
-    train_dataset = datasets["train"].map(
-        prepare_features,
-        batched=True,
-        num_proc=data_args.preprocessing_num_workers,
-        remove_columns=column_names,
-        load_from_cache_file=not data_args.overwrite_cache,
-    )
-
+    train_dataset = ContrastiveLearningDataset(data_args.train_file, tokenizer)
     trainer = CLTrainer(
         model=model,
-        data_collator=PairDataCollator(
-            tokenizer,
-            max_length=data_args.max_seq_length,
-            mlm=model_args.loss_mlm,
-        ),
+        data_collator=partial(collate_fn, tokenizer=tokenizer),
         args=training_args,
         train_dataset=train_dataset,
         tokenizer=tokenizer,
@@ -343,7 +263,6 @@ def main():
     _, _, training_args = args
     # Set the verbosity to info of the Transformers logger
     # (on main process only):
-    logger.info(f"{training_args.local_rank = }")
     if is_main_process(training_args.local_rank):
         transformers.utils.logging.set_verbosity_info()
         transformers.utils.logging.enable_default_handler()

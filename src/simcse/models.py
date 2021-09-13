@@ -1,26 +1,18 @@
 import logging
-from dataclasses import dataclass
-from typing import Callable, List, NamedTuple, Optional, Tuple
+from typing import Callable, List, Tuple
 
 import torch
 import torch.distributed as dist
 import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
-from transformers.modeling_outputs import BaseModelOutput
+from transformers.modeling_outputs import TokenClassifierOutput
 from transformers.models.roberta.modeling_roberta import (
     RobertaLMHead,
     RobertaForTokenClassification,
 )
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class BaseModelOutputWithHead(BaseModelOutput):
-    last_hidden_state: torch.FloatTensor = None
-    hidden_states: Tuple[torch.FloatTensor] = None
-    token_output: torch.FloatTensor = None
 
 
 class Pooler(nn.Module):
@@ -43,20 +35,16 @@ class Pooler(nn.Module):
             "avg_first_last",
         ], f"unrecognized pooling type {self.pooler_type}"
 
-    def forward(
-        self,
-        attention_mask: Tensor,
-        outputs: BaseModelOutputWithHead,
-    ) -> Tensor:
+    def forward(self, attention_mask: Tensor, outputs: TokenClassifierOutput) -> Tensor:
         if self.pooler_type == "cls":
             if self.training:
-                return outputs.token_output[:, 0]
+                return outputs.logits[:, 0]
             else:
-                return outputs.last_hidden_state[:, 0]
+                return outputs.hidden_states[-1][:, 0]
         elif self.pooler_type == "cls_before_pooler":
             return outputs.last_hidden_state[:, 0]
         elif self.pooler_type == "avg":
-            last_hidden = outputs.last_hidden_state
+            last_hidden = outputs.hidden_states[-1]
             attention_mask = attention_mask[:, :, None]
             hidden = last_hidden * attention_mask
             pooled_sum = hidden.sum(dim=1)
@@ -123,9 +111,10 @@ def dist_all_gather(x: Tensor) -> Tensor:
 
 
 def compute_loss_simclr(
-    outputs: BaseModelOutput,
-    token_outputs: Tensor,
-    attention_mask: Tensor,
+    outputs1: TokenClassifierOutput,
+    outputs2: TokenClassifierOutput,
+    attention_mask1: Tensor,
+    attention_mask2: Tensor,
     pooler_fn: Callable,
     temp: float,
     is_training: bool,
@@ -146,31 +135,12 @@ def compute_loss_simclr(
     :return: Scalar loss
     :rtype: FloatTensor()
     """
-    attention_mask1 = attention_mask[:, 0, :]
-    attention_mask2 = attention_mask[:, 1, :]
-    if outputs.hidden_states is not None:
-        hidden_states1 = outputs.hidden_states[:, 0, :]
-        hidden_states2 = outputs.hidden_states[:, 1, :]
-    else:
-        hidden_states1, hidden_states2 = None, None
-    output1 = BaseModelOutputWithHead(
-        last_hidden_state=outputs.last_hidden_state[:, 0, :],
-        hidden_states=hidden_states1,
-        token_output=token_outputs[:, 0, :, :],
-    )
-    output2 = BaseModelOutputWithHead(
-        last_hidden_state=outputs.last_hidden_state[:, 1, :],
-        hidden_states=hidden_states2,
-        token_output=token_outputs[:, 1, :, :],
-    )
-    output1 = pooler_fn(attention_mask1, output1)
-    output2 = pooler_fn(attention_mask2, output2)
+    outputs1 = pooler_fn(attention_mask1, outputs1)
+    outputs2 = pooler_fn(attention_mask2, outputs2)
     # Gather all embeddings if using distributed training
     if dist.is_initialized() and is_training:
-        output1, output2 = dist_all_gather(output1), dist_all_gather(output2)
-
-    sim = F.cosine_similarity(output1[None, :, :], output2[:, None, :], dim=2)
-    sim = sim / temp
+        outputs1, outputs2 = dist_all_gather(outputs1), dist_all_gather(outputs2)
+    sim = F.cosine_similarity(outputs1[None, :, :], outputs2[:, None, :], dim=2) / temp
     # (batch_size, batch_size)
     labels = torch.arange(sim.shape[1], dtype=torch.long, device=sim.device)
     loss = F.cross_entropy(sim, labels)
@@ -238,47 +208,10 @@ def compute_loss_simclr_token(
     return loss
 
 
-def compute_representation(
-    encoder: Callable,
-    input_ids: Tensor,
-    attention_mask: Tensor,
-    token_type_ids: Tensor,
-) -> BaseModelOutput:
-    """Compute bert contextual representation for contrastive learning"""
-    input_ids = input_ids.view(-1, input_ids.shape[2])
-    attention_mask = attention_mask.view(-1, attention_mask.shape[2])
-    if token_type_ids is not None:
-        token_type_ids = token_type_ids.view(-1, token_type_ids.shape[2])
-    outputs = encoder(
-        input_ids,
-        attention_mask=attention_mask,
-        token_type_ids=token_type_ids,
-        return_dict=True,
-    )
-    dims = outputs.last_hidden_state.shape[1:]
-    last_hidden = outputs.last_hidden_state.view(-1, 2, *dims)
-    if outputs.hidden_states is not None:
-        dims = outputs.hidden_states.shape[1:]
-        hidden_states = outputs.hidden_states.view(-1, 2, *dims)
-    else:
-        hidden_states = None
-    outputs = BaseModelOutput(
-        last_hidden_state=last_hidden,
-        hidden_states=hidden_states,
-    )
-    return outputs
-
-
-class BaseModelInput(NamedTuple):
-    input_ids: Tensor
-    attention_mask: Optional[Tensor]
-    token_type_ids: Optional[Tensor]
-    labels: Optional[Tensor]
-
-
 class RobertaForTokenContrastiveLearning(RobertaForTokenClassification):
-    def __init__(self, config, pooler_type: str, loss_mlm: bool):
+    def __init__(self, config, pooler_type: str, loss_mlm: bool, temp: float):
         super().__init__(config)
+        self.temp = temp
         self.pooler = Pooler(pooler_type)
         if loss_mlm:
             self.lm_head = RobertaLMHead(config)
@@ -286,25 +219,29 @@ class RobertaForTokenContrastiveLearning(RobertaForTokenClassification):
 
     def forward(
         self,
-        inputs: BaseModelInput,
-        inputs_mlm: Optional[BaseModelInput] = None,
-        pairs: Optional[Tensor] = None,
+        input_ids1: Tensor,
+        input_ids2: Tensor,
+        attention_mask1: Tensor,
+        attention_mask2: Tensor,
     ) -> Tuple[Tensor]:
-        outputs = compute_representation(
-            self.roberta,
-            inputs.input_ids,
-            inputs.attention_mask,
-            inputs.token_type_ids,
-        )
-        token_outputs = self.mlp(outputs.last_hidden_state)
+        input_ids = torch.cat((input_ids1, input_ids2))
+        attention_mask = torch.cat((attention_mask1, attention_mask2))
+        outputs = super().forward(input_ids, attention_mask)
+        logits1, logits2 = torch.chunk(outputs.logits, 2)
+        hidden_states1 = tuple(torch.chunk(x, 2)[0] for x in outputs.hidden_states)
+        hidden_states2 = tuple(torch.chunk(x, 2)[1] for x in outputs.hidden_states)
+        outputs1 = TokenClassifierOutput(logits=logits1, hidden_states=hidden_states1)
+        outputs2 = TokenClassifierOutput(logits=logits2, hidden_states=hidden_states2)
         loss = compute_loss_simclr(
-            outputs,
-            token_outputs,
-            attention_mask,
+            outputs1,
+            outputs2,
+            attention_mask1,
+            attention_mask2,
             self.pooler,
-            self.model_args.temp,
+            self.temp,
             self.training,
         )
+        """
         if cls.model_args.loss_mlm:
             outputs_mlm = compute_representation(
                 encoder, input_ids_mlm, attention_mask, token_type_ids
@@ -325,9 +262,10 @@ class RobertaForTokenContrastiveLearning(RobertaForTokenClassification):
                 cls.model_args.temp,
                 cls.training,
             )
+        """
         return (loss,)
 
-    def compute_sentence_representation(self, inputs: BaseModelInput):
+    def compute_sentence_representation(self, inputs):
         outputs = self.roberta(
             inputs.input_ids,
             attention_mask=inputs.attention_mask,
@@ -343,7 +281,5 @@ class RobertaForTokenContrastiveLearning(RobertaForTokenClassification):
         outputs = self.pooler(inputs.attention_mask, outputs)
         return outputs
 
-    def compute_similarity(
-        self, inputs1: BaseModelInput, inputs2: BaseModelInput
-    ) -> Tensor:
+    def compute_similarity(self, inputs1, inputs2) -> Tensor:
         pass

@@ -1,8 +1,8 @@
 __pycache__/
 .vscode/
 .ipynb_checkpoints/
-data/
-.data/
+/data/
+/.data/
 result/
 res/fasttext/crawl-300d-2M.vec.zip
 res/fasttext/crawl-300d-2M.vec
