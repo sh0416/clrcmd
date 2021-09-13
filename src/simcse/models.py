@@ -11,7 +11,6 @@ from transformers.modeling_outputs import BaseModelOutput
 from transformers.models.roberta.modeling_roberta import (
     RobertaLMHead,
     RobertaForTokenClassification,
-    RobertaPreTrainedModel,
 )
 
 logger = logging.getLogger(__name__)

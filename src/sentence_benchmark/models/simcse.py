@@ -39,15 +39,25 @@ def batcher(inputs: List[Input], param: Dict) -> np.ndarray:
         outputs1 = model(**batch1, output_hidden_states=True, return_dict=True)
         outputs2 = model(**batch2, output_hidden_states=True, return_dict=True)
 
-        outputs1 = masked_mean(
-            outputs1.last_hidden_state,
-            batch1["attention_mask"][:, :, None],
-            dim=1,
-        )
-        outputs2 = masked_mean(
-            outputs2.last_hidden_state,
-            batch2["attention_mask"][:, :, None],
-            dim=1,
-        )
-        score = F.cosine_similarity(outputs1, outputs2, dim=1)
+        if param["pooler_type"] == "avg":
+            outputs1 = masked_mean(
+                outputs1.last_hidden_state,
+                batch1["attention_mask"][:, :, None],
+                dim=1,
+            )
+            outputs2 = masked_mean(
+                outputs2.last_hidden_state,
+                batch2["attention_mask"][:, :, None],
+                dim=1,
+            )
+            score = F.cosine_similarity(outputs1, outputs2, dim=1)
+        elif param["pooler_type"] == "rwmd":
+            pairwise_sim = F.cosine_similarity(
+                outputs1.last_hidden_state[:, :, None, :],
+                outputs2.last_hidden_state[:, None, :, :],
+                dim=3,
+            )
+            output1 = torch.max(pairwise_sim, dim=2)[0].mean(dim=1)
+            output2 = torch.max(pairwise_sim, dim=1)[0].mean(dim=1)
+            score = torch.where(output1 > output2, output1, output2)
         return score.cpu().numpy()

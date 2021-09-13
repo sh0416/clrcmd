@@ -28,6 +28,7 @@ parser.add_argument(
     choices=["random", "bow", "sbert", "simcse"],
     help="method",
 )
+parser.add_argument("--pooler_type", type=str, choices=["avg", "rwmd"], default="avg")
 parser.add_argument(
     "--checkpoint",
     type=str,
@@ -54,7 +55,7 @@ parser.add_argument(
     help="dataset",
 )
 parser.add_argument(
-    "--data-dir", type=str, default=".data/STS/STS12-en-test", help="data dir"
+    "--data-dir", type=str, default="data/STS/STS12-en-test", help="data dir"
 )
 parser.add_argument("--sources", type=str, nargs="*", help="sources")
 parser.add_argument("--batch-size", type=int, default=32, help="batch size")
