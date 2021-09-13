@@ -4,8 +4,7 @@ flake8
 numpy
 pandas
 scipy
-transformers==4.2.1
-datasets==1.2.1
+transformers==4.10.1
 sentence-transformers
 jupyter
 notebook
