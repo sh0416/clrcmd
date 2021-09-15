@@ -18,6 +18,7 @@ from transformers.trainer_utils import is_main_process
 
 from simcse.data.dataset import ContrastiveLearningDataset, collate_fn
 from simcse.models import RobertaForContrastiveLearning
+from simcse.models import RobertaForTokenContrastiveLearning
 from simcse.trainers import CLTrainer
 
 logger = logging.getLogger(__name__)
@@ -198,10 +199,10 @@ def train(args):
             config = AutoConfig.from_pretrained(
                 model_args.model_name_or_path, **config_kwargs
             )
-            model = RobertaForContrastiveLearning.from_pretrained(
+            model = RobertaForTokenContrastiveLearning.from_pretrained(
                 model_args.model_name_or_path,
                 config=config,
-                pooler_type=model_args.pooler_type,
+                # pooler_type=model_args.pooler_type,
                 loss_mlm=model_args.loss_mlm,
                 temp=model_args.temp,
             )
@@ -236,16 +237,18 @@ def train(args):
                 writer.write(f"{key} = {value}\n")
 
     # Evaluation
-    logger.info("*** Evaluate ***")
-    results = trainer.evaluate(all=True)
-
-    output_eval_file = os.path.join(training_args.output_dir, "eval_results.txt")
     if trainer.is_world_process_zero():
+        logger.info("*** Evaluate ***")
+        results = trainer.evaluate(all=True)
+
+        output_eval_file = os.path.join(training_args.output_dir, "eval_results.txt")
         with open(output_eval_file, "w") as writer:
             logger.info("***** Eval results *****")
             for key, value in sorted(results.items()):
                 logger.info(f"  {key} = {value}")
                 writer.write(f"{key} = {value}\n")
+    else:
+        results = None
 
     return results
 

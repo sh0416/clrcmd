@@ -13,6 +13,8 @@ from transformers.models.roberta.modeling_roberta import (
     RobertaForTokenClassification,
 )
 
+from simcse.utils import masked_mean
+
 logger = logging.getLogger(__name__)
 
 
@@ -296,3 +298,95 @@ class RobertaForContrastiveLearning(RobertaModel):
         outputs2 = self._pooler(attention_mask2, outputs2)
         score = F.cosine_similarity(outputs1, outputs2)
         return score
+
+
+class RobertaForTokenContrastiveLearning(RobertaModel):
+    def __init__(self, config, loss_mlm: bool, temp: float):
+        super().__init__(config, add_pooling_layer=False)
+        self.temp = temp
+        self.cl_head = nn.Sequential(
+            nn.Linear(config.hidden_size, config.hidden_size), nn.Tanh()
+        )
+        if loss_mlm:
+            self.lm_head = RobertaLMHead(config)
+        self.init_weights()
+
+    def forward(
+        self,
+        input_ids1: Tensor,
+        input_ids2: Tensor,
+        attention_mask1: Tensor,
+        attention_mask2: Tensor,
+    ) -> Tuple[Tensor]:
+        outputs1, outputs2 = self._compute_representation(
+            input_ids1, input_ids2, attention_mask1, attention_mask2
+        )
+        # (batch, seq_len, hidden_dim)
+        if dist.is_initialized():
+            outputs1 = dist_all_gather(outputs1)
+            outputs2 = dist_all_gather(outputs2)
+        sim = self._compute_pairwise_similarity(
+            outputs1[:, None, :, :],
+            outputs2[None, :, :, :],
+            attention_mask1[:, None, :],
+            attention_mask2[None, :, :],
+        )
+        # (batch, batch, seq_len, seq_len)
+        sim = self._aggregate_pairwise_similarity(sim) / 0.05
+        # (batch, batch)
+        label = torch.arange(sim.shape[1], dtype=torch.long, device=sim.device)
+        loss = F.cross_entropy(sim, label)
+        return (loss,)
+
+    def compute_similarity(
+        self,
+        input_ids1: Tensor,
+        input_ids2: Tensor,
+        attention_mask1: Tensor,
+        attention_mask2: Tensor,
+    ) -> Tuple[Tensor]:
+        outputs1, outputs2 = self._compute_representation(
+            input_ids1, input_ids2, attention_mask1, attention_mask2
+        )
+        sim = self._compute_pairwise_similarity(
+            outputs1, outputs2, attention_mask1, attention_mask2
+        )
+        # (batch, seq_len, seq_len)
+        score = self._aggregate_pairwise_similarity(sim) / 0.05
+        # (batch,)
+        return score
+
+    def _compute_representation(
+        self,
+        input_ids1: Tensor,
+        input_ids2: Tensor,
+        attention_mask1: Tensor,
+        attention_mask2: Tensor,
+    ) -> Tuple[Tensor, Tensor]:
+        input_ids = torch.cat((input_ids1, input_ids2))
+        attention_mask = torch.cat((attention_mask1, attention_mask2))
+        outputs = super().forward(input_ids, attention_mask)
+        outputs1, outputs2 = torch.chunk(self.cl_head(outputs.last_hidden_state), 2)
+        return outputs1, outputs2
+
+    def _compute_pairwise_similarity(
+        self,
+        outputs1: Tensor,
+        outputs2: Tensor,
+        attention_mask1: Tensor,
+        attention_mask2: Tensor,
+    ) -> Tensor:
+        sim = F.cosine_similarity(
+            outputs1[..., :, None, :], outputs2[..., None, :, :], dim=-1
+        )
+        inf = torch.tensor(float("-inf"), device=sim.device)
+        sim = torch.where(attention_mask1[..., :, None].bool(), sim, inf)
+        sim = torch.where(attention_mask2[..., None, :].bool(), sim, inf)
+        return sim
+
+    def _aggregate_pairwise_similarity(self, sim: Tensor) -> Tensor:
+        sim_left = torch.max(sim, dim=-1)[0]
+        sim_right = torch.max(sim, dim=-2)[0]
+        sim_left = masked_mean(sim_left, ~torch.isinf(sim_left), dim=-1)
+        sim_right = masked_mean(sim_right, ~torch.isinf(sim_right), dim=-1)
+        return (sim_left + sim_right) / 2
