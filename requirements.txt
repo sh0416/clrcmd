@@ -4,6 +4,7 @@ flake8
 numpy
 pandas
 scipy
+matplotlib
 transformers==4.10.1
 sentence-transformers
 jupyter

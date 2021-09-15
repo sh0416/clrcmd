@@ -332,7 +332,7 @@ class RobertaForTokenContrastiveLearning(RobertaModel):
             attention_mask2[None, :, :],
         )
         # (batch, batch, seq_len, seq_len)
-        sim = self._aggregate_pairwise_similarity(sim) / 0.05
+        sim = self._aggregate_pairwise_similarity(sim) / 0.01
         # (batch, batch)
         label = torch.arange(sim.shape[1], dtype=torch.long, device=sim.device)
         loss = F.cross_entropy(sim, label)
@@ -352,7 +352,7 @@ class RobertaForTokenContrastiveLearning(RobertaModel):
             outputs1, outputs2, attention_mask1, attention_mask2
         )
         # (batch, seq_len, seq_len)
-        score = self._aggregate_pairwise_similarity(sim) / 0.05
+        score = self._aggregate_pairwise_similarity(sim)
         # (batch,)
         return score
 
