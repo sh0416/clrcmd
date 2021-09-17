@@ -1,5 +1,8 @@
+import abc
 import csv
+import random
 import logging
+from typing import Tuple, Any, Dict
 
 from torch import Tensor
 from torch.utils.data import Dataset
@@ -9,13 +12,69 @@ logger = logging.getLogger(__name__)
 
 
 class ContrastiveLearningDataset(Dataset):
+    @abc.abstractmethod
+    def __getitem__(self, index: int) -> Tuple[Dict[str, Tensor], Dict[str, Tensor]]:
+        pass
+
+
+class SimCSEDataset(ContrastiveLearningDataset):
     def __init__(self, filepath: str, tokenizer: RobertaTokenizer):
         self.tokenizer = tokenizer
         with open(filepath) as f:
             self.data = [x.strip() for x in f]
 
-    def __getitem__(self, index: int) -> Tensor:
-        return self.data[index]
+    def __getitem__(self, index: int) -> Tuple[Dict[str, Tensor], Dict[str, Tensor]]:
+        sentence = self.data[index]
+        x = self.tokenizer.encode_plus(
+            sentence,
+            return_tensors="pt",
+            padding="max_length",
+            max_length=32,
+            truncation=True,
+        )
+        return x, x
+
+    def __len__(self) -> int:
+        return len(self.data)
+
+
+class ESimCSEDataset(ContrastiveLearningDataset):
+    def __init__(
+        self, filepath: str, tokenizer: RobertaTokenizer, dup_rate: float = 0.5
+    ):
+        self.tokenizer = tokenizer
+        with open(filepath) as f:
+            self.data = [x.strip() for x in f]
+        self.dup_rate = dup_rate
+
+    def __getitem__(self, index: int) -> Tuple[Dict[str, Tensor], Dict[str, Tensor]]:
+        sentence = self.data[index]
+        tokens = self.tokenizer.tokenize(sentence)
+        # Compute dup_len
+        dup_len = random.randint(0, max(2, int(self.dup_rate * len(tokens))))
+        # Compute positions
+        dup_set = random.sample(range(len(tokens)), k=dup_len)
+        # Compute repetition tokens
+        tokens_new = []
+        for pos, token in enumerate(tokens):
+            tokens_new.append(token)
+            if pos in dup_set:
+                tokens_new.append(token)
+        x = self.tokenizer.encode_plus(
+            tokens,
+            return_tensors="pt",
+            padding="max_length",
+            max_length=32,
+            truncation=True,
+        )
+        x_pos = self.tokenizer.encode_plus(
+            tokens_new,
+            return_tensors="pt",
+            padding="max_length",
+            max_length=32,
+            truncation=True,
+        )
+        return x, x_pos
 
     def __len__(self) -> int:
         return len(self.data)
