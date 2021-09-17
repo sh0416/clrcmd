@@ -117,43 +117,6 @@ def dist_all_gather(x: Tensor) -> Tensor:
     return torch.cat(x_list, dim=0)
 
 
-def compute_loss_simclr(
-    outputs1: BaseModelOutputWithPoolingAndCrossAttentions,
-    outputs2: BaseModelOutputWithPoolingAndCrossAttentions,
-    attention_mask1: Tensor,
-    attention_mask2: Tensor,
-    pooler_fn: Callable,
-    temp: float,
-    is_training: bool,
-) -> Tensor:
-    """Compute SimCLR loss in sentence-level
-
-    :param outputs: Model output for first view
-    :type outputs: BaseModelOutputWithPooling
-    :param attention_mask: Attention mask
-    :type attention_mask: FloatTensor(batch_size, 2, seq_len)
-    :param pooler_fn: Function for extracting sentence representation
-    :type pooler_fn: Callable[[Tensor, BaseModelOutputWithHead],
-                              FloatTensor(batch_size, hidden_dim)]
-    :param temp: Temperature for cosine similarity
-    :type temp: float
-    :param is_training: Flag indicating whether is training or not
-    :type is_training: bool
-    :return: Scalar loss
-    :rtype: FloatTensor()
-    """
-    outputs1 = pooler_fn(attention_mask1, outputs1)
-    outputs2 = pooler_fn(attention_mask2, outputs2)
-    # Gather all embeddings if using distributed training
-    if dist.is_initialized() and is_training:
-        outputs1, outputs2 = dist_all_gather(outputs1), dist_all_gather(outputs2)
-    sim = F.cosine_similarity(outputs1[:, None, :], outputs2[None, :, :], dim=2) / temp
-    # (batch_size, batch_size)
-    labels = torch.arange(sim.shape[1], dtype=torch.long, device=sim.device)
-    loss = F.cross_entropy(sim, labels)
-    return loss
-
-
 def compute_loss_simclr_token(
     inputs: Tensor,
     outputs: Tensor,
@@ -233,6 +196,39 @@ class RobertaForContrastiveLearning(RobertaModel):
         attention_mask1: Tensor,
         attention_mask2: Tensor,
     ) -> Tuple[Tensor]:
+        outputs1, outputs2 = self._compute_representation(
+            input_ids1, input_ids2, attention_mask1, attention_mask2
+        )
+        # Gather all embeddings if using distributed training
+        if dist.is_initialized() and self.training:
+            outputs1, outputs2 = dist_all_gather(outputs1), dist_all_gather(outputs2)
+        sim = F.cosine_similarity(outputs1[:, None, :], outputs2[None, :, :], dim=2)
+        sim = sim / self.temp
+        # (batch_size, batch_size)
+        labels = torch.arange(sim.shape[1], dtype=torch.long, device=sim.device)
+        loss = F.cross_entropy(sim, labels)
+        return (loss,)
+
+    def compute_similarity(
+        self,
+        input_ids1: Tensor,
+        input_ids2: Tensor,
+        attention_mask1: Tensor,
+        attention_mask2: Tensor,
+    ) -> Tensor:
+        outputs1, outputs2 = self._compute_representation(
+            input_ids1, input_ids2, attention_mask1, attention_mask2
+        )
+        score = F.cosine_similarity(outputs1, outputs2)
+        return score
+
+    def _compute_representation(
+        self,
+        input_ids1: Tensor,
+        input_ids2: Tensor,
+        attention_mask1: Tensor,
+        attention_mask2: Tensor,
+    ) -> Tuple[Tensor, Tensor]:
         input_ids = torch.cat((input_ids1, input_ids2))
         attention_mask = torch.cat((attention_mask1, attention_mask2))
         outputs = super().forward(input_ids, attention_mask)
@@ -254,47 +250,9 @@ class RobertaForContrastiveLearning(RobertaModel):
             hidden_states=hidden_states2,
             pooler_output=pooler_output2,
         )
-        loss = compute_loss_simclr(
-            outputs1,
-            outputs2,
-            attention_mask1,
-            attention_mask2,
-            self._pooler,
-            self.temp,
-            self.training,
-        )
-        return (loss,)
-
-    def compute_similarity(
-        self,
-        input_ids1: Tensor,
-        input_ids2: Tensor,
-        attention_mask1: Tensor,
-        attention_mask2: Tensor,
-    ) -> Tuple[Tensor]:
-        input_ids = torch.cat((input_ids1, input_ids2))
-        attention_mask = torch.cat((attention_mask1, attention_mask2))
-        outputs = super().forward(input_ids, attention_mask)
-        pooler_output1, pooler_output2 = torch.chunk(outputs.last_hidden_state, 2)
-        last_hidden_state1, last_hidden_state2 = torch.chunk(
-            outputs.last_hidden_state, 2
-        )
-        hidden_states1 = tuple(torch.chunk(x, 2)[0] for x in outputs.hidden_states)
-        hidden_states2 = tuple(torch.chunk(x, 2)[1] for x in outputs.hidden_states)
-        outputs1 = BaseModelOutputWithPoolingAndCrossAttentions(
-            last_hidden_state=last_hidden_state1,
-            hidden_states=hidden_states1,
-            pooler_output=pooler_output1,
-        )
-        outputs2 = BaseModelOutputWithPoolingAndCrossAttentions(
-            last_hidden_state=last_hidden_state2,
-            hidden_states=hidden_states2,
-            pooler_output=pooler_output2,
-        )
         outputs1 = self._pooler(attention_mask1, outputs1)
         outputs2 = self._pooler(attention_mask2, outputs2)
-        score = F.cosine_similarity(outputs1, outputs2)
-        return score
+        return outputs1, outputs2
 
 
 class RobertaForTokenContrastiveLearning(RobertaModel):
