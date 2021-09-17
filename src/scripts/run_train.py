@@ -16,7 +16,7 @@ from transformers import (
 )
 from transformers.trainer_utils import is_main_process
 
-from simcse.data.dataset import ContrastiveLearningDataset, collate_fn
+from simcse.data.dataset import ESimCSEDataset, SimCSEDataset, collate_fn
 from simcse.models import (
     RobertaForContrastiveLearning,
     RobertaForTokenContrastiveLearning,
@@ -78,35 +78,6 @@ class DataTrainingArguments:
     Arguments pertaining to what data we are going to input our model for training and eval.
     """
 
-    # Huggingface's original arguments.
-    dataset_config_name: Optional[str] = field(
-        default=None,
-        metadata={
-            "help": (
-                "The configuration name of the dataset to use (via the"
-                " datasets library)."
-            )
-        },
-    )
-    overwrite_cache: bool = field(
-        default=False,
-        metadata={"help": "Overwrite the cached training and evaluation sets"},
-    )
-    validation_split_percentage: Optional[int] = field(
-        default=5,
-        metadata={
-            "help": (
-                "The percentage of the train set used as validation set in"
-                " case there's no validation split"
-            )
-        },
-    )
-    preprocessing_num_workers: Optional[int] = field(
-        default=None,
-        metadata={"help": "The number of processes to use for the preprocessing."},
-    )
-
-    # SimCSE's arguments
     train_file: str = field(
         default=None,
         metadata={"help": "The training data file (.txt or .csv)."},
@@ -119,6 +90,9 @@ class DataTrainingArguments:
                 " Sequences longer than this will be truncated."
             )
         },
+    )
+    dup_rate: float = field(
+        default=0.08, metadata={"help": "Duplication rate for ESimCSE"}
     )
 
     def __post_init__(self):
@@ -193,18 +167,16 @@ def train(args):
         "hidden_dropout_prob": model_args.hidden_dropout_prob,
         "output_hidden_states": True,
     }
-    if model_args.pooler_type in ["avg_top2", "avg_first_last"]:
-        config_kwargs["output_hidden_states"] = True
     if model_args.model_name_or_path:
         if "roberta" in model_args.model_name_or_path:
             tokenizer = RobertaTokenizer.from_pretrained(model_args.model_name_or_path)
             config = AutoConfig.from_pretrained(
                 model_args.model_name_or_path, **config_kwargs
             )
-            model = RobertaForTokenContrastiveLearning.from_pretrained(
+            model = RobertaForContrastiveLearning.from_pretrained(
                 model_args.model_name_or_path,
                 config=config,
-                # pooler_type=model_args.pooler_type,
+                pooler_type=model_args.pooler_type,
                 loss_mlm=model_args.loss_mlm,
                 temp=model_args.temp,
             )
@@ -217,7 +189,9 @@ def train(args):
     model.resize_token_embeddings(len(tokenizer))
     model.train()
 
-    train_dataset = ContrastiveLearningDataset(data_args.train_file, tokenizer)
+    train_dataset = ESimCSEDataset(
+        data_args.train_file, tokenizer, dup_rate=data_args.dup_rate
+    )
     trainer = CLTrainer(
         model=model,
         data_collator=partial(collate_fn, tokenizer=tokenizer),

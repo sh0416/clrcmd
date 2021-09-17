@@ -151,7 +151,6 @@ def compute_loss_simclr(
     # (batch_size, batch_size)
     labels = torch.arange(sim.shape[1], dtype=torch.long, device=sim.device)
     loss = F.cross_entropy(sim, labels)
-    logger.info(f"{loss = :.4f}")
     return loss
 
 
@@ -276,9 +275,7 @@ class RobertaForContrastiveLearning(RobertaModel):
         input_ids = torch.cat((input_ids1, input_ids2))
         attention_mask = torch.cat((attention_mask1, attention_mask2))
         outputs = super().forward(input_ids, attention_mask)
-        pooler_output1, pooler_output2 = torch.chunk(
-            self.cl_head(outputs.last_hidden_state), 2
-        )
+        pooler_output1, pooler_output2 = torch.chunk(outputs.last_hidden_state, 2)
         last_hidden_state1, last_hidden_state2 = torch.chunk(
             outputs.last_hidden_state, 2
         )

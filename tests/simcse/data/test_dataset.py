@@ -1,10 +1,11 @@
 import random
-import pytest
-import torch
 from functools import partial
 
+import pytest
+import torch
 from transformers import RobertaTokenizer
-from src.simcse.data.dataset import SimCSEDataset, ESimCSEDataset
+
+from src.simcse.data.dataset import ESimCSEDataset, SimCSEDataset
 
 
 @pytest.fixture
@@ -46,12 +47,10 @@ def test_simcse_dataset(corpus_filepath, tokenizer, corpus):
     for i in range(len(dataset)):
         true = tokenize_fn(corpus[i])
         pred1, pred2 = dataset[i]
-        assert torch.equal(pred1["input_ids"], true["input_ids"])
-        assert torch.equal(pred1["attention_mask"], true["attention_mask"])
-        assert torch.equal(pred2["input_ids"], true["input_ids"])
-        assert torch.equal(pred2["attention_mask"], true["attention_mask"])
-        assert pred1["input_ids"].shape == pred1["attention_mask"].shape == (1, 32)
-        assert pred2["input_ids"].shape == pred2["attention_mask"].shape == (1, 32)
+        assert pred1["input_ids"] == true["input_ids"]
+        assert pred1["attention_mask"] == true["attention_mask"]
+        assert pred2["input_ids"] == true["input_ids"]
+        assert pred2["attention_mask"] == true["attention_mask"]
 
 
 def test_esimcse_dataset(corpus_filepath, tokenizer):
@@ -60,24 +59,24 @@ def test_esimcse_dataset(corpus_filepath, tokenizer):
     dataset = ESimCSEDataset(corpus_filepath, tokenizer)
     # fmt: off
     true_dataset = [
-        ({"input_ids": [[0, 4783, 766, 16, 842, 41860, 4717, 261, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]],
-          "attention_mask": [[1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]},
-         {"input_ids": [[0, 4783, 4783, 766, 16, 842, 842, 41860, 4717, 261, 261, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]],
-          "attention_mask": [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]}),
-        ({"input_ids": [[0, 9178, 32, 47, 116, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]],
-          "attention_mask": [[1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ]]},
-         {"input_ids": [[0, 9178, 32, 47, 116, 116, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]],
-          "attention_mask": [[1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]}),
-        ({"input_ids": [[0, 118, 437, 2051, 3392, 47, 4, 8, 47, 116, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]],
-          "attention_mask": [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]},
-         {"input_ids": [[0, 118, 437, 2051, 2051, 3392, 47, 47, 4, 8, 47, 47, 116, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]],
-          "attention_mask": [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]})
+        ({"input_ids": [0, 4783, 766, 16, 842, 41860, 4717, 261, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+          "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
+         {"input_ids": [0, 4783, 4783, 766, 16, 842, 842, 41860, 4717, 261, 261, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+          "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}),
+        ({"input_ids": [0, 9178, 32, 47, 116, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+          "attention_mask": [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ]},
+         {"input_ids": [0, 9178, 32, 47, 116, 116, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+          "attention_mask": [1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}),
+        ({"input_ids": [0, 118, 437, 2051, 3392, 47, 4, 8, 47, 116, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+          "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
+         {"input_ids": [0, 118, 437, 2051, 2051, 3392, 47, 47, 4, 8, 47, 47, 116, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+          "attention_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]})
     ]
     assert len(dataset) == 3
     for i in range(len(dataset)):
         true1, true2 = true_dataset[i]
         pred1, pred2 = dataset[i]
-        assert pred1["input_ids"].tolist() == true1["input_ids"]
-        assert pred1["attention_mask"].tolist() == true1["attention_mask"]
-        assert pred2["input_ids"].tolist() == true2["input_ids"]
-        assert pred2["attention_mask"].tolist() == true2["attention_mask"]
+        assert pred1["input_ids"] == true1["input_ids"]
+        assert pred1["attention_mask"] == true1["attention_mask"]
+        assert pred2["input_ids"] == true2["input_ids"]
+        assert pred2["attention_mask"] == true2["attention_mask"]

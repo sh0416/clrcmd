@@ -1,8 +1,8 @@
 import abc
 import csv
-import random
 import logging
-from typing import Tuple, Any, Dict
+import random
+from typing import Any, Dict, Tuple
 
 from torch import Tensor
 from torch.utils.data import Dataset
@@ -27,7 +27,6 @@ class SimCSEDataset(ContrastiveLearningDataset):
         sentence = self.data[index]
         x = self.tokenizer.encode_plus(
             sentence,
-            return_tensors="pt",
             padding="max_length",
             max_length=32,
             truncation=True,
@@ -51,7 +50,7 @@ class ESimCSEDataset(ContrastiveLearningDataset):
         sentence = self.data[index]
         tokens = self.tokenizer.tokenize(sentence)
         # Compute dup_len
-        dup_len = random.randint(0, max(2, int(self.dup_rate * len(tokens))))
+        dup_len = random.randint(0, max(1, int(self.dup_rate * len(tokens))))
         # Compute positions
         dup_set = random.sample(range(len(tokens)), k=dup_len)
         # Compute repetition tokens
@@ -62,14 +61,12 @@ class ESimCSEDataset(ContrastiveLearningDataset):
                 tokens_new.append(token)
         x = self.tokenizer.encode_plus(
             tokens,
-            return_tensors="pt",
             padding="max_length",
             max_length=32,
             truncation=True,
         )
         x_pos = self.tokenizer.encode_plus(
             tokens_new,
-            return_tensors="pt",
             padding="max_length",
             max_length=32,
             truncation=True,
