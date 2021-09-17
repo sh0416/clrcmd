@@ -3,8 +3,8 @@ import logging
 import os
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
-from typing import Optional
 from functools import partial
+from typing import Optional
 
 import transformers
 from transformers import (
@@ -17,8 +17,10 @@ from transformers import (
 from transformers.trainer_utils import is_main_process
 
 from simcse.data.dataset import ContrastiveLearningDataset, collate_fn
-from simcse.models import RobertaForContrastiveLearning
-from simcse.models import RobertaForTokenContrastiveLearning
+from simcse.models import (
+    RobertaForContrastiveLearning,
+    RobertaForTokenContrastiveLearning,
+)
 from simcse.trainers import CLTrainer
 
 logger = logging.getLogger(__name__)

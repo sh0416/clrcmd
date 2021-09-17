@@ -1,6 +1,4 @@
-import random
 from functools import partial
-from typing import Dict, Set, Tuple
 
 import numpy as np
 from transformers import RobertaTokenizer
@@ -34,7 +32,7 @@ def get_priority(pair, dropped_ranks, bpe_ranks):
     return float("inf") if pair in dropped_ranks else bpe_ranks.get(pair, float("inf"))
 
 
-class RobertaTokenizerDropout(RobertaTokenizer):
+class BPEDropoutRobertaTokenizer(RobertaTokenizer):
     """Tokenizer with BPE dropout implementation"""
 
     def bpe(self, token: str) -> str:

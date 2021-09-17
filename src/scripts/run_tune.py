@@ -8,14 +8,13 @@ import optuna
 import torch
 import torch.distributed as dist
 from optuna import Trial
-from transformers.hf_argparser import HfArgumentParser
-
 from run_train_simcse import (
     DataTrainingArguments,
     ModelArguments,
     OurTrainingArguments,
     train,
 )
+from transformers.hf_argparser import HfArgumentParser
 
 logger = logging.getLogger(__name__)
 Arguments = Tuple[ModelArguments, DataTrainingArguments, OurTrainingArguments]

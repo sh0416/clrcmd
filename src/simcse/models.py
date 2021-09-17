@@ -8,9 +8,9 @@ import torch.nn.functional as F
 from torch import Tensor
 from transformers.modeling_outputs import BaseModelOutputWithPoolingAndCrossAttentions
 from transformers.models.roberta.modeling_roberta import (
+    RobertaForTokenClassification,
     RobertaLMHead,
     RobertaModel,
-    RobertaForTokenClassification,
 )
 
 from simcse.utils import masked_mean
@@ -332,7 +332,7 @@ class RobertaForTokenContrastiveLearning(RobertaModel):
             attention_mask2[None, :, :],
         )
         # (batch, batch, seq_len, seq_len)
-        sim = self._aggregate_pairwise_similarity(sim) / 0.01
+        sim = self._aggregate_pairwise_similarity(sim) / self.temp
         # (batch, batch)
         label = torch.arange(sim.shape[1], dtype=torch.long, device=sim.device)
         loss = F.cross_entropy(sim, label)

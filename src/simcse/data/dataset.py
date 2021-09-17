@@ -1,5 +1,7 @@
 import csv
 import logging
+
+from torch import Tensor
 from torch.utils.data import Dataset
 from transformers import RobertaTokenizer
 
@@ -7,6 +9,19 @@ logger = logging.getLogger(__name__)
 
 
 class ContrastiveLearningDataset(Dataset):
+    def __init__(self, filepath: str, tokenizer: RobertaTokenizer):
+        self.tokenizer = tokenizer
+        with open(filepath) as f:
+            self.data = [x.strip() for x in f]
+
+    def __getitem__(self, index: int) -> Tensor:
+        return self.data[index]
+
+    def __len__(self) -> int:
+        return len(self.data)
+
+
+class TokenizedContrastiveLearningDataset(Dataset):
     def __init__(self, filepath: str, tokenizer: RobertaTokenizer):
         self.tokenizer = tokenizer
         with open(filepath) as f:

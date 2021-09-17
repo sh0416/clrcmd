@@ -4,6 +4,7 @@ from typing import Iterable, List
 import numpy as np
 import torch
 from torch import Tensor
+
 from sentence_benchmark.data import Example
 
 
