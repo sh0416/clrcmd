@@ -1,8 +1,9 @@
 import abc
 import csv
+from functools import partial
 import logging
 import random
-from typing import Any, Dict, Tuple
+from typing import Dict, Tuple, List
 
 from torch import Tensor
 from torch.utils.data import Dataset
@@ -12,72 +13,58 @@ logger = logging.getLogger(__name__)
 
 
 class ContrastiveLearningDataset(Dataset):
-    @abc.abstractmethod
-    def __getitem__(self, index: int) -> Tuple[Dict[str, Tensor], Dict[str, Tensor]]:
-        pass
-
-
-class SimCSEDataset(ContrastiveLearningDataset):
     def __init__(self, filepath: str, tokenizer: RobertaTokenizer):
         self.tokenizer = tokenizer
         with open(filepath) as f:
             self.data = [x.strip() for x in f]
 
     def __getitem__(self, index: int) -> Tuple[Dict[str, Tensor], Dict[str, Tensor]]:
-        sentence = self.data[index]
-        x = self.tokenizer.encode_plus(
-            sentence,
+        x, x_pos = self._create_tokenized_pair(self.data[index])
+        f = partial(
+            self.tokenizer.encode_plus,
             padding="max_length",
             max_length=32,
             truncation=True,
         )
-        return x, x
+        return f(x), f(x_pos)
 
     def __len__(self) -> int:
         return len(self.data)
 
+    @abc.abstractmethod
+    def _create_tokenized_pair(self, s: str) -> Tuple[List[str], List[str]]:
+        pass
+
+
+class SimCSEDataset(ContrastiveLearningDataset):
+    def _create_tokenized_pair(self, sentence: str) -> Tuple[List[str], List[str]]:
+        tokens = self.tokenizer.tokenize(sentence)
+        return tokens, tokens
+
 
 class ESimCSEDataset(ContrastiveLearningDataset):
-    def __init__(
-        self, filepath: str, tokenizer: RobertaTokenizer, dup_rate: float = 0.5
-    ):
-        self.tokenizer = tokenizer
-        with open(filepath) as f:
-            self.data = [x.strip() for x in f]
+    def __init__(self, filepath: str, tokenizer: RobertaTokenizer, dup_rate: float):
+        super().__init__(filepath=filepath, tokenizer=tokenizer)
         self.dup_rate = dup_rate
 
-    def __getitem__(self, index: int) -> Tuple[Dict[str, Tensor], Dict[str, Tensor]]:
-        sentence = self.data[index]
+    def _create_tokenized_pair(self, sentence: str) -> Tuple[List[str], List[str]]:
         tokens = self.tokenizer.tokenize(sentence)
         # Compute dup_len
         dup_len = random.randint(0, max(1, int(self.dup_rate * len(tokens))))
         # Compute positions
         dup_set = random.sample(range(len(tokens)), k=dup_len)
         # Compute repetition tokens
-        tokens_new = []
+        tokens_pos = []
         for pos, token in enumerate(tokens):
-            tokens_new.append(token)
+            tokens_pos.append(token)
             if pos in dup_set:
-                tokens_new.append(token)
-        x = self.tokenizer.encode_plus(
-            tokens,
-            padding="max_length",
-            max_length=32,
-            truncation=True,
-        )
-        x_pos = self.tokenizer.encode_plus(
-            tokens_new,
-            padding="max_length",
-            max_length=32,
-            truncation=True,
-        )
-        return x, x_pos
-
-    def __len__(self) -> int:
-        return len(self.data)
+                tokens_pos.append(token)
+        return tokens, tokens_pos
 
 
 class TokenizedContrastiveLearningDataset(Dataset):
+    """Deprecated"""
+
     def __init__(self, filepath: str, tokenizer: RobertaTokenizer):
         self.tokenizer = tokenizer
         with open(filepath) as f:

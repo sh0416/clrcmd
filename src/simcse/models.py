@@ -91,17 +91,14 @@ def dist_all_gather(x: Tensor) -> Tensor:
     :rtype: Tensor
     """
     assert dist.is_initialized(), "The process is not in DDP setting"
+    world_size = dist.get_world_size()
     # 1. Get size acroess processes
-    x_numel_list = [
-        torch.tensor(x.numel(), device=x.device) for _ in range(dist.get_world_size())
-    ]
+    x_numel_list = [torch.tensor(x.numel(), device=x.device) for _ in range(world_size)]
     dist.all_gather(x_numel_list, torch.tensor(x.numel(), device=x.device))
     # 2. Infer maximum size
     max_size = max(x.item() for x in x_numel_list)
     # 3. Communitcate tensor with padded version
-    _x_list = [
-        torch.empty((max_size,), device=x.device) for _ in range(dist.get_world_size())
-    ]
+    _x_list = [torch.empty((max_size,), device=x.device) for _ in range(world_size)]
     _x = torch.cat(
         (
             x.contiguous().view(-1),

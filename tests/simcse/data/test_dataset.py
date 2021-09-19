@@ -38,7 +38,6 @@ def test_simcse_dataset(corpus_filepath, tokenizer, corpus):
     # Test dataset
     tokenize_fn = partial(
         tokenizer.encode_plus,
-        return_tensors="pt",
         padding="max_length",
         max_length=32,
         truncation=True,
@@ -56,7 +55,7 @@ def test_simcse_dataset(corpus_filepath, tokenizer, corpus):
 def test_esimcse_dataset(corpus_filepath, tokenizer):
     random.seed(0)
     # Create dataset
-    dataset = ESimCSEDataset(corpus_filepath, tokenizer)
+    dataset = ESimCSEDataset(corpus_filepath, tokenizer, 0.5)
     # fmt: off
     true_dataset = [
         ({"input_ids": [0, 4783, 766, 16, 842, 41860, 4717, 261, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],

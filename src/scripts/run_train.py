@@ -218,11 +218,16 @@ def train(args):
         results = trainer.evaluate(all=True)
 
         output_eval_file = os.path.join(training_args.output_dir, "eval_results.txt")
-        with open(output_eval_file, "w") as writer:
+        with open(output_eval_file, "w") as f:
             logger.info("***** Eval results *****")
-            for key, value in sorted(results.items()):
-                logger.info(f"  {key} = {value}")
-                writer.write(f"{key} = {value}\n")
+            f.write(
+                f"{results['STS12']['all']['spearman']['all']:.4f},"
+                f"{results['STS13']['all']['spearman']['all']:.4f},"
+                f"{results['STS14']['all']['spearman']['all']:.4f},"
+                f"{results['STS15']['all']['spearman']['all']:.4f},"
+                f"{results['STS16']['all']['spearman']['all']:.4f},"
+                f"{results['STSB-test']['all']['spearman']['all']:.4f}"
+            )
     else:
         results = None
 
