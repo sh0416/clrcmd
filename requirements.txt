@@ -9,3 +9,4 @@ transformers==4.10.1
 sentence-transformers
 jupyter
 notebook
+nltk

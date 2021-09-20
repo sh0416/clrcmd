@@ -1,13 +1,15 @@
 import abc
 import csv
-from functools import partial
 import logging
 import random
-from typing import Dict, Tuple, List
+from functools import partial
+from typing import Dict, List, Tuple
 
 from torch import Tensor
 from torch.utils.data import Dataset
 from transformers import RobertaTokenizer
+
+from simcse.data.eda import eda
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +34,7 @@ class ContrastiveLearningDataset(Dataset):
         return len(self.data)
 
     @abc.abstractmethod
-    def _create_tokenized_pair(self, s: str) -> Tuple[List[str], List[str]]:
+    def _create_tokenized_pair(self, sentence: str) -> Tuple[List[str], List[str]]:
         pass
 
 
@@ -59,6 +61,15 @@ class ESimCSEDataset(ContrastiveLearningDataset):
             tokens_pos.append(token)
             if pos in dup_set:
                 tokens_pos.append(token)
+        return tokens, tokens_pos
+
+
+class EDASimCSEDataset(ContrastiveLearningDataset):
+    def _create_tokenized_pair(self, sentence: str) -> Tuple[List[str], List[str]]:
+        sentence_pos = eda(sentence, num_aug=1)[0]
+        assert len(sentence_pos) > 0, sentence
+        tokens = self.tokenizer.tokenize(sentence)
+        tokens_pos = self.tokenizer.tokenize(sentence_pos)
         return tokens, tokens_pos
 
 

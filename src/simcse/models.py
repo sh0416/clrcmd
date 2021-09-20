@@ -1,5 +1,5 @@
 import logging
-from typing import Callable, List, Tuple
+from typing import Tuple
 
 import torch
 import torch.distributed as dist
@@ -7,11 +7,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
 from transformers.modeling_outputs import BaseModelOutputWithPoolingAndCrossAttentions
-from transformers.models.roberta.modeling_roberta import (
-    RobertaForTokenClassification,
-    RobertaLMHead,
-    RobertaModel,
-)
+from transformers.models.roberta.modeling_roberta import RobertaLMHead, RobertaModel
 
 from simcse.utils import masked_mean
 
@@ -112,66 +108,6 @@ def dist_all_gather(x: Tensor) -> Tensor:
     # current process's corresponding embeddings with original tensors
     x_list[dist.get_rank()] = x
     return torch.cat(x_list, dim=0)
-
-
-def compute_loss_simclr_token(
-    inputs: Tensor,
-    outputs: Tensor,
-    pairs: List[Tensor],
-    temp: float,
-    is_training: bool,
-) -> Tensor:
-    """Compute SimCLR loss in token-level
-
-    :param inputs: Bert input for the first sentence
-    :type inputs: LongTensor(batch_size, 2, seq_len)
-    :param outputs: Bert output for the first sentence
-    :type outputs: FloatTensor(batch_size, 2, seq_len, hidden_dim)
-    :param pairs: Pair for computing similarity between token
-    :type pairs: List[LongTensor(num_pairs, 2, 2)]
-    :param temp: Temperature for cosine similarity
-    :type temp: float
-    :param is_training: indicator whether training or not
-    :type is_training: bool
-    :return: Scalar loss
-    :rtype: FloatTensor()
-    """
-    # NOTE: Keep in mind that this code should be compatible in DDP setting
-    # Assertion: Batch size is equal for all tensor
-    assert inputs.shape[0:3] == outputs.shape[0:3]
-    # 1. Index input and output tensor
-    input1 = inputs[pairs[:, 0], 0, pairs[:, 1]]
-    input2 = inputs[pairs[:, 0], 1, pairs[:, 2]]
-    assert torch.equal(input1, input2), "Different input pair is not supported"
-    output1 = outputs[pairs[:, 0], 0, pairs[:, 1]]
-    output2 = outputs[pairs[:, 0], 1, pairs[:, 2]]
-    # (num_pairs,), (num_pairs, hidden_dim)
-    # 2. (Optional) Gather all embeddings if using distributed training
-    if dist.is_initialized() and is_training:
-        input1 = dist_all_gather(input1)
-        output1, output2 = dist_all_gather(output1), dist_all_gather(output2)
-    # (valid_num_pairs,), (valid_num_pairs, hidden_dim)
-    # 3. Sort and split output tensor based on input
-    sorted_val, sorted_indice = torch.sort(input1)
-    output1, output2 = output1[sorted_indice], output2[sorted_indice]
-    # (valid_num_pairs,), (valid_num_pairs, hidden_dim)
-    val, counts = torch.unique(sorted_val, sorted=True, return_counts=True)
-    counts = counts.tolist()
-    output1 = torch.split(output1, counts)
-    output2 = torch.split(output2, counts)
-    output1 = [x for x in output1 if x.shape[0] > 20]
-    output2 = [x for x in output2 if x.shape[0] > 20]
-    # list(torch.FloatTensor(valid_num_pairs_per_token, hidden_dim))
-    # 4. Calculate temperature aware cosine similarity
-    sim = [
-        F.cosine_similarity(x1[None, :, :], x2[:, None, :], dim=2) / temp
-        for x1, x2 in zip(output1, output2)
-    ]
-    # list(FloatTensor(num_pairs_per_symbol, num_pairs_per_symbol))
-    label = [torch.arange(x.shape[1], dtype=torch.long, device=x.device) for x in sim]
-    loss = torch.stack([F.cross_entropy(x, l) for x, l in zip(sim, label)])
-    loss = loss.mean()
-    return loss
 
 
 class RobertaForContrastiveLearning(RobertaModel):

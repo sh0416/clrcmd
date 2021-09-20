@@ -16,7 +16,12 @@ from transformers import (
 )
 from transformers.trainer_utils import is_main_process
 
-from simcse.data.dataset import ESimCSEDataset, SimCSEDataset, collate_fn
+from simcse.data.dataset import (
+    EDASimCSEDataset,
+    ESimCSEDataset,
+    SimCSEDataset,
+    collate_fn,
+)
 from simcse.models import (
     RobertaForContrastiveLearning,
     RobertaForTokenContrastiveLearning,
@@ -44,22 +49,9 @@ class ModelArguments:
             )
         },
     )
-    loss_token: bool = field(
+    loss_rwmd: bool = field(
         default=False,
-        metadata={
-            "help": (
-                "Whether to use token alignment contrastive learning" " objective."
-            )
-        },
-    )
-    coeff_loss_token: float = field(
-        default=0.1,
-        metadata={
-            "help": (
-                "Coefficient for token alignment contrastive learning"
-                " objective (only effective if --loss_token)."
-            )
-        },
+        metadata={"help": "Whether to use rwmd metric learning objective."},
     )
     mlp_only_train: bool = field(
         default=False, metadata={"help": "Use MLP only during training"}
@@ -91,6 +83,7 @@ class DataTrainingArguments:
             )
         },
     )
+    method: str = field(default="simcse", metadata={"help": "Training method"})
     dup_rate: float = field(
         default=0.08, metadata={"help": "Duplication rate for ESimCSE"}
     )
@@ -173,13 +166,21 @@ def train(args):
             config = AutoConfig.from_pretrained(
                 model_args.model_name_or_path, **config_kwargs
             )
-            model = RobertaForContrastiveLearning.from_pretrained(
-                model_args.model_name_or_path,
-                config=config,
-                pooler_type=model_args.pooler_type,
-                loss_mlm=model_args.loss_mlm,
-                temp=model_args.temp,
-            )
+            if model_args.loss_rwmd:
+                model = RobertaForTokenContrastiveLearning.from_pretrained(
+                    model_args.model_name_or_path,
+                    config=config,
+                    loss_mlm=model_args.loss_mlm,
+                    temp=model_args.temp,
+                )
+            else:
+                model = RobertaForContrastiveLearning.from_pretrained(
+                    model_args.model_name_or_path,
+                    config=config,
+                    pooler_type=model_args.pooler_type,
+                    loss_mlm=model_args.loss_mlm,
+                    temp=model_args.temp,
+                )
         else:
             raise NotImplementedError()
     else:
@@ -189,9 +190,17 @@ def train(args):
     model.resize_token_embeddings(len(tokenizer))
     model.train()
 
-    train_dataset = ESimCSEDataset(
-        data_args.train_file, tokenizer, dup_rate=data_args.dup_rate
-    )
+    if data_args.method == "simcse":
+        train_dataset = SimCSEDataset(data_args.train_file, tokenizer)
+    elif data_args.method == "esimcse":
+        train_dataset = ESimCSEDataset(
+            data_args.train_file, tokenizer, dup_rate=data_args.dup_rate
+        )
+    elif data_args.method == "edasimcse":
+        train_dataset = EDASimCSEDataset(data_args.train_file, tokenizer)
+    else:
+        raise ValueError
+
     trainer = CLTrainer(
         model=model,
         data_collator=partial(collate_fn, tokenizer=tokenizer),
