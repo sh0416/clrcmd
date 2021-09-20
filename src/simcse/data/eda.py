@@ -7,8 +7,8 @@ from typing import List
 
 import nltk
 
-nltk.download("punkt")
-nltk.download("wordnet")
+# nltk.download("punkt")
+# nltk.download("wordnet")
 from nltk.corpus import wordnet
 from nltk.tokenize.treebank import TreebankWordDetokenizer
 

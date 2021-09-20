@@ -213,14 +213,31 @@ class RobertaForTokenContrastiveLearning(RobertaModel):
         if dist.is_initialized():
             outputs1 = dist_all_gather(outputs1)
             outputs2 = dist_all_gather(outputs2)
-        sim = self._compute_pairwise_similarity(
-            outputs1[:, None, :, :],
-            outputs2[None, :, :, :],
-            attention_mask1[:, None, :],
-            attention_mask2[None, :, :],
-        )
-        # (batch, batch, seq_len, seq_len)
-        sim = self._aggregate_pairwise_similarity(sim) / self.temp
+            attention_mask1 = dist_all_gather(attention_mask1)
+            attention_mask2 = dist_all_gather(attention_mask2)
+        # Compute indice blockwise
+        with torch.no_grad():
+            batch1, batch2 = outputs1.shape[0], outputs2.shape[0]
+            seq_len1, seq_len2 = outputs1.shape[1], outputs2.shape[1]
+            indice1 = torch.empty(
+                (batch1, batch2, seq_len1), dtype=torch.long, device=outputs1.device
+            )
+            indice2 = torch.empty(
+                (batch1, batch2, seq_len2), dtype=torch.long, device=outputs2.device
+            )
+            for i in range(0, outputs1.shape[0], 8):
+                for j in range(0, outputs2.shape[0], 8):
+                    sim = self._compute_pairwise_similarity(
+                        outputs1[i : i + 8, None, :, :],
+                        outputs2[None, j : j + 8, :, :],
+                        attention_mask1[i : i + 8, None, :],
+                        attention_mask2[None, j : j + 8, :],
+                    )
+                    indice1[i : i + 8, j : j + 8, :] = self._compute_indice(sim, dim=-1)
+                    indice2[i : i + 8, j : j + 8, :] = self._compute_indice(sim, dim=-2)
+        # (batch, batch, seq_len), (batch, batch, seq_len)
+        # Compute RWMD
+        sim = self._compute_rwmd(outputs1, outputs2, indice1, indice2) / self.temp
         # (batch, batch)
         label = torch.arange(sim.shape[1], dtype=torch.long, device=sim.device)
         loss = F.cross_entropy(sim, label)
@@ -264,6 +281,11 @@ class RobertaForTokenContrastiveLearning(RobertaModel):
         attention_mask1: Tensor,
         attention_mask2: Tensor,
     ) -> Tensor:
+        assert all(
+            x == y or x == 1 or y == 1
+            for x, y in zip(outputs1.shape[:-2], outputs2.shape[:-2])
+        ), f"Preceding dim doesn't match {outputs1.shape = }, {outputs2.shape = }"
+        assert outputs1.shape[-1] == outputs2.shape[-1], "Hidden dim doesn't match"
         sim = F.cosine_similarity(
             outputs1[..., :, None, :], outputs2[..., None, :, :], dim=-1
         )
@@ -271,6 +293,40 @@ class RobertaForTokenContrastiveLearning(RobertaModel):
         sim = torch.where(attention_mask1[..., :, None].bool(), sim, inf)
         sim = torch.where(attention_mask2[..., None, :].bool(), sim, inf)
         return sim
+
+    def _compute_indice(self, sim: Tensor, dim: int) -> Tensor:
+        return torch.max(sim, dim=dim)[1]
+
+    def _compute_rwmd(
+        self, outputs1: Tensor, outputs2: Tensor, indice1: Tensor, indice2: Tensor
+    ) -> Tensor:
+        """Compute relaxed word mover distance
+
+        :param outputs1: (batch1, seq_len1, hidden_dim)
+        :param outputs2: (batch2, seq_len2, hidden_dim)
+        :param indice1: (batch1, batch2, seq_len1) 0 <= val < seq_len2
+        :param indice2: (batch1, batch2, seq_len2) 0 <= val < seq_len1
+        :return: (batch1, batch2)
+        """
+        _outputs2 = outputs2[None, :, :, :].expand((outputs1.shape[0], -1, -1, -1))
+        # (batch1, batch2, seq_len2, hidden_dim)
+        _indice1 = indice1[:, :, :, None].expand((-1, -1, -1, outputs2.shape[2]))
+        # (batch1, batch2, seq_len1, hidden_dim)
+        _outputs2 = torch.gather(_outputs2, dim=2, index=_indice1)
+        # (batch1, batch2, seq_len1, hidden_dim)
+        sim1 = F.cosine_similarity(outputs1[:, None, :, :], _outputs2, dim=-1)
+        # (batch1, batch2, seq_len1)
+        _outputs1 = outputs1[:, None, :, :].expand((-1, outputs2.shape[0], -1, -1))
+        # (batch1, batch2, seq_len1, hidden_dim)
+        _indice2 = indice2[:, :, :, None].expand((-1, -1, -1, outputs1.shape[2]))
+        # (batch1, batch2, seq_len2, hidden_dim)
+        _outputs1 = torch.gather(_outputs1, dim=2, index=_indice2)
+        # (batch1, batch2, seq_len2, hidden_dim)
+        sim2 = F.cosine_similarity(_outputs1, outputs2[None, :, :, :], dim=-1)
+        # (batch1, batch2, seq_len2)
+        sim1 = masked_mean(sim1, ~torch.isinf(sim1), dim=-1)
+        sim2 = masked_mean(sim2, ~torch.isinf(sim2), dim=-1)
+        return (sim1 + sim2) / 2
 
     def _aggregate_pairwise_similarity(self, sim: Tensor) -> Tensor:
         sim_left = torch.max(sim, dim=-1)[0]
