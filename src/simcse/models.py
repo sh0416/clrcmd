@@ -209,6 +209,7 @@ class RobertaForTokenContrastiveLearning(RobertaModel):
         outputs1, outputs2 = self._compute_representation(
             input_ids1, input_ids2, attention_mask1, attention_mask2
         )
+        outputs1, outputs2 = self.cl_head(outputs1), self.cl_head(outputs2)
         # (batch, seq_len, hidden_dim)
         if dist.is_initialized():
             outputs1 = dist_all_gather(outputs1)
@@ -237,7 +238,7 @@ class RobertaForTokenContrastiveLearning(RobertaModel):
                     indice2[i : i + 8, j : j + 8, :] = self._compute_indice(sim, dim=-2)
         # (batch, batch, seq_len), (batch, batch, seq_len)
         # Compute RWMD
-        sim = self._compute_rwmd(outputs1, outputs2, indice1, indice2) / self.temp
+        sim = self._compute_rwmd(outputs1, outputs2, indice1, indice2)
         # (batch, batch)
         label = torch.arange(sim.shape[1], dtype=torch.long, device=sim.device)
         loss = F.cross_entropy(sim, label)
@@ -249,7 +250,7 @@ class RobertaForTokenContrastiveLearning(RobertaModel):
         input_ids2: Tensor,
         attention_mask1: Tensor,
         attention_mask2: Tensor,
-    ) -> Tuple[Tensor]:
+    ) -> Tensor:
         outputs1, outputs2 = self._compute_representation(
             input_ids1, input_ids2, attention_mask1, attention_mask2
         )
@@ -271,7 +272,7 @@ class RobertaForTokenContrastiveLearning(RobertaModel):
         input_ids = torch.cat((input_ids1, input_ids2))
         attention_mask = torch.cat((attention_mask1, attention_mask2))
         outputs = super().forward(input_ids, attention_mask)
-        outputs1, outputs2 = torch.chunk(self.cl_head(outputs.last_hidden_state), 2)
+        outputs1, outputs2 = torch.chunk(outputs.last_hidden_state, 2)
         return outputs1, outputs2
 
     def _compute_pairwise_similarity(
@@ -315,6 +316,7 @@ class RobertaForTokenContrastiveLearning(RobertaModel):
         _outputs2 = torch.gather(_outputs2, dim=2, index=_indice1)
         # (batch1, batch2, seq_len1, hidden_dim)
         sim1 = F.cosine_similarity(outputs1[:, None, :, :], _outputs2, dim=-1)
+        sim1 = sim1 / self.temp
         # (batch1, batch2, seq_len1)
         _outputs1 = outputs1[:, None, :, :].expand((-1, outputs2.shape[0], -1, -1))
         # (batch1, batch2, seq_len1, hidden_dim)
@@ -323,6 +325,7 @@ class RobertaForTokenContrastiveLearning(RobertaModel):
         _outputs1 = torch.gather(_outputs1, dim=2, index=_indice2)
         # (batch1, batch2, seq_len2, hidden_dim)
         sim2 = F.cosine_similarity(_outputs1, outputs2[None, :, :, :], dim=-1)
+        sim2 = sim2 / self.temp
         # (batch1, batch2, seq_len2)
         sim1 = masked_mean(sim1, ~torch.isinf(sim1), dim=-1)
         sim2 = masked_mean(sim2, ~torch.isinf(sim2), dim=-1)

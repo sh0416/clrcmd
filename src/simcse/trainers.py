@@ -57,27 +57,27 @@ class CLTrainer(Trainer):
         if all:
             metrics = {}
             # STS12
-            dataset = load_sts12("data/STS/STS12-en-test")
+            dataset = load_sts12("/nas/home/sh0416/data/STS/STS12-en-test")
             metrics["STS12"] = evaluate_sts(dataset, {}, prepare, batcher)
             # STS13
-            dataset = load_sts13("data/STS/STS13-en-test")
+            dataset = load_sts13("/nas/home/sh0416/data/STS/STS13-en-test")
             metrics["STS13"] = evaluate_sts(dataset, {}, prepare, batcher)
             # STS14
-            dataset = load_sts14("data/STS/STS14-en-test")
+            dataset = load_sts14("/nas/home/sh0416/data/STS/STS14-en-test")
             metrics["STS14"] = evaluate_sts(dataset, {}, prepare, batcher)
             # STS15
-            dataset = load_sts15("data/STS/STS15-en-test")
+            dataset = load_sts15("/nas/home/sh0416/data/STS/STS15-en-test")
             metrics["STS15"] = evaluate_sts(dataset, {}, prepare, batcher)
             # STS16
-            dataset = load_sts16("data/STS/STS16-en-test")
+            dataset = load_sts16("/nas/home/sh0416/data/STS/STS16-en-test")
             metrics["STS16"] = evaluate_sts(dataset, {}, prepare, batcher)
             # STSB
-            dataset = load_stsb_dev("data/STS/STSBenchmark")
+            dataset = load_stsb_dev("/nas/home/sh0416/data/STS/STSBenchmark")
             metrics["STSB-dev"] = evaluate_sts(dataset, {}, prepare, batcher)
-            dataset = load_stsb_test("data/STS/STSBenchmark")
+            dataset = load_stsb_test("/nas/home/sh0416/data/STS/STSBenchmark")
             metrics["STSB-test"] = evaluate_sts(dataset, {}, prepare, batcher)
         else:
-            dataset = load_stsb_dev("data/STS/STSBenchmark")
+            dataset = load_stsb_dev("/nas/home/sh0416/data/STS/STSBenchmark")
             result = evaluate_sts(dataset, {}, prepare, batcher)
             stsb_spearman = result["all"]["spearman"]["all"]
             metrics = {"eval_stsb_spearman": stsb_spearman}

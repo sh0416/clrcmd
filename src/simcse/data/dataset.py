@@ -4,6 +4,7 @@ import logging
 import random
 from functools import partial
 from typing import Dict, List, Tuple
+import typing
 
 from torch import Tensor
 from torch.utils.data import Dataset
@@ -14,11 +15,24 @@ from simcse.data.eda import eda
 logger = logging.getLogger(__name__)
 
 
+def _load_txt(filepath: str) -> List[str]:
+    with open(filepath) as f:
+        return [x.strip() for x in f]
+
+
+def _load_csv(filepath: str) -> List[Tuple[str, ...]]:
+    with open(filepath) as f:
+        reader = csv.reader(f)
+        return list(reader)
+
+
+Row = typing.TypeVar("Row", str, Tuple[str, str])
+
+
 class ContrastiveLearningDataset(Dataset):
     def __init__(self, filepath: str, tokenizer: RobertaTokenizer):
         self.tokenizer = tokenizer
-        with open(filepath) as f:
-            self.data = [x.strip() for x in f]
+        self.data = self._load_data(filepath)
 
     def __getitem__(self, index: int) -> Tuple[Dict[str, Tensor], Dict[str, Tensor]]:
         x, x_pos = self._create_tokenized_pair(self.data[index])
@@ -34,13 +48,20 @@ class ContrastiveLearningDataset(Dataset):
         return len(self.data)
 
     @abc.abstractmethod
-    def _create_tokenized_pair(self, sentence: str) -> Tuple[List[str], List[str]]:
+    def _load_data(self, filepath: str) -> List[Row]:
+        pass
+
+    @abc.abstractmethod
+    def _create_tokenized_pair(self, row: Row) -> Tuple[List[str], List[str]]:
         pass
 
 
 class SimCSEDataset(ContrastiveLearningDataset):
-    def _create_tokenized_pair(self, sentence: str) -> Tuple[List[str], List[str]]:
-        tokens = self.tokenizer.tokenize(sentence)
+    def _load_data(self, filepath: str) -> List[Row]:
+        return _load_txt(filepath)
+
+    def _create_tokenized_pair(self, row: Row) -> Tuple[List[str], List[str]]:
+        tokens = self.tokenizer.tokenize(row)
         return tokens, tokens
 
 
@@ -49,8 +70,11 @@ class ESimCSEDataset(ContrastiveLearningDataset):
         super().__init__(filepath=filepath, tokenizer=tokenizer)
         self.dup_rate = dup_rate
 
-    def _create_tokenized_pair(self, sentence: str) -> Tuple[List[str], List[str]]:
-        tokens = self.tokenizer.tokenize(sentence)
+    def _load_data(self, filepath: str) -> List[Row]:
+        return _load_txt(filepath)
+
+    def _create_tokenized_pair(self, row: Row) -> Tuple[List[str], List[str]]:
+        tokens = self.tokenizer.tokenize(row)
         # Compute dup_len
         dup_len = random.randint(0, max(1, int(self.dup_rate * len(tokens))))
         # Compute positions
@@ -65,37 +89,27 @@ class ESimCSEDataset(ContrastiveLearningDataset):
 
 
 class EDASimCSEDataset(ContrastiveLearningDataset):
-    def _create_tokenized_pair(self, sentence: str) -> Tuple[List[str], List[str]]:
-        sentence_pos = eda(sentence, num_aug=1)[0]
-        assert len(sentence_pos) > 0, sentence
-        tokens = self.tokenizer.tokenize(sentence)
+    def _load_data(self, filepath: str) -> List[Row]:
+        return _load_txt(filepath)
+
+    def _create_tokenized_pair(self, row: Row) -> Tuple[List[str], List[str]]:
+        sentence_pos = eda(row, num_aug=1)[0]
+        assert len(sentence_pos) > 0, row
+        tokens = self.tokenizer.tokenize(row)
         tokens_pos = self.tokenizer.tokenize(sentence_pos)
         return tokens, tokens_pos
 
 
-class TokenizedContrastiveLearningDataset(Dataset):
-    """Deprecated"""
+class PairedContrastiveLearningDataset(ContrastiveLearningDataset):
+    def _load_data(self, filepath: str) -> List[Row]:
+        return _load_csv(filepath)
 
-    def __init__(self, filepath: str, tokenizer: RobertaTokenizer):
-        self.tokenizer = tokenizer
-        with open(filepath) as f:
-            reader = csv.DictReader(f)
-            self.data = list(reader)
-
-    def __getitem__(self, index):
-        def f(x):
-            return self.tokenizer.encode_plus(
-                self.tokenizer.convert_tokens_to_ids(x.split()),
-                is_split_into_words=True,
-                truncation=True,
-                padding="max_length",
-                max_length=32,
-            )
-
-        return f(self.data[index]["input_strs"]), f(self.data[index]["input_strs2"])
-
-    def __len__(self):
-        return len(self.data)
+    def _create_tokenized_pair(self, row: Row) -> Tuple[List[str], List[str]]:
+        tokens = self.tokenizer.tokenize(row[0])
+        tokens_pos = self.tokenizer.tokenize(row[1])
+        assert len(tokens) > 0, f"{row = }"
+        assert len(tokens_pos) > 0, f"{row = }"
+        return tokens, tokens_pos
 
 
 def collate_fn(batch, tokenizer: RobertaTokenizer):

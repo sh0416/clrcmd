@@ -6,6 +6,7 @@ from datetime import datetime
 from functools import partial
 from typing import Optional
 
+from torch.utils.data import ConcatDataset
 import transformers
 from transformers import (
     AutoConfig,
@@ -19,6 +20,7 @@ from transformers.trainer_utils import is_main_process
 from simcse.data.dataset import (
     EDASimCSEDataset,
     ESimCSEDataset,
+    PairedContrastiveLearningDataset,
     SimCSEDataset,
     collate_fn,
 )
@@ -84,6 +86,12 @@ class DataTrainingArguments:
         },
     )
     method: str = field(default="simcse", metadata={"help": "Training method"})
+    add_typo_corpus: bool = field(
+        default=False, metadata={"help": "Add github typo corpus"}
+    )
+    typo_corpus_filepath: str = field(
+        default=None, metadata={"help": "Typo corpus path"}
+    )
     dup_rate: float = field(
         default=0.08, metadata={"help": "Duplication rate for ESimCSE"}
     )
@@ -201,6 +209,11 @@ def train(args):
     else:
         raise ValueError
 
+    if data_args.add_typo_corpus:
+        typo_dataset = PairedContrastiveLearningDataset(
+            data_args.typo_corpus_filepath, tokenizer
+        )
+        train_dataset = ConcatDataset((train_dataset, typo_dataset))
     trainer = CLTrainer(
         model=model,
         data_collator=partial(collate_fn, tokenizer=tokenizer),
