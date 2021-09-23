@@ -284,14 +284,26 @@ class RobertaForTokenContrastiveLearning(RobertaForContrastiveLearning):
         )
         outputs1 = self.cl_head(outputs1.last_hidden_state)
         outputs2 = self.cl_head(outputs2.last_hidden_state)
+        if outputs_neg is not None:
+            outputs_neg = self.cl_head(outputs_neg.last_hidden_state)
         # (batch, seq_len, hidden_dim)
         if dist.is_initialized():
             outputs1 = dist_all_gather(outputs1)
             outputs2 = dist_all_gather(outputs2)
             attention_mask1 = dist_all_gather(attention_mask1)
             attention_mask2 = dist_all_gather(attention_mask2)
+            if outputs_neg is not None:
+                outputs_neg = dist_all_gather(outputs_neg)
+                attention_mask_neg = dist_all_gather(attention_mask_neg)
         # Compute RWMD
-        sim = self._compute_rwmd(outputs1, outputs2, attention_mask1, attention_mask2)
+        sim = self._compute_rwmd(
+            outputs1,
+            outputs2,
+            attention_mask1,
+            attention_mask2,
+            outputs_neg,
+            attention_mask_neg,
+        )
         # (batch, batch)
         label = torch.arange(sim.shape[0], dtype=torch.long, device=sim.device)
         loss = F.cross_entropy(sim, label)
@@ -378,9 +390,40 @@ class RobertaForTokenContrastiveLearning(RobertaForContrastiveLearning):
                     )
                     indice1[i : i + 8, j : j + 8, :] = self._compute_indice(sim, dim=-1)
                     indice2[i : i + 8, j : j + 8, :] = self._compute_indice(sim, dim=-2)
-        # (batch1, batch2, seq_len1, hidden_dim)
+            indice1, indice2 = indice1.unsqueeze(-1), indice2.unsqueeze(-1)
+            # (batch1, batch2, seq_len1), (batch1, batch2, seq_len2)
+            if outputs_neg is not None:
+                sim_neg = self._compute_pairwise_similarity(
+                    outputs1, outputs_neg, attention_mask1, attention_mask_neg
+                )
+                indice_neg1 = self._compute_indice(sim_neg, dim=-1)
+                indice_neg2 = self._compute_indice(sim_neg, dim=-2)
+                indice_neg1 = indice_neg1.unsqueeze(-1)
+                indice_neg2 = indice_neg2.unsqueeze(-1)
+            # (batch1, seq_len1)
+        if outputs_neg is not None:
+            # NOTE: Pair negative
+            sim1 = F.cosine_similarity(
+                outputs1,
+                torch.gather(
+                    outputs_neg, dim=1, index=indice_neg1.expand(-1, -1, hidden_dim)
+                ),
+                dim=-1,
+            )
+            sim2 = F.cosine_similarity(
+                torch.gather(
+                    outputs1, dim=1, index=indice_neg2.expand(-1, -1, hidden_dim)
+                ),
+                outputs_neg,
+                dim=-1,
+            )
+            sim1 = sim1 / self.temp
+            sim2 = sim2 / self.temp
+            sim1 = masked_mean(sim1, ~torch.isinf(sim1), dim=-1)
+            sim2 = masked_mean(sim2, ~torch.isinf(sim2), dim=-1)
+            sim_neg = (sim1 + sim2) / 2
+        # NOTE: Pairwise negative
         outputs1, outputs2 = outputs1.unsqueeze(1), outputs2.unsqueeze(0)
-        indice1, indice2 = indice1.unsqueeze(-1), indice2.unsqueeze(-1)
         sim1 = F.cosine_similarity(
             outputs1,
             torch.gather(
@@ -406,7 +449,10 @@ class RobertaForTokenContrastiveLearning(RobertaForContrastiveLearning):
         # (batch1, batch2, seq_len2)
         sim1 = masked_mean(sim1, ~torch.isinf(sim1), dim=-1)
         sim2 = masked_mean(sim2, ~torch.isinf(sim2), dim=-1)
-        return (sim1 + sim2) / 2
+        sim = (sim1 + sim2) / 2
+        if outputs_neg is not None:
+            sim = torch.cat((sim, sim_neg.unsqueeze(-1)), dim=1)
+        return sim
 
     def _aggregate_pairwise_similarity(self, sim: Tensor) -> Tensor:
         sim_left = torch.max(sim, dim=-1)[0]
