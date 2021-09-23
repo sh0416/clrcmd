@@ -359,9 +359,9 @@ class RobertaForTokenContrastiveLearning(RobertaForContrastiveLearning):
         :param attention_mask_neg: (batch1, seq_len1), torch.bool
         :return: (batch1, batch2(+1))
         """
+        batch1, seq_len1, hidden_dim = outputs1.shape
+        batch2, seq_len2, _ = outputs2.shape
         with torch.no_grad():
-            batch1, batch2 = outputs1.shape[0], outputs2.shape[0]
-            seq_len1, seq_len2 = outputs1.shape[1], outputs2.shape[1]
             indice1 = torch.empty(
                 (batch1, batch2, seq_len1), dtype=torch.long, device=outputs1.device
             )
@@ -378,22 +378,30 @@ class RobertaForTokenContrastiveLearning(RobertaForContrastiveLearning):
                     )
                     indice1[i : i + 8, j : j + 8, :] = self._compute_indice(sim, dim=-1)
                     indice2[i : i + 8, j : j + 8, :] = self._compute_indice(sim, dim=-2)
-        _outputs2 = outputs2[None, :, :, :].expand((outputs1.shape[0], -1, -1, -1))
-        # (batch1, batch2, seq_len2, hidden_dim)
-        _indice1 = indice1[:, :, :, None].expand((-1, -1, -1, outputs2.shape[2]))
         # (batch1, batch2, seq_len1, hidden_dim)
-        _outputs2 = torch.gather(_outputs2, dim=2, index=_indice1)
-        # (batch1, batch2, seq_len1, hidden_dim)
-        sim1 = F.cosine_similarity(outputs1[:, None, :, :], _outputs2, dim=-1)
+        outputs1, outputs2 = outputs1.unsqueeze(1), outputs2.unsqueeze(0)
+        indice1, indice2 = indice1.unsqueeze(-1), indice2.unsqueeze(-1)
+        sim1 = F.cosine_similarity(
+            outputs1,
+            torch.gather(
+                outputs2.expand((batch1, -1, -1, -1)),
+                dim=2,
+                index=indice1.expand((-1, -1, -1, hidden_dim)),
+            ),
+            dim=-1,
+        )
         sim1 = sim1 / self.temp
         # (batch1, batch2, seq_len1)
-        _outputs1 = outputs1[:, None, :, :].expand((-1, outputs2.shape[0], -1, -1))
-        # (batch1, batch2, seq_len1, hidden_dim)
-        _indice2 = indice2[:, :, :, None].expand((-1, -1, -1, outputs1.shape[2]))
         # (batch1, batch2, seq_len2, hidden_dim)
-        _outputs1 = torch.gather(_outputs1, dim=2, index=_indice2)
-        # (batch1, batch2, seq_len2, hidden_dim)
-        sim2 = F.cosine_similarity(_outputs1, outputs2[None, :, :, :], dim=-1)
+        sim2 = F.cosine_similarity(
+            torch.gather(
+                outputs1.expand((-1, batch2, -1, -1)),
+                dim=2,
+                index=indice2.expand((-1, -1, -1, hidden_dim)),
+            ),
+            outputs2,
+            dim=-1,
+        )
         sim2 = sim2 / self.temp
         # (batch1, batch2, seq_len2)
         sim1 = masked_mean(sim1, ~torch.isinf(sim1), dim=-1)
