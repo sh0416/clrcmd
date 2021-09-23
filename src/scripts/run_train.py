@@ -21,7 +21,8 @@ from simcse.data.dataset import (
     EDASimCSEDataset,
     ESimCSEDataset,
     PairedContrastiveLearningDataset,
-    SimCSEDataset,
+    SimCSEUnsupervisedDataset,
+    SimCSESupervisedDataset,
     collate_fn,
 )
 from simcse.models import (
@@ -85,7 +86,7 @@ class DataTrainingArguments:
             )
         },
     )
-    method: str = field(default="simcse", metadata={"help": "Training method"})
+    method: str = field(default="simcse-unsup", metadata={"help": "Training method"})
     add_typo_corpus: bool = field(
         default=False, metadata={"help": "Add github typo corpus"}
     )
@@ -109,7 +110,9 @@ class DataTrainingArguments:
 @dataclass
 class OurTrainingArguments(TrainingArguments):
     output_dir: str = field(
-        default=os.path.join("result", datetime.now().strftime("%Y%m%d_%H%M%S")),
+        default=os.path.join(
+            "/nas/home/sh0416/checkpoints", datetime.now().strftime("%Y%m%d_%H%M%S")
+        ),
         metadata={
             "help": (
                 "The output directory where the model predictions and"
@@ -198,8 +201,10 @@ def train(args):
     model.resize_token_embeddings(len(tokenizer))
     model.train()
 
-    if data_args.method == "simcse":
-        train_dataset = SimCSEDataset(data_args.train_file, tokenizer)
+    if data_args.method == "simcse-unsup":
+        train_dataset = SimCSEUnsupervisedDataset(data_args.train_file, tokenizer)
+    elif data_args.method == "simcse-sup":
+        train_dataset = SimCSESupervisedDataset(data_args.train_file, tokenizer)
     elif data_args.method == "esimcse":
         train_dataset = ESimCSEDataset(
             data_args.train_file, tokenizer, dup_rate=data_args.dup_rate

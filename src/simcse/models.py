@@ -1,5 +1,5 @@
 import logging
-from typing import Tuple
+from typing import Tuple, Optional
 
 import torch
 import torch.distributed as dist
@@ -128,17 +128,32 @@ class RobertaForContrastiveLearning(RobertaModel):
         input_ids2: Tensor,
         attention_mask1: Tensor,
         attention_mask2: Tensor,
+        input_ids_neg: Optional[Tensor] = None,
+        attention_mask_neg: Optional[Tensor] = None,
     ) -> Tuple[Tensor]:
-        outputs1, outputs2 = self._compute_representation(
-            input_ids1, input_ids2, attention_mask1, attention_mask2
+        outputs1, outputs2, outputs_neg = self._compute_representation(
+            input_ids1,
+            input_ids2,
+            attention_mask1,
+            attention_mask2,
+            input_ids_neg,
+            attention_mask_neg,
         )
         # Gather all embeddings if using distributed training
         if dist.is_initialized() and self.training:
             outputs1, outputs2 = dist_all_gather(outputs1), dist_all_gather(outputs2)
+            if outputs_neg is not None:
+                outputs_neg = dist_all_gather(outputs_neg)
         sim = F.cosine_similarity(outputs1[:, None, :], outputs2[None, :, :], dim=2)
+        if outputs_neg is not None:
+            # (batch_size, hidden_dim) x (batch_size, hidden_dim)
+            sim_neg = F.cosine_similarity(outputs1, outputs_neg, dim=1)
+            # (batch_size)
+            sim = torch.cat((sim, sim_neg[:, None]), dim=1)
+            # (batch_size, hidden_dim + 1)
         sim = sim / self.temp
         # (batch_size, batch_size)
-        labels = torch.arange(sim.shape[1], dtype=torch.long, device=sim.device)
+        labels = torch.arange(sim.shape[0], dtype=torch.long, device=sim.device)
         loss = F.cross_entropy(sim, labels)
         return (loss,)
 
@@ -149,7 +164,7 @@ class RobertaForContrastiveLearning(RobertaModel):
         attention_mask1: Tensor,
         attention_mask2: Tensor,
     ) -> Tensor:
-        outputs1, outputs2 = self._compute_representation(
+        outputs1, outputs2, _ = self._compute_representation(
             input_ids1, input_ids2, attention_mask1, attention_mask2
         )
         score = F.cosine_similarity(outputs1, outputs2)
@@ -161,18 +176,44 @@ class RobertaForContrastiveLearning(RobertaModel):
         input_ids2: Tensor,
         attention_mask1: Tensor,
         attention_mask2: Tensor,
-    ) -> Tuple[Tensor, Tensor]:
-        input_ids = torch.cat((input_ids1, input_ids2))
-        attention_mask = torch.cat((attention_mask1, attention_mask2))
+        input_ids_neg: Optional[Tensor] = None,
+        attention_mask_neg: Optional[Tensor] = None,
+    ) -> Tuple[Tensor, Tensor, Optional[Tensor]]:
+        if input_ids_neg is not None:
+            input_ids = (input_ids1, input_ids2, input_ids_neg)
+        else:
+            input_ids = (input_ids1, input_ids2)
+        input_ids = torch.cat(input_ids)
+        if attention_mask_neg is not None:
+            attention_mask = (attention_mask1, attention_mask2, attention_mask_neg)
+        else:
+            attention_mask = (attention_mask1, attention_mask2)
+        attention_mask = torch.cat(attention_mask)
         outputs = super().forward(input_ids, attention_mask)
-        pooler_output1, pooler_output2 = torch.chunk(
-            self.cl_head(outputs.last_hidden_state[:, 0]), 2
-        )
-        last_hidden_state1, last_hidden_state2 = torch.chunk(
-            outputs.last_hidden_state, 2
-        )
-        hidden_states1 = tuple(torch.chunk(x, 2)[0] for x in outputs.hidden_states)
-        hidden_states2 = tuple(torch.chunk(x, 2)[1] for x in outputs.hidden_states)
+        pooler_outputs = self.cl_head(outputs.last_hidden_state[:, 0])
+        if input_ids_neg is not None:
+            pooler_output1, pooler_output2, pooler_output_neg = torch.chunk(
+                pooler_outputs, 3
+            )
+            last_hidden_state1, last_hidden_state2, last_hidden_state_neg = torch.chunk(
+                outputs.last_hidden_state, 3
+            )
+            hidden_states1, hidden_states2, hidden_states_neg = [], [], []
+            for x in outputs.hidden_states:
+                hidden_state1, hidden_state2, hidden_state_neg = torch.chunk(x, 3)
+                hidden_states1.append(hidden_state1)
+                hidden_states2.append(hidden_state2)
+                hidden_states_neg.append(hidden_state_neg)
+        else:
+            pooler_output1, pooler_output2 = torch.chunk(pooler_outputs, 2)
+            last_hidden_state1, last_hidden_state2 = torch.chunk(
+                outputs.last_hidden_state, 2
+            )
+            hidden_states1, hidden_states2 = [], []
+            for x in outputs.hidden_states:
+                hidden_state1, hidden_state2 = torch.chunk(x, 2)
+                hidden_states1.append(hidden_state1)
+                hidden_states2.append(hidden_state2)
         outputs1 = BaseModelOutputWithPoolingAndCrossAttentions(
             last_hidden_state=last_hidden_state1,
             hidden_states=hidden_states1,
@@ -183,9 +224,19 @@ class RobertaForContrastiveLearning(RobertaModel):
             hidden_states=hidden_states2,
             pooler_output=pooler_output2,
         )
+        if input_ids_neg is not None:
+            outputs_neg = BaseModelOutputWithPoolingAndCrossAttentions(
+                last_hidden_state=last_hidden_state_neg,
+                hidden_states=hidden_states_neg,
+                pooler_output=pooler_output_neg,
+            )
         outputs1 = self._pooler(attention_mask1, outputs1)
         outputs2 = self._pooler(attention_mask2, outputs2)
-        return outputs1, outputs2
+        if input_ids_neg is not None:
+            outputs_neg = self._pooler(attention_mask_neg, outputs_neg)
+            return outputs1, outputs2, outputs_neg
+        else:
+            return outputs1, outputs2, None
 
 
 class RobertaForTokenContrastiveLearning(RobertaModel):
