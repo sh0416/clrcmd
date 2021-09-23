@@ -26,7 +26,7 @@ from simcse.data.dataset import (
     collate_fn,
 )
 from simcse.models import (
-    RobertaForContrastiveLearning,
+    RobertaForSimpleContrastiveLearning,
     RobertaForTokenContrastiveLearning,
 )
 from simcse.trainers import CLTrainer
@@ -185,7 +185,7 @@ def train(args):
                     temp=model_args.temp,
                 )
             else:
-                model = RobertaForContrastiveLearning.from_pretrained(
+                model = RobertaForSimpleContrastiveLearning.from_pretrained(
                     model_args.model_name_or_path,
                     config=config,
                     pooler_type=model_args.pooler_type,
