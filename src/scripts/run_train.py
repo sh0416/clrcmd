@@ -253,7 +253,8 @@ def train(args):
                 f"{results['STS14']['all']['spearman']['all']:.4f},"
                 f"{results['STS15']['all']['spearman']['all']:.4f},"
                 f"{results['STS16']['all']['spearman']['all']:.4f},"
-                f"{results['STSB-test']['all']['spearman']['all']:.4f}"
+                f"{results['STSB-test']['all']['spearman']['all']:.4f},"
+                f"{results['STSB-dev']['all']['spearman']['all']:.4f}"
             )
     else:
         results = None
@@ -262,23 +263,10 @@ def train(args):
 
 
 def main():
-    # See all possible arguments in src/transformers/training_args.py
-    # or by passing the --help flag to this script.
-    # We now keep distinct sets of args, for a cleaner separation of concerns.
-
     parser = HfArgumentParser(
         (ModelArguments, DataTrainingArguments, OurTrainingArguments)
     )
     args = parser.parse_args_into_dataclasses()
-
-    _, _, training_args = args
-    # Set the verbosity to info of the Transformers logger
-    # (on main process only):
-    if is_main_process(training_args.local_rank):
-        transformers.utils.logging.set_verbosity_info()
-        transformers.utils.logging.enable_default_handler()
-        transformers.utils.logging.enable_explicit_format()
-
     train(args)
 
 
