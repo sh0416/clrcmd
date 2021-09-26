@@ -305,6 +305,12 @@ class RobertaForTokenContrastiveLearning(RobertaForContrastiveLearning):
             attention_mask_neg,
         )
         # (batch, batch)
+        with torch.no_grad():
+            sim_wo_positive = torch.sum(sim, dim=1) - torch.diagonal(sim)
+            sim_wo_positive = sim_wo_positive / (sim.shape[1] - 1)
+            sim_wo_positive = sim_wo_positive.unsqueeze(1).expand(-1, 128)
+            sim_wo_positive = torch.logsumexp(sim_wo_positive, dim=1, keepdim=True)
+        sim = torch.cat((sim, sim_wo_positive), dim=1)
         label = torch.arange(sim.shape[0], dtype=torch.long, device=sim.device)
         loss = F.cross_entropy(sim, label)
         return (loss,)
