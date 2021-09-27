@@ -304,13 +304,27 @@ class RobertaForTokenContrastiveLearning(RobertaForContrastiveLearning):
             outputs_neg,
             attention_mask_neg,
         )
-        # (batch, batch)
-        with torch.no_grad():
-            sim_wo_positive = torch.sum(sim, dim=1) - torch.diagonal(sim)
-            sim_wo_positive = sim_wo_positive / (sim.shape[1] - 1)
-            sim_wo_positive = sim_wo_positive.unsqueeze(1).expand(-1, 128)
-            sim_wo_positive = torch.logsumexp(sim_wo_positive, dim=1, keepdim=True)
+        sim = sim / self.temp
+        # (batch, batch + neg)
+#       VERSION1.4 (NEGATIVE AMPLIFICATION STOP GRAD)
+#        sim_wo_positive = sim[:, [-1]].detach().expand(-1, 128)
+#       VERSION1.3 (NEGATIVE AMPLIFICATION)
+#       sim_wo_positive = sim[:, [-1]].expand(-1, 128)
+#       VERSION1.2 (UNIFORM SAMPLING)
+#        with torch.no_grad():
+#            prob = torch.ones_like(sim) - torch.eye(sim.shape[0], sim.shape[1], device=sim.device)
+#            indice = torch.multinomial(prob, num_samples=16384, replacement=True)
+#        sim_wo_positive = torch.gather(sim, dim=1, index=indice)
+
+#       VERSION1.1 (MEAN)
+#       logger.warn(f"{sim_wo_positive = }")
+#           sim_wo_positive = torch.sum(sim, dim=1) - torch.diagonal(sim)
+#           sim_wo_positive = sim_wo_positive / (sim.shape[1] - 1)
+#           sim_wo_positive = sim_wo_positive.unsqueeze(1).expand(-1, 128)
+#           sim_wo_positive = torch.logsumexp(sim_wo_positive, dim=1, keepdim=True)
         sim = torch.cat((sim, sim_wo_positive), dim=1)
+#        logger.warn(f"{sim.shape = }")
+#        logger.warn(f"{torch.mean(torch.diagonal(sim)).item() = } {torch.mean(sim).item() = }")
         label = torch.arange(sim.shape[0], dtype=torch.long, device=sim.device)
         loss = F.cross_entropy(sim, label)
         return (loss,)
@@ -423,8 +437,6 @@ class RobertaForTokenContrastiveLearning(RobertaForContrastiveLearning):
                 outputs_neg,
                 dim=-1,
             )
-            sim1 = sim1 / self.temp
-            sim2 = sim2 / self.temp
             sim1 = masked_mean(sim1, ~torch.isinf(sim1), dim=-1)
             sim2 = masked_mean(sim2, ~torch.isinf(sim2), dim=-1)
             sim_neg = (sim1 + sim2) / 2
@@ -439,7 +451,6 @@ class RobertaForTokenContrastiveLearning(RobertaForContrastiveLearning):
             ),
             dim=-1,
         )
-        sim1 = sim1 / self.temp
         # (batch1, batch2, seq_len1)
         # (batch1, batch2, seq_len2, hidden_dim)
         sim2 = F.cosine_similarity(
@@ -451,7 +462,6 @@ class RobertaForTokenContrastiveLearning(RobertaForContrastiveLearning):
             outputs2,
             dim=-1,
         )
-        sim2 = sim2 / self.temp
         # (batch1, batch2, seq_len2)
         sim1 = masked_mean(sim1, ~torch.isinf(sim1), dim=-1)
         sim2 = masked_mean(sim2, ~torch.isinf(sim2), dim=-1)
