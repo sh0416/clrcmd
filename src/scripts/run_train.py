@@ -6,6 +6,7 @@ from datetime import datetime
 from functools import partial
 from typing import Optional
 
+import torch
 from torch.utils.data import ConcatDataset
 import transformers
 from transformers import (
@@ -254,6 +255,7 @@ def train(args):
                 f"{results['STS15']['all']['spearman']['all']:.4f},"
                 f"{results['STS16']['all']['spearman']['all']:.4f},"
                 f"{results['STSB-test']['all']['spearman']['all']:.4f},"
+                f"{results['SICKR-test']['all']['spearman']['all']:.4f},"
                 f"{results['STSB-dev']['all']['spearman']['all']:.4f}"
             )
     else:
@@ -263,6 +265,7 @@ def train(args):
 
 
 def main():
+    torch.set_printoptions(precision=2, threshold=1e-7, sci_mode=False)
     parser = HfArgumentParser(
         (ModelArguments, DataTrainingArguments, OurTrainingArguments)
     )
