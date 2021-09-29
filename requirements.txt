@@ -10,3 +10,4 @@ sentence-transformers
 jupyter
 notebook
 nltk
+textualheatmap
