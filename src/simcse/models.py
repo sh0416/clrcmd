@@ -1,11 +1,12 @@
 import logging
-from typing import Callable, Tuple, Optional
+from typing import Callable, Tuple, Optional, Dict, TypedDict
 
 import torch
 import torch.distributed as dist
 import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
+from transformers import PretrainedConfig, PreTrainedModel, AutoConfig, AutoModel
 from transformers.modeling_outputs import BaseModelOutputWithPoolingAndCrossAttentions
 from transformers.models.roberta.modeling_roberta import RobertaLMHead, RobertaModel
 
@@ -28,49 +29,25 @@ class Pooler(nn.Module):
         self.pooler_type = pooler_type
         assert self.pooler_type in [
             "cls",
-            "cls_before_pooler",
             "avg",
             "avg_top2",
             "avg_first_last",
         ], f"unrecognized pooling type {self.pooler_type}"
 
-    def forward(
-        self,
-        attention_mask: Tensor,
-        outputs: BaseModelOutputWithPoolingAndCrossAttentions,
-    ) -> Tensor:
+    def forward(self, attention_mask: Tensor, hidden_states: Tuple[Tensor]) -> Tensor:
         if self.pooler_type == "cls":
-            if self.training:
-                return outputs.pooler_output
-            else:
-                return outputs.last_hidden_state[:, 0]
-        elif self.pooler_type == "cls_before_pooler":
-            return outputs.last_hidden_state[:, 0]
+            return outputs[-1][:, 0]
         elif self.pooler_type == "avg":
-            last_hidden = outputs.last_hidden_state
-            attention_mask = attention_mask[:, :, None]
-            hidden = last_hidden * attention_mask
-            pooled_sum = hidden.sum(dim=1)
-            masked_sum = attention_mask.sum(dim=1)
-            return pooled_sum / masked_sum
+            last_hidden = hidden_states[-1]
+            return masked_mean(last_hidden, attention_mask[:, :, None], dim=1)
         elif self.pooler_type == "avg_first_last":
             assert outputs.hidden_states is not None
-            hidden_states = outputs.hidden_states
-            attention_mask = attention_mask[:, :, None]
             hidden = (hidden_states[0] + hidden_states[-1]) / 2.0
-            hidden = hidden * attention_mask
-            pooled_sum = hidden.sum(dim=1)
-            masked_sum = attention_mask.sum(dim=1)
-            return pooled_sum / masked_sum
+            return masked_mean(hidden, attention_mask[:, :, None], dim=1)
         elif self.pooler_type == "avg_top2":
             assert outputs.hidden_states is not None
-            hidden_states = outputs.hidden_states
-            attention_mask = attention_mask[:, :, None]
             hidden = (hidden_states[-1] + hidden_states[-2]) / 2.0
-            hidden = hidden * attention_mask
-            pooled_sum = hidden.sum(dim=1)
-            masked_sum = attention_mask.sum(dim=1)
-            return pooled_sum / masked_sum
+            return masked_mean(hidden, attention_mask[:, :, None], dim=1)
         else:
             raise NotImplementedError()
 
@@ -110,111 +87,92 @@ def dist_all_gather(x: Tensor) -> Tensor:
     return torch.cat(x_list, dim=0)
 
 
-class RobertaForContrastiveLearning(RobertaModel):
-    def __init__(self, config):
-        super().__init__(config, add_pooling_layer=False)
+class ContrastiveLearning(nn.Module):
+    def __init__(
+        self, config: PretrainedConfig, backbone: PreTrainedModel, temp: float
+    ):
+        super().__init__()
+        self.backbone = backbone
         self.cl_head = nn.Sequential(
             nn.Linear(config.hidden_size, config.hidden_size), nn.Tanh()
         )
-        self.init_weights()
-
-    def _compute_representation(
-        self,
-        input_ids1: Tensor,
-        input_ids2: Tensor,
-        attention_mask1: Tensor,
-        attention_mask2: Tensor,
-        input_ids_neg: Optional[Tensor] = None,
-        attention_mask_neg: Optional[Tensor] = None,
-    ) -> Tuple[
-        BaseModelOutputWithPoolingAndCrossAttentions,
-        BaseModelOutputWithPoolingAndCrossAttentions,
-        Optional[BaseModelOutputWithPoolingAndCrossAttentions],
-    ]:
-        if input_ids_neg is not None:
-            input_ids = (input_ids1, input_ids2, input_ids_neg)
-        else:
-            input_ids = (input_ids1, input_ids2)
-        input_ids = torch.cat(input_ids)
-        if attention_mask_neg is not None:
-            attention_mask = (attention_mask1, attention_mask2, attention_mask_neg)
-        else:
-            attention_mask = (attention_mask1, attention_mask2)
-        attention_mask = torch.cat(attention_mask)
-        outputs = super().forward(input_ids, attention_mask)
-        pooler_outputs = self.cl_head(outputs.last_hidden_state[:, 0])
-        if input_ids_neg is not None:
-            pooler_output1, pooler_output2, pooler_output_neg = torch.chunk(
-                pooler_outputs, 3
-            )
-            last_hidden_state1, last_hidden_state2, last_hidden_state_neg = torch.chunk(
-                outputs.last_hidden_state, 3
-            )
-            hidden_states1, hidden_states2, hidden_states_neg = [], [], []
-            for x in outputs.hidden_states:
-                hidden_state1, hidden_state2, hidden_state_neg = torch.chunk(x, 3)
-                hidden_states1.append(hidden_state1)
-                hidden_states2.append(hidden_state2)
-                hidden_states_neg.append(hidden_state_neg)
-        else:
-            pooler_output1, pooler_output2 = torch.chunk(pooler_outputs, 2)
-            last_hidden_state1, last_hidden_state2 = torch.chunk(
-                outputs.last_hidden_state, 2
-            )
-            hidden_states1, hidden_states2 = [], []
-            for x in outputs.hidden_states:
-                hidden_state1, hidden_state2 = torch.chunk(x, 2)
-                hidden_states1.append(hidden_state1)
-                hidden_states2.append(hidden_state2)
-        outputs1 = BaseModelOutputWithPoolingAndCrossAttentions(
-            last_hidden_state=last_hidden_state1,
-            hidden_states=hidden_states1,
-            pooler_output=pooler_output1,
-        )
-        outputs2 = BaseModelOutputWithPoolingAndCrossAttentions(
-            last_hidden_state=last_hidden_state2,
-            hidden_states=hidden_states2,
-            pooler_output=pooler_output2,
-        )
-        if input_ids_neg is not None:
-            outputs_neg = BaseModelOutputWithPoolingAndCrossAttentions(
-                last_hidden_state=last_hidden_state_neg,
-                hidden_states=hidden_states_neg,
-                pooler_output=pooler_output_neg,
-            )
-        else:
-            outputs_neg = None
-        return outputs1, outputs2, outputs_neg
-
-
-class RobertaForSimpleContrastiveLearning(RobertaForContrastiveLearning):
-    def __init__(self, config, pooler_type: str, loss_mlm: bool, temp: float):
-        super().__init__(config)
         self.temp = temp
-        self.cl_head = nn.Sequential(
-            nn.Linear(config.hidden_size, config.hidden_size), nn.Tanh()
-        )
-        self._pooler = Pooler(pooler_type)
-        if loss_mlm:
-            self.lm_head = RobertaLMHead(config)
-        self.init_weights()
 
     def forward(
         self,
-        input_ids1: Tensor,
-        input_ids2: Tensor,
-        attention_mask1: Tensor,
-        attention_mask2: Tensor,
-        input_ids_neg: Optional[Tensor] = None,
-        attention_mask_neg: Optional[Tensor] = None,
+        inputs1: Dict[str, Tensor],
+        inputs2: Dict[str, Tensor],
+        inputs_neg: Optional[Dict[str, Tensor]] = None,
     ) -> Tuple[Tensor]:
+        sim = self._compute_batchwise_similarity(inputs1, inputs2, inputs_neg)
+        sim = sim / self.temp
+        # (batch_size, batch_size)
+        labels = torch.arange(sim.shape[0], dtype=torch.long, device=sim.device)
+        loss = F.cross_entropy(sim, labels)
+        return (loss,)
+
+    def _compute_representation(
+        self,
+        inputs1: Dict[str, Tensor],
+        inputs2: Dict[str, Tensor],
+        inputs_neg: Optional[Dict[str, Tensor]] = None,
+    ) -> Tuple[Tuple[Tensor], Tuple[Tensor], Optional[Tuple[Tensor]]]:
+        if inputs_neg is not None:
+            input_ids = (
+                inputs1["input_ids"],
+                inputs2["input_ids"],
+                inputs_neg["input_ids"],
+            )
+            attention_mask = (
+                inputs1["attention_mask"],
+                inputs2["attention_mask"],
+                inputs_neg["attention_mask"],
+            )
+        else:
+            input_ids = (inputs1["input_ids"], inputs2["input_ids"])
+            attention_mask = (inputs1["attention_mask"], inputs2["attention_mask"])
+        input_ids = torch.cat(input_ids, dim=0)
+        attention_mask = torch.cat(attention_mask, dim=0)
+        outputs = self.backbone(input_ids, attention_mask)
+        hidden_states1, hidden_states2 = [], []
+        if inputs_neg is not None:
+            hidden_states_neg = []
+        else:
+            hidden_states_neg = None
+        for x in outputs.hidden_states:
+            if inputs_neg is not None:
+                hidden_state1, hidden_state2, hidden_state_neg = torch.chunk(x, 3)
+            else:
+                hidden_state1, hidden_state2 = torch.chunk(x, 2)
+            hidden_states1.append(hidden_state1)
+            hidden_states2.append(hidden_state2)
+            if inputs_neg is not None:
+                hidden_states_neg.append(hidden_state_neg)
+        return hidden_states1, hidden_states2, hidden_states_neg
+
+
+class SimpleContrastiveLearning(ContrastiveLearning):
+    def __init__(
+        self,
+        config: PretrainedConfig,
+        backbone: PreTrainedModel,
+        temp: float,
+        loss_mlm: bool,
+        pooler_type: str,
+    ):
+        super().__init__(config, backbone, temp)
+        self._pooler = Pooler(pooler_type)
+        if loss_mlm:
+            self.lm_head = RobertaLMHead(config)
+
+    def _compute_batchwise_similarity(
+        self,
+        inputs1: Dict[str, Tensor],
+        inputs2: Dict[str, Tensor],
+        inputs_neg: Optional[Dict[str, Tensor]] = None,
+    ) -> Tensor:
         outputs1, outputs2, outputs_neg = self._compute_representation(
-            input_ids1,
-            input_ids2,
-            attention_mask1,
-            attention_mask2,
-            input_ids_neg,
-            attention_mask_neg,
+            inputs1, inputs2, inputs_neg
         )
         outputs1 = self._pooler(attention_mask1, outputs1)
         outputs2 = self._pooler(attention_mask2, outputs2)
@@ -232,61 +190,62 @@ class RobertaForSimpleContrastiveLearning(RobertaForContrastiveLearning):
             # (batch_size)
             sim = torch.cat((sim, sim_neg[:, None]), dim=1)
             # (batch_size, hidden_dim + 1)
-        sim = sim / self.temp
-        # (batch_size, batch_size)
-        labels = torch.arange(sim.shape[0], dtype=torch.long, device=sim.device)
-        loss = F.cross_entropy(sim, labels)
-        return (loss,)
+        return sim
 
     def compute_similarity(
-        self,
-        input_ids1: Tensor,
-        input_ids2: Tensor,
-        attention_mask1: Tensor,
-        attention_mask2: Tensor,
+        self, inputs1: Dict[str, Tensor], inputs2: Dict[str, Tensor]
     ) -> Tensor:
-        outputs1, outputs2, _ = self._compute_representation(
-            input_ids1, input_ids2, attention_mask1, attention_mask2
-        )
+        outputs1, outputs2, _ = self._compute_representation(inputs1, inputs2)
         outputs1 = self._pooler(attention_mask1, outputs1)
         outputs2 = self._pooler(attention_mask2, outputs2)
         score = F.cosine_similarity(outputs1, outputs2)
         return score
 
 
-class RobertaForTokenContrastiveLearning(RobertaForContrastiveLearning):
-    def __init__(self, config, loss_mlm: bool, temp: float):
-        super().__init__(config)
-        self.temp = temp
-        self.cl_head = nn.Sequential(
-            nn.Linear(config.hidden_size, config.hidden_size), nn.Tanh()
-        )
+class TokenContrastiveLearning(ContrastiveLearning):
+    def __init__(
+        self,
+        config: PretrainedConfig,
+        backbone: PreTrainedModel,
+        temp: float,
+        loss_mlm: bool,
+    ):
+        super().__init__(config, backbone, temp)
         if loss_mlm:
             self.lm_head = RobertaLMHead(config)
-        self.init_weights()
 
-    def forward(
-        self,
-        input_ids1: Tensor,
-        input_ids2: Tensor,
-        attention_mask1: Tensor,
-        attention_mask2: Tensor,
-        input_ids_neg: Optional[Tensor] = None,
-        attention_mask_neg: Optional[Tensor] = None,
-    ) -> Tuple[Tensor]:
-        outputs1, outputs2, outputs_neg = self._compute_representation(
-            input_ids1,
-            input_ids2,
-            attention_mask1,
-            attention_mask2,
-            input_ids_neg,
-            attention_mask_neg,
+    def compute_similarity(
+        self, inputs1: Dict[str, Tensor], inputs2: Dict[str, Tensor]
+    ) -> Tensor:
+        outputs1, outputs2, _ = self._compute_representation(inputs1, inputs2)
+        outputs1 = self.cl_head(outputs1[-1])
+        outputs2 = self.cl_head(outputs2[-1])
+        sim = self._compute_pairwise_similarity(
+            outputs1, outputs2, inputs1["attention_mask"], inputs2["attention_mask"]
         )
-        outputs1 = self.cl_head(outputs1.last_hidden_state)
-        outputs2 = self.cl_head(outputs2.last_hidden_state)
+        # (batch, seq_len, seq_len)
+        score = self._aggregate_pairwise_similarity(sim)
+        # (batch,)
+        return score
+
+    def _compute_batchwise_similarity(
+        self,
+        inputs1: Dict[str, Tensor],
+        inputs2: Dict[str, Tensor],
+        inputs_neg: Optional[Dict[str, Tensor]] = None,
+    ) -> Tensor:
+        outputs1, outputs2, outputs_neg = self._compute_representation(
+            inputs1, inputs2, inputs_neg
+        )
+        outputs1 = self.cl_head(outputs1[-1])
+        outputs2 = self.cl_head(outputs2[-1])
         if outputs_neg is not None:
-            outputs_neg = self.cl_head(outputs_neg.last_hidden_state)
+            outputs_neg = self.cl_head(outputs_neg[-1])
         # (batch, seq_len, hidden_dim)
+        attention_mask1 = inputs1["attention_mask"]
+        attention_mask2 = inputs2["attention_mask"]
+        if inputs_neg is not None:
+            attention_mask_neg = inputs_neg["attention_mask"]
         if dist.is_initialized():
             outputs1 = dist_all_gather(outputs1)
             outputs2 = dist_all_gather(outputs2)
@@ -304,50 +263,7 @@ class RobertaForTokenContrastiveLearning(RobertaForContrastiveLearning):
             outputs_neg,
             attention_mask_neg,
         )
-        sim = sim / self.temp
-        # (batch, batch + neg)
-#       VERSION1.4 (NEGATIVE AMPLIFICATION STOP GRAD)
-#        sim_wo_positive = sim[:, [-1]].detach().expand(-1, 128)
-#       VERSION1.3 (NEGATIVE AMPLIFICATION)
-#       sim_wo_positive = sim[:, [-1]].expand(-1, 128)
-#       VERSION1.2 (UNIFORM SAMPLING)
-#        with torch.no_grad():
-#            prob = torch.ones_like(sim) - torch.eye(sim.shape[0], sim.shape[1], device=sim.device)
-#            indice = torch.multinomial(prob, num_samples=16384, replacement=True)
-#        sim_wo_positive = torch.gather(sim, dim=1, index=indice)
-
-#       VERSION1.1 (MEAN)
-#       logger.warn(f"{sim_wo_positive = }")
-#           sim_wo_positive = torch.sum(sim, dim=1) - torch.diagonal(sim)
-#           sim_wo_positive = sim_wo_positive / (sim.shape[1] - 1)
-#           sim_wo_positive = sim_wo_positive.unsqueeze(1).expand(-1, 128)
-#           sim_wo_positive = torch.logsumexp(sim_wo_positive, dim=1, keepdim=True)
-        sim = torch.cat((sim, sim_wo_positive), dim=1)
-#        logger.warn(f"{sim.shape = }")
-#        logger.warn(f"{torch.mean(torch.diagonal(sim)).item() = } {torch.mean(sim).item() = }")
-        label = torch.arange(sim.shape[0], dtype=torch.long, device=sim.device)
-        loss = F.cross_entropy(sim, label)
-        return (loss,)
-
-    def compute_similarity(
-        self,
-        input_ids1: Tensor,
-        input_ids2: Tensor,
-        attention_mask1: Tensor,
-        attention_mask2: Tensor,
-    ) -> Tensor:
-        outputs1, outputs2, _ = self._compute_representation(
-            input_ids1, input_ids2, attention_mask1, attention_mask2
-        )
-        outputs1 = self.cl_head(outputs1.last_hidden_state)
-        outputs2 = self.cl_head(outputs2.last_hidden_state)
-        sim = self._compute_pairwise_similarity(
-            outputs1, outputs2, attention_mask1, attention_mask2
-        )
-        # (batch, seq_len, seq_len)
-        score = self._aggregate_pairwise_similarity(sim)
-        # (batch,)
-        return score
+        return sim
 
     def _compute_pairwise_similarity(
         self,
@@ -476,3 +392,22 @@ class RobertaForTokenContrastiveLearning(RobertaForContrastiveLearning):
         sim_left = masked_mean(sim_left, ~torch.isinf(sim_left), dim=-1)
         sim_right = masked_mean(sim_right, ~torch.isinf(sim_right), dim=-1)
         return (sim_left + sim_right) / 2
+
+
+def create_contrastive_learning(model_args) -> ContrastiveLearning:
+    config = AutoConfig.from_pretrained(
+        model_args.model_name_or_path, output_hidden_states=True
+    )
+    backbone = AutoModel.from_pretrained(model_args.model_name_or_path, config=config)
+    if model_args.loss_rwmd:
+        return TokenContrastiveLearning(
+            config, backbone, model_args.temp, model_args.loss_mlm
+        )
+    else:
+        return SimpleContrastiveLearning(
+            config,
+            backbone,
+            model_args.temp,
+            model_args.loss_mlm,
+            model_args.pooler_type,
+        )

@@ -11,8 +11,8 @@ from torch.utils.data import ConcatDataset
 import transformers
 from transformers import (
     AutoConfig,
+    AutoTokenizer,
     HfArgumentParser,
-    RobertaTokenizer,
     TrainingArguments,
     set_seed,
 )
@@ -26,10 +26,7 @@ from simcse.data.dataset import (
     SimCSESupervisedDataset,
     collate_fn,
 )
-from simcse.models import (
-    RobertaForSimpleContrastiveLearning,
-    RobertaForTokenContrastiveLearning,
-)
+from simcse.models import create_contrastive_learning
 from simcse.trainers import CLTrainer
 
 logger = logging.getLogger(__name__)
@@ -112,7 +109,7 @@ class DataTrainingArguments:
 class OurTrainingArguments(TrainingArguments):
     output_dir: str = field(
         default=os.path.join(
-            "/nas/home/sh0416/checkpoints", datetime.now().strftime("%Y%m%d_%H%M%S")
+            "/home/sh0416/checkpoints", datetime.now().strftime("%Y%m%d_%H%M%S")
         ),
         metadata={
             "help": (
@@ -168,39 +165,14 @@ def train(args):
     # Distributed training:
     # The .from_pretrained methods guarantee that only one local process can
     # concurrently download model & vocab.
-    config_kwargs = {
-        "hidden_dropout_prob": model_args.hidden_dropout_prob,
-        "output_hidden_states": True,
-    }
     if model_args.model_name_or_path:
-        if "roberta" in model_args.model_name_or_path:
-            tokenizer = RobertaTokenizer.from_pretrained(model_args.model_name_or_path)
-            config = AutoConfig.from_pretrained(
-                model_args.model_name_or_path, **config_kwargs
-            )
-            if model_args.loss_rwmd:
-                model = RobertaForTokenContrastiveLearning.from_pretrained(
-                    model_args.model_name_or_path,
-                    config=config,
-                    loss_mlm=model_args.loss_mlm,
-                    temp=model_args.temp,
-                )
-            else:
-                model = RobertaForSimpleContrastiveLearning.from_pretrained(
-                    model_args.model_name_or_path,
-                    config=config,
-                    pooler_type=model_args.pooler_type,
-                    loss_mlm=model_args.loss_mlm,
-                    temp=model_args.temp,
-                )
-        else:
-            raise NotImplementedError()
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_args.model_name_or_path, add_prefix_space=True
+        )
+        model = create_contrastive_learning(model_args)
+        model.train()
     else:
         raise NotImplementedError()
-
-    # For the case where the tokenizer and model is different
-    model.resize_token_embeddings(len(tokenizer))
-    model.train()
 
     if data_args.method == "simcse-unsup":
         train_dataset = SimCSEUnsupervisedDataset(data_args.train_file, tokenizer)

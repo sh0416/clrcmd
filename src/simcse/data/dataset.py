@@ -39,10 +39,11 @@ class ContrastiveLearningDataset(Dataset):
     ) -> Tuple[Dict[str, Tensor], Dict[str, Tensor], Optional[Dict[str, Tensor]]]:
         x, x_pos, x_neg = self._create_tokenized_pair(self.data[index])
         f = partial(
-            self.tokenizer.encode_plus,
+            self.tokenizer.__call__,
             padding="max_length",
             max_length=32,
             truncation=True,
+            is_split_into_words=True,
         )
         if x_neg is not None:
             return f(x), f(x_pos), f(x_neg)
@@ -155,12 +156,5 @@ def collate_fn(batch, tokenizer: RobertaTokenizer):
     if len(batch_neg) > 0:
         batch_neg = tokenizer.pad(batch_neg, return_tensors="pt")
     else:
-        batch_neg = {"input_ids": None, "attention_mask": None}
-    return {
-        "input_ids1": batch_x["input_ids"],
-        "attention_mask1": batch_x["attention_mask"],
-        "input_ids2": batch_pos["input_ids"],
-        "attention_mask2": batch_pos["attention_mask"],
-        "input_ids_neg": batch_neg["input_ids"],
-        "attention_mask_neg": batch_neg["attention_mask"],
-    }
+        batch_neg = None
+    return {"inputs1": batch_x, "inputs2": batch_pos, "inputs_neg": batch_neg}

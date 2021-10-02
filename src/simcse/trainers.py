@@ -15,8 +15,10 @@ from sentence_benchmark.data import (
     load_sts16,
     load_stsb_dev,
     load_stsb_test,
+    load_sickr_test,
 )
 from sentence_benchmark.evaluate import evaluate_sts
+from sentence_benchmark.models.rwmdcse import prepare, batcher
 
 logger = logging.get_logger(__name__)
 
@@ -26,60 +28,38 @@ class CLTrainer(Trainer):
         self, ignore_keys=None, metric_key_prefix="eval", all: bool = False
     ) -> Dict[str, float]:
 
-        # SentEval prepare and batcher
-        def prepare(inputs: List[Input], param: Dict) -> Dict:
-            param["batch_size"] = 64
-            return param
-
-        def batcher(inputs: List[Input], param: Dict) -> np.ndarray:
-            sentence = [x[0] for x in inputs] + [x[1] for x in inputs]
-            batch = self.tokenizer.batch_encode_plus(
-                sentence, return_tensors="pt", padding=True
-            )
-            batch1 = {
-                k: v[: len(inputs)].to(self.args.device) for k, v in batch.items()
-            }
-            batch2 = {
-                k: v[len(inputs) :].to(self.args.device) for k, v in batch.items()
-            }
-            self.model.eval()
-            with torch.no_grad():
-                score = self.model.compute_similarity(
-                    input_ids1=batch1["input_ids"],
-                    input_ids2=batch2["input_ids"],
-                    attention_mask1=batch1["attention_mask"],
-                    attention_mask2=batch2["attention_mask"],
-                )
-            self.model.train()
-            return score.cpu().numpy()
-
+        param = {"batch_size": 64, "model": self.model, "tokenizer": self.tokenizer}
         self.model.eval()
         if all:
             metrics = {}
             # STS12
             dataset = load_sts12("/nas/home/sh0416/data/STS/STS12-en-test")
-            metrics["STS12"] = evaluate_sts(dataset, {}, prepare, batcher)
+            metrics["STS12"] = evaluate_sts(dataset, param, prepare, batcher)
             # STS13
             dataset = load_sts13("/nas/home/sh0416/data/STS/STS13-en-test")
-            metrics["STS13"] = evaluate_sts(dataset, {}, prepare, batcher)
+            metrics["STS13"] = evaluate_sts(dataset, param, prepare, batcher)
             # STS14
             dataset = load_sts14("/nas/home/sh0416/data/STS/STS14-en-test")
-            metrics["STS14"] = evaluate_sts(dataset, {}, prepare, batcher)
+            metrics["STS14"] = evaluate_sts(dataset, param, prepare, batcher)
             # STS15
             dataset = load_sts15("/nas/home/sh0416/data/STS/STS15-en-test")
-            metrics["STS15"] = evaluate_sts(dataset, {}, prepare, batcher)
+            metrics["STS15"] = evaluate_sts(dataset, param, prepare, batcher)
             # STS16
             dataset = load_sts16("/nas/home/sh0416/data/STS/STS16-en-test")
-            metrics["STS16"] = evaluate_sts(dataset, {}, prepare, batcher)
+            metrics["STS16"] = evaluate_sts(dataset, param, prepare, batcher)
             # STSB
             dataset = load_stsb_dev("/nas/home/sh0416/data/STS/STSBenchmark")
-            metrics["STSB-dev"] = evaluate_sts(dataset, {}, prepare, batcher)
+            metrics["STSB-dev"] = evaluate_sts(dataset, param, prepare, batcher)
             dataset = load_stsb_test("/nas/home/sh0416/data/STS/STSBenchmark")
-            metrics["STSB-test"] = evaluate_sts(dataset, {}, prepare, batcher)
+            metrics["STSB-test"] = evaluate_sts(dataset, param, prepare, batcher)
+            # SICKR
+            dataset = load_sickr_test("/nas/home/sh0416/data/SICK")
+            metrics["SICKR-test"] = evaluate_sts(dataset, param, prepare, batcher)
         else:
             dataset = load_stsb_dev("/nas/home/sh0416/data/STS/STSBenchmark")
-            result = evaluate_sts(dataset, {}, prepare, batcher)
+            result = evaluate_sts(dataset, param, prepare, batcher)
             stsb_spearman = result["all"]["spearman"]["all"]
             metrics = {"eval_stsb_spearman": stsb_spearman}
+        self.model.train()
         self.log(metrics)
         return metrics
