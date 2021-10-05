@@ -1,12 +1,12 @@
 import logging
-from typing import Callable, Tuple, Optional, Dict, TypedDict
+from typing import Callable, Dict, Optional, Tuple, TypedDict
 
 import torch
 import torch.distributed as dist
 import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
-from transformers import PretrainedConfig, PreTrainedModel, AutoConfig, AutoModel
+from transformers import AutoConfig, AutoModel, PretrainedConfig, PreTrainedModel
 from transformers.modeling_outputs import BaseModelOutputWithPoolingAndCrossAttentions
 from transformers.models.roberta.modeling_roberta import RobertaLMHead, RobertaModel
 
@@ -36,7 +36,7 @@ class Pooler(nn.Module):
 
     def forward(self, attention_mask: Tensor, hidden_states: Tuple[Tensor]) -> Tensor:
         if self.pooler_type == "cls":
-            return outputs[-1][:, 0]
+            return hidden_states[-1][:, 0]
         elif self.pooler_type == "avg":
             last_hidden = hidden_states[-1]
             return masked_mean(last_hidden, attention_mask[:, :, None], dim=1)
@@ -174,10 +174,10 @@ class SimpleContrastiveLearning(ContrastiveLearning):
         outputs1, outputs2, outputs_neg = self._compute_representation(
             inputs1, inputs2, inputs_neg
         )
-        outputs1 = self._pooler(attention_mask1, outputs1)
-        outputs2 = self._pooler(attention_mask2, outputs2)
+        outputs1 = self._pooler(inputs1["attention_mask"], outputs1)
+        outputs2 = self._pooler(inputs2["attention_mask"], outputs2)
         if outputs_neg is not None:
-            outputs_neg = self._pooler(attention_mask_neg, outputs_neg)
+            outputs_neg = self._pooler(inputs_neg["attention_mask"], outputs_neg)
         # Gather all embeddings if using distributed training
         if dist.is_initialized() and self.training:
             outputs1, outputs2 = dist_all_gather(outputs1), dist_all_gather(outputs2)
@@ -196,8 +196,8 @@ class SimpleContrastiveLearning(ContrastiveLearning):
         self, inputs1: Dict[str, Tensor], inputs2: Dict[str, Tensor]
     ) -> Tensor:
         outputs1, outputs2, _ = self._compute_representation(inputs1, inputs2)
-        outputs1 = self._pooler(attention_mask1, outputs1)
-        outputs2 = self._pooler(attention_mask2, outputs2)
+        outputs1 = self._pooler(inputs1["attention_mask"], outputs1)
+        outputs2 = self._pooler(inputs2["attention_mask"], outputs2)
         score = F.cosine_similarity(outputs1, outputs2)
         return score
 

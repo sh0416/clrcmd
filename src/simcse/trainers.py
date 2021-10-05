@@ -8,6 +8,7 @@ from transformers.utils import logging
 
 from sentence_benchmark.data import (
     Input,
+    load_sickr_test,
     load_sts12,
     load_sts13,
     load_sts14,
@@ -15,10 +16,9 @@ from sentence_benchmark.data import (
     load_sts16,
     load_stsb_dev,
     load_stsb_test,
-    load_sickr_test,
 )
 from sentence_benchmark.evaluate import evaluate_sts
-from sentence_benchmark.models.rwmdcse import prepare, batcher
+from sentence_benchmark.models.rwmdcse import batcher, prepare
 
 logger = logging.get_logger(__name__)
 

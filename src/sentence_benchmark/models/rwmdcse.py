@@ -5,8 +5,7 @@ import torch
 from transformers import RobertaTokenizer
 
 from sentence_benchmark.data import Input
-from simcse.models import RobertaForTokenContrastiveLearning
-from simcse.models import RobertaForSimpleContrastiveLearning
+from simcse.models import create_contrastive_learning
 
 
 def prepare(inputs: List[Input], param: Dict) -> Dict:
@@ -14,10 +13,7 @@ def prepare(inputs: List[Input], param: Dict) -> Dict:
     param["device"] = device
     if param.get("checkpoint", None) is not None:
         tokenizer = RobertaTokenizer.from_pretrained(param["checkpoint"])
-        if param["method"] == "simcse-ours":
-            model = RobertaForSimpleContrastiveLearning.from_pretrained(param["checkpoint"], pooler_type=param["pooler_type"], loss_mlm=False, temp=0.05)
-        else:
-            model = RobertaForTokenContrastiveLearning.from_pretrained(param["checkpoint"], loss_mlm=False, temp=0.05)
+        model = create_contrastive_learning(param["model_args"])
         model.to(device)
         param["tokenizer"] = tokenizer
         param["model"] = model
@@ -36,11 +32,6 @@ def batcher(inputs: List[Input], param: Dict) -> np.ndarray:
     batch2 = {k: v[len(inputs) :].to(param["device"]) for k, v in batch.items()}
     param["model"].eval()
     with torch.no_grad():
-        score = param["model"].compute_similarity(
-            input_ids1=batch1["input_ids"],
-            input_ids2=batch2["input_ids"],
-            attention_mask1=batch1["attention_mask"],
-            attention_mask2=batch2["attention_mask"],
-        )
+        score = param["model"].compute_similarity(inputs1=batch1, inputs2=batch2)
     param["model"].train()
     return score.cpu().numpy()

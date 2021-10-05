@@ -7,8 +7,8 @@ from functools import partial
 from typing import Optional
 
 import torch
-from torch.utils.data import ConcatDataset
 import transformers
+from torch.utils.data import ConcatDataset
 from transformers import (
     AutoConfig,
     AutoTokenizer,
@@ -19,11 +19,11 @@ from transformers import (
 from transformers.trainer_utils import is_main_process
 
 from simcse.data.dataset import (
-    EDASimCSEDataset,
-    ESimCSEDataset,
+    NLIDataset,
     PairedContrastiveLearningDataset,
-    SimCSEUnsupervisedDataset,
-    SimCSESupervisedDataset,
+    WikiEDADataset,
+    WikiIdentityDataset,
+    WikiRepetitionDataset,
     collate_fn,
 )
 from simcse.models import create_contrastive_learning
@@ -175,15 +175,15 @@ def train(args):
         raise NotImplementedError()
 
     if data_args.method == "simcse-unsup":
-        train_dataset = SimCSEUnsupervisedDataset(data_args.train_file, tokenizer)
+        train_dataset = WikiIdentityDataset(data_args.train_file, tokenizer)
     elif data_args.method == "simcse-sup":
-        train_dataset = SimCSESupervisedDataset(data_args.train_file, tokenizer)
+        train_dataset = NLIDataset(data_args.train_file, tokenizer)
     elif data_args.method == "esimcse":
-        train_dataset = ESimCSEDataset(
+        train_dataset = WikiRepetitionDataset(
             data_args.train_file, tokenizer, dup_rate=data_args.dup_rate
         )
     elif data_args.method == "edasimcse":
-        train_dataset = EDASimCSEDataset(data_args.train_file, tokenizer)
+        train_dataset = WikiEDADataset(data_args.train_file, tokenizer)
     else:
         raise ValueError
 
