@@ -57,7 +57,7 @@ def train(args):
     # concurrently download model & vocab.
     if model_args.model_name_or_path:
         tokenizer = AutoTokenizer.from_pretrained(
-            model_args.model_name_or_path, add_prefix_space=True
+            model_args.model_name_or_path, use_fast=False
         )
         model = create_contrastive_learning(model_args)
         model.train()
