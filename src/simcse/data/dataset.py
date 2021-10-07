@@ -9,6 +9,7 @@ from typing import Dict, List, Optional, Tuple
 from torch import Tensor
 from torch.utils.data import Dataset
 from transformers import RobertaTokenizer
+from transformers.tokenization_utils_base import PreTrainedTokenizerBase
 
 from simcse.data.eda import eda
 
@@ -32,18 +33,17 @@ Example = Tuple[Dict[str, Tensor], Dict[str, Tensor], Optional[Dict[str, Tensor]
 
 
 class ContrastiveLearningDataset(Dataset):
-    def __init__(self, filepath: str, tokenizer: RobertaTokenizer):
+    def __init__(self, filepath: str, tokenizer: PreTrainedTokenizerBase):
         self.tokenizer = tokenizer
         self.data = self._load_data(filepath)
 
     def __getitem__(self, index: int) -> Example:
         x, x_pos, x_neg = self._create_tokenized_pair(self.data[index])
         f = partial(
-            self.tokenizer.__call__,
+            self.tokenizer.encode_plus,
             padding="max_length",
             max_length=32,
             truncation=True,
-            is_split_into_words=True,
         )
         if x_neg is not None:
             return f(x), f(x_pos), f(x_neg)
