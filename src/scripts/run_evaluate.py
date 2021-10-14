@@ -25,11 +25,11 @@ parser.add_argument(
     "--method",
     type=str,
     default="random",
-    choices=["random", "bow", "sbert", "simcse"],
+    choices=["random", "bow", "sbert", "simcse", "rwmdcse", "simcse-ours"],
     help="method",
 )
 parser.add_argument(
-    "--pooler_type", type=str, choices=["cls", "avg", "rwmd"], default="cls"
+    "--pooler_type", type=str, choices=["cls", "avg"], default="cls", help="pooler type"
 )
 parser.add_argument(
     "--checkpoint",
@@ -114,6 +114,8 @@ if __name__ == "__main__":
         from sentence_benchmark.models.sbert import batcher, prepare
     elif args.method == "simcse":
         from sentence_benchmark.models.simcse import batcher, prepare
+    elif args.method == "rwmdcse" or args.method == "simcse-ours":
+        from sentence_benchmark.models.rwmdcse import batcher, prepare
     else:
         raise AttributeError()
 
