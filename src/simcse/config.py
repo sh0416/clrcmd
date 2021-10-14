@@ -12,7 +12,6 @@ class ModelArguments:
         default="roberta-base",
         metadata={"help": "The model checkpoint for weights initialization."},
     )
-
     # SimCSE's arguments
     temp: float = field(default=0.05, metadata={"help": "Temperature for softmax."})
     pooler_type: str = field(
@@ -24,18 +23,23 @@ class ModelArguments:
             )
         },
     )
-    loss_rwmd: bool = field(
-        default=False,
-        metadata={"help": "Whether to use rwmd metric learning objective."},
-    )
+    hidden_dropout_prob: float = field(default=0.1, metadata={"help": "Dropout prob"})
     mlp_only_train: bool = field(
         default=False, metadata={"help": "Use MLP only during training"}
     )
-    hidden_dropout_prob: float = field(default=0.1, metadata={"help": "Dropout prob"})
     loss_mlm: bool = field(default=False, metadata={"help": "Add MLM loss"})
     coeff_loss_mlm: float = field(
         default=0.1,
         metadata={"help": "Coefficient for masked language model objective"},
+    )
+
+    # RWMD's arguments
+    loss_rwmd: bool = field(
+        default=False,
+        metadata={"help": "Whether to use rwmd metric learning objective."},
+    )
+    layer_idx: Optional[int] = field(
+        default=None, metadata={"help": "Index of final layer"}
     )
 
 

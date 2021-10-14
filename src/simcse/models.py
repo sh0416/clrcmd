@@ -1,5 +1,6 @@
 import logging
-from typing import Callable, Dict, Optional, Tuple, TypedDict
+from dataclasses import asdict
+from typing import Dict, Optional, Tuple
 
 import torch
 import torch.distributed as dist
@@ -10,6 +11,7 @@ from transformers import AutoConfig, AutoModel, PretrainedConfig, PreTrainedMode
 from transformers.modeling_outputs import BaseModelOutputWithPoolingAndCrossAttentions
 from transformers.models.roberta.modeling_roberta import RobertaLMHead, RobertaModel
 
+from simcse.config import ModelArguments
 from simcse.utils import masked_mean
 
 logger = logging.getLogger(__name__)
@@ -41,11 +43,9 @@ class Pooler(nn.Module):
             last_hidden = hidden_states[-1]
             return masked_mean(last_hidden, attention_mask[:, :, None], dim=1)
         elif self.pooler_type == "avg_first_last":
-            assert outputs.hidden_states is not None
             hidden = (hidden_states[0] + hidden_states[-1]) / 2.0
             return masked_mean(hidden, attention_mask[:, :, None], dim=1)
         elif self.pooler_type == "avg_top2":
-            assert outputs.hidden_states is not None
             hidden = (hidden_states[-1] + hidden_states[-2]) / 2.0
             return masked_mean(hidden, attention_mask[:, :, None], dim=1)
         else:
@@ -209,8 +209,10 @@ class TokenContrastiveLearning(ContrastiveLearning):
         backbone: PreTrainedModel,
         temp: float,
         loss_mlm: bool,
+        layer_idx: Optional[int],
     ):
         super().__init__(config, backbone, temp)
+        self.layer_idx = -1 if layer_idx is None else layer_idx
         if loss_mlm:
             self.lm_head = RobertaLMHead(config)
 
@@ -218,8 +220,8 @@ class TokenContrastiveLearning(ContrastiveLearning):
         self, inputs1: Dict[str, Tensor], inputs2: Dict[str, Tensor]
     ) -> Tensor:
         outputs1, outputs2, _ = self._compute_representation(inputs1, inputs2)
-        outputs1 = self.cl_head(outputs1[-1])
-        outputs2 = self.cl_head(outputs2[-1])
+        outputs1 = self.cl_head(outputs1[self.layer_idx])
+        outputs2 = self.cl_head(outputs2[self.layer_idx])
         sim = self._compute_pairwise_similarity(
             outputs1, outputs2, inputs1["attention_mask"], inputs2["attention_mask"]
         )
@@ -237,10 +239,10 @@ class TokenContrastiveLearning(ContrastiveLearning):
         outputs1, outputs2, outputs_neg = self._compute_representation(
             inputs1, inputs2, inputs_neg
         )
-        outputs1 = self.cl_head(outputs1[-1])
-        outputs2 = self.cl_head(outputs2[-1])
+        outputs1 = self.cl_head(outputs1[self.layer_idx])
+        outputs2 = self.cl_head(outputs2[self.layer_idx])
         if outputs_neg is not None:
-            outputs_neg = self.cl_head(outputs_neg[-1])
+            outputs_neg = self.cl_head(outputs_neg[self.layer_idx])
         # (batch, seq_len, hidden_dim)
         attention_mask1 = inputs1["attention_mask"]
         attention_mask2 = inputs2["attention_mask"]
@@ -394,14 +396,14 @@ class TokenContrastiveLearning(ContrastiveLearning):
         return (sim_left + sim_right) / 2
 
 
-def create_contrastive_learning(model_args) -> ContrastiveLearning:
+def create_contrastive_learning(model_args: ModelArguments) -> ContrastiveLearning:
     config = AutoConfig.from_pretrained(
-        model_args.model_name_or_path, output_hidden_states=True
+        model_args.model_name_or_path, output_hidden_states=True, **asdict(model_args)
     )
     backbone = AutoModel.from_pretrained(model_args.model_name_or_path, config=config)
     if model_args.loss_rwmd:
         return TokenContrastiveLearning(
-            config, backbone, model_args.temp, model_args.loss_mlm
+            config, backbone, model_args.temp, model_args.loss_mlm, model_args.layer_idx
         )
     else:
         return SimpleContrastiveLearning(
