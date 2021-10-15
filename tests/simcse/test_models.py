@@ -8,9 +8,9 @@ def test_pairwise_relaxed_word_mover_similarity():
     model = PairwiseRelaxedWordMoverSimilarity()
 
     # Create random input
-    x1 = torch.rand((2, 6, 10))
+    x1 = torch.rand((9, 6, 10))
     mask1 = torch.bernoulli(torch.full((x1.shape[0], x1.shape[1]), 0.6)).bool()
-    x2 = torch.rand((4, 8, 10))
+    x2 = torch.rand((10, 8, 10))
     mask2 = torch.bernoulli(torch.full((x2.shape[0], x2.shape[1]), 0.6)).bool()
 
     # Compute similarity using implemented module

@@ -145,6 +145,10 @@ def compute_masked_cosine_similarity(
 
 
 class RelaxedWordMoverSimilarity(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.cos = nn.CosineSimilarity(dim=-1)
+
     def forward(self, x1: Tuple[Tensor, Tensor], x2: Tuple[Tensor, Tensor]) -> Tensor:
         """Compute relaxed word mover similarity
 
@@ -152,35 +156,20 @@ class RelaxedWordMoverSimilarity(nn.Module):
         :param x2: ((batch, seq_len2, hidden_dim), (batch, seq_len2)), torch.float
         :return: (batch)
         """
-        x1, mask1 = x1
-        x2, mask2 = x2
-        hidden_dim = x1.shape[2]
+        (x1, mask1), (x2, mask2) = x1, x2
         # Compute max indice batchwise
         with torch.no_grad():
             sim = compute_masked_cosine_similarity(x1, x2, mask1, mask2)
             # (batch, seq_len1, seq_len2)
             indice1 = torch.max(sim, dim=-1)[1]  # (batch, seq_len1)
             indice2 = torch.max(sim, dim=-2)[1]  # (batch, seq_len2)
-            indice1, indice2 = indice1.unsqueeze(-1), indice2.unsqueeze(-1)
         # Construct computational graph
-        sim1 = F.cosine_similarity(
-            x1,  # (batch, seq_len1, hidden_dim)
-            torch.gather(
-                x2,
-                dim=1,
-                index=indice1.expand((-1, -1, hidden_dim)),
-            ),  # (batch, seq_len1, hidden_dim)
-            dim=-1,
+        sim1 = self.cos(
+            x1, torch.gather(x2, dim=1, index=indice1.unsqueeze(-1).expand_as(x1))
         )
         # (batch, seq_len1)
-        sim2 = F.cosine_similarity(
-            torch.gather(
-                x1,
-                dim=1,
-                index=indice2.expand((-1, -1, hidden_dim)),
-            ),  # (batch, seq_len2, hidden_dim)
-            x2,  # (batch, seq_len2, hidden_dim)
-            dim=-1,
+        sim2 = self.cos(
+            torch.gather(x1, dim=1, index=indice2.unsqueeze(-1).expand_as(x2)), x2
         )
         # (batch, seq_len2)
         sim1 = masked_mean(sim1, mask1.bool(), dim=-1)
@@ -190,6 +179,10 @@ class RelaxedWordMoverSimilarity(nn.Module):
 
 
 class PairwiseRelaxedWordMoverSimilarity(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.cos = nn.CosineSimilarity(dim=-1)
+
     def forward(self, x1: Tuple[Tensor, Tensor], x2: Tuple[Tensor, Tensor]) -> Tensor:
         """Compute relaxed word mover similarity
 
@@ -197,8 +190,7 @@ class PairwiseRelaxedWordMoverSimilarity(nn.Module):
         :param x2: ((batch2, seq_len2, hidden_dim), (batch2, seq_len2)), torch.float
         :return: (batch1, batch2)
         """
-        x1, mask1 = x1
-        x2, mask2 = x2
+        (x1, mask1), (x2, mask2) = x1, x2
         batch1, seq_len1, hidden_dim = x1.shape
         batch2, seq_len2, _ = x2.shape
         # Compute max indice batchwise
@@ -219,27 +211,24 @@ class PairwiseRelaxedWordMoverSimilarity(nn.Module):
                     )
                     indice1[i : i + 8, j : j + 8, :] = torch.max(sim, dim=-1)[1]
                     indice2[i : i + 8, j : j + 8, :] = torch.max(sim, dim=-2)[1]
-            indice1, indice2 = indice1.unsqueeze(-1), indice2.unsqueeze(-1)
         # Construct computational graph for RWMD
         x1, x2 = x1.unsqueeze(1), x2.unsqueeze(0)
-        sim1 = F.cosine_similarity(
+        sim1 = self.cos(
             x1,  # (batch1, 1, seq_len1, hidden_dim)
             torch.gather(
                 x2.expand((batch1, -1, -1, -1)),
                 dim=2,
-                index=indice1.expand((-1, -1, -1, hidden_dim)),
+                index=indice1.unsqueeze(-1).expand((-1, -1, -1, hidden_dim)),
             ),  # (batch1, batch2, seq_len1, hidden_dim)
-            dim=-1,
         )
         # (batch1, batch2, seq_len1)
-        sim2 = F.cosine_similarity(
+        sim2 = self.cos(
             torch.gather(
                 x1.expand((-1, batch2, -1, -1)),
                 dim=2,
-                index=indice2.expand((-1, -1, -1, hidden_dim)),
+                index=indice2.unsqueeze(-1).expand((-1, -1, -1, hidden_dim)),
             ),  # (batch1, batch2, seq_len2, hidden_dim)
             x2,  # (1, batch2, seq_len2, hidden_dim)
-            dim=-1,
         )
         # (batch1, batch2, seq_len2)
         batchwise_mask1 = mask1[:, None, :].expand_as(sim1)
