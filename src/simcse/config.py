@@ -86,9 +86,7 @@ class DataTrainingArguments:
 @dataclass
 class OurTrainingArguments(TrainingArguments):
     output_dir: str = field(
-        default=os.path.join(
-            "/home/sh0416/checkpoints", datetime.now().strftime("%Y%m%d_%H%M%S")
-        ),
+        default=f"/home/sh0416/checkpoints/{datetime.now().strftime('%Y%m%d_%H%M%S')}",
         metadata={
             "help": (
                 "The output directory where the model predictions and"
