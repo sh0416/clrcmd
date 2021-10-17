@@ -27,8 +27,7 @@ class ModelArguments:
     mlp_only_train: bool = field(
         default=False, metadata={"help": "Use MLP only during training"}
     )
-    loss_mlm: bool = field(default=False, metadata={"help": "Add MLM loss"})
-    coeff_loss_mlm: float = field(
+    coeff_mlm: float = field(
         default=0.1,
         metadata={"help": "Coefficient for masked language model objective"},
     )

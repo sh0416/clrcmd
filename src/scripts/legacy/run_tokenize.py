@@ -10,10 +10,16 @@ from sentence_benchmark.tokenizer import RobertaTokenizerDropout
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument(
-    "--filepath", type=str, default=".data/wiki1m_for_simcse.txt", help="filepath",
+    "--filepath",
+    type=str,
+    default=".data/wiki1m_for_simcse.txt",
+    help="filepath",
 )
 parser.add_argument(
-    "--bpe-dropout-prob", type=float, default=0.0, help="bpe dropout probability",
+    "--bpe-dropout-prob",
+    type=float,
+    default=0.0,
+    help="bpe dropout probability",
 )
 
 if __name__ == "__main__":

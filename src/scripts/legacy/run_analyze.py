@@ -41,7 +41,12 @@ def is_overlap(interval1: Pair, interval2: Pair) -> bool:
     assert interval1[0] < interval1[1]
     assert interval2[0] < interval2[1]
     l = sorted(
-        [(interval1[0], 0), (interval1[1], 1), (interval2[0], 0), (interval2[1], 1),],
+        [
+            (interval1[0], 0),
+            (interval1[1], 1),
+            (interval2[0], 0),
+            (interval2[1], 1),
+        ],
         key=lambda x: (x[0], 1 - x[1]),
     )
     l = list(map(lambda x: x[1], l))
@@ -85,7 +90,9 @@ def index_pair_list(
 
 
 def index_pair(
-    pair: Tuple[Pair, Pair], pair2idx1: Dict[Pair, int], pair2idx2: Dict[Pair, int],
+    pair: Tuple[Pair, Pair],
+    pair2idx1: Dict[Pair, int],
+    pair2idx2: Dict[Pair, int],
 ) -> Tuple[int, int]:
     return (pair2idx1[pair[0]], pair2idx2[pair[1]])
 
@@ -162,7 +169,10 @@ def main(args: argparse.Namespace):
             filter(lambda x: x[0] < 32 and x[1] < 32, overlap_perfect_idxes)
         )
         token_diff = [
-            distance(outputs.last_hidden_state[0, i], outputs.last_hidden_state[1, j],)
+            distance(
+                outputs.last_hidden_state[0, i],
+                outputs.last_hidden_state[1, j],
+            )
             for i, j in overlap_perfect_idxes
         ]
         print(f"{token_diff = }")

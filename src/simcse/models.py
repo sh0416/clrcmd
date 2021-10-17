@@ -214,12 +214,15 @@ class InBatchContrastiveLearningModule(nn.Module):
         self.model = model
         self.pairwise_similarity = pairwise_similarity
         self.temp = temp
+        self.coeff_mlm = coeff_mlm
 
     def forward(
         self,
         inputs1: ModelInput,
         inputs2: ModelInput,
         inputs_neg: Optional[ModelInput] = None,
+        inputs_mlm: Optional[ModelInput] = None,
+        labels_mlm: Optional[Tensor] = None,
     ) -> Tuple[Tensor]:
         if inputs_neg is not None:
             inputs = {
