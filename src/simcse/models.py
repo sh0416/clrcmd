@@ -7,7 +7,8 @@ import torch.distributed as dist
 import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
-from transformers import AutoConfig, AutoModel, PretrainedConfig
+from transformers import AutoConfig, AutoModel
+from transformers.utils.dummy_pt_objects import PreTrainedModel
 
 from simcse.config import ModelArguments
 from simcse.utils import masked_mean
@@ -53,61 +54,33 @@ def dist_all_gather(x: Tensor) -> Tensor:
 ModelInput = Dict[str, Tensor]
 
 
-def concatenate_model_inputs(
-    inputs: Tuple[ModelInput, ...]
-) -> Tuple[ModelInput, List[int]]:
-    sections = [i["input_ids"].shape[0] for i in inputs]
-    inputs = {k: torch.cat([i[k] for i in inputs]) for k in inputs[0].keys()}
-    return inputs, sections
-
-
-class SentenceRepresentationModelPretrainedLastHidden(nn.Module):
-    def __init__(self, model_name_or_path: str, config: PretrainedConfig):
+class LastHiddenSentenceRepresentationModel(nn.Module):
+    def __init__(self, model: PreTrainedModel, hidden_size: int):
         super().__init__()
-        self.model = AutoModel.from_pretrained(model_name_or_path, config=config)
+        self.model = model
+        self.head = nn.Sequential(nn.Linear(hidden_size, hidden_size), nn.Tanh())
 
-    def forward(
-        self, inputs: Tuple[ModelInput, ...]
-    ) -> Tuple[Tuple[Tensor, Tensor], ...]:
-        """Provide sentence representation from CLS
-
-        :param inputs: {"input_ids": tensor(batch_size, seq_len), "attention_mask": tensor(batch_size, seq_len)}
-        :return: tensor(batch_size, hidden_dim)
-        """
-        inputs_concat, sections = concatenate_model_inputs(inputs)
-        outputs_concat = self.model(**inputs_concat).last_hidden_state
-        return torch.split(outputs_concat, sections)
+    def forward(self, inputs: ModelInput) -> Tuple[Tensor, Tensor]:
+        # Return representation with mask
+        mask = inputs["attention_mask"].bool()
+        return self.head(self.model(**inputs).last_hidden_state), mask
 
 
-class SentenceRepresentationModelPretrainedCLS(nn.Module):
-    def __init__(self, model_name_or_path: str, config: PretrainedConfig):
+class CLSSentenceRepresentationModel(nn.Module):
+    def __init__(self, model: PreTrainedModel, hidden_size: int):
         super().__init__()
-        self.model = AutoModel.from_pretrained(model_name_or_path, config=config)
+        self.model = model
+        self.head = nn.Sequential(nn.Linear(hidden_size, hidden_size), nn.Tanh())
 
-    def forward(self, inputs: Tuple[ModelInput, ...]) -> Tuple[Tensor, ...]:
-        """Provide sentence representation from CLS
-
-        :param inputs: {"input_ids": tensor(batch_size, seq_len), "attention_mask": tensor(batch_size, seq_len)}
-        :return: tensor(batch_size, hidden_dim)
-        """
-        inputs_concat, sections = concatenate_model_inputs(inputs)
-        outputs_concat = self.model(**inputs_concat).last_hidden_dim[:, 0]
-        return torch.split(outputs_concat, sections)
+    def forward(self, inputs: ModelInput) -> Tensor:
+        return self.head(self.model(**inputs).last_hidden_state[:, 0])
 
 
-class SentenceSimilarityModelPretrained(nn.Module):
-    def __init__(
-        self,
-        representation_model: nn.Module,
-        similarity: nn.Module,
-        pairwise_similarity: nn.Module,
-        hidden_size: int,
-    ):
+class SentenceSimilarityModel(nn.Module):
+    def __init__(self, representation_model: nn.Module, similarity: nn.Module):
         super().__init__()
         self.representation_model = representation_model
-        self.head = nn.Sequential(nn.Linear(hidden_size, hidden_size), nn.Tanh())
         self.similarity = similarity
-        self.pairwise_similarity = pairwise_similarity  # For training
 
     def forward(self, inputs1: ModelInput, inputs2: ModelInput) -> Tensor:
         """Provide similarity between two sentences
@@ -116,32 +89,22 @@ class SentenceSimilarityModelPretrained(nn.Module):
         :param inputs2: model input for sentence2.
         :return: similarity score.
         """
-        assert set(inputs1.keys()) == set(inputs2.keys())
-        outputs1, outputs2 = self.forward_pretrained_model((inputs1, inputs2))
-        # For rwmd similarity, add mask information
-        outputs1 = (outputs1, inputs1["attention_mask"])
-        outputs2 = (outputs2, inputs2["attention_mask"])
-        return self.similarity(outputs1, outputs2)
-
-    def forward_pretrained_model(
-        self, inputs: Tuple[ModelInput, ...]
-    ) -> Tuple[Tensor, ...]:
-        """Provide sentence representation of two given sentences
-
-        :param inputs: model input for sentence. No broadcastable
-        :return: **internal representation** for two sentences
-        """
-        return tuple(self.head(x) for x in self.representation_model(inputs))
+        x1, x2 = self.representation_model(inputs1), self.representation_model(inputs2)
+        return self.similarity(x1, x2)
 
 
-def compute_masked_cosine_similarity(
+def compute_alignment(
     x1: Tensor, x2: Tensor, mask1: Tensor, mask2: Tensor
-) -> Tensor:
-    sim = F.cosine_similarity(x1[..., :, None, :], x2[..., None, :, :], dim=-1)
+) -> Tuple[Tensor, Tensor]:
+    # Compute indice that produces maximum similarity
+    sim = F.cosine_similarity(x1.unsqueeze(-2), x2.unsqueeze(-3), dim=-1)
+    # Set similarity of invalid position to negative inf
     inf = torch.tensor(float("-inf"), device=sim.device)
-    sim = torch.where(mask1[..., :, None].bool(), sim, inf)
-    sim = torch.where(mask2[..., None, :].bool(), sim, inf)
-    return sim
+    sim = torch.where(mask1.unsqueeze(-1).bool(), sim, inf)
+    sim = torch.where(mask2.unsqueeze(-2).bool(), sim, inf)
+    indice1 = torch.max(sim, dim=-1)[1]
+    indice2 = torch.max(sim, dim=-2)[1]
+    return indice1, indice2
 
 
 class RelaxedWordMoverSimilarity(nn.Module):
@@ -157,12 +120,8 @@ class RelaxedWordMoverSimilarity(nn.Module):
         :return: (batch)
         """
         (x1, mask1), (x2, mask2) = x1, x2
-        # Compute max indice batchwise
         with torch.no_grad():
-            sim = compute_masked_cosine_similarity(x1, x2, mask1, mask2)
-            # (batch, seq_len1, seq_len2)
-            indice1 = torch.max(sim, dim=-1)[1]  # (batch, seq_len1)
-            indice2 = torch.max(sim, dim=-2)[1]  # (batch, seq_len2)
+            indice1, indice2 = compute_alignment(x1, x2, mask1, mask2)
         # Construct computational graph
         sim1 = self.cos(
             x1, torch.gather(x2, dim=1, index=indice1.unsqueeze(-1).expand_as(x1))
@@ -203,14 +162,14 @@ class PairwiseRelaxedWordMoverSimilarity(nn.Module):
             )
             for i in range(0, batch1, 8):
                 for j in range(0, batch2, 8):
-                    sim = compute_masked_cosine_similarity(
+                    _indice1, _indice2 = compute_alignment(
                         x1[i : i + 8, None, :, :],
                         x2[None, j : j + 8, :, :],
                         mask1[i : i + 8, None, :],
                         mask2[None, j : j + 8, :],
                     )
-                    indice1[i : i + 8, j : j + 8, :] = torch.max(sim, dim=-1)[1]
-                    indice2[i : i + 8, j : j + 8, :] = torch.max(sim, dim=-2)[1]
+                    indice1[i : i + 8, j : j + 8, :] = _indice1
+                    indice2[i : i + 8, j : j + 8, :] = _indice2
         # Construct computational graph for RWMD
         x1, x2 = x1.unsqueeze(1), x2.unsqueeze(0)
         sim1 = self.cos(
@@ -239,12 +198,21 @@ class PairwiseRelaxedWordMoverSimilarity(nn.Module):
         return sim
 
 
+class PairwiseCosineSimilarity(nn.Module):
+    def forward(self, x1: Tensor, x2: Tensor) -> Tensor:
+        return F.cosine_similarity(x1.unsqueeze(1), x2.unsqueeze(0), dim=-1)
+
+
 class InBatchContrastiveLearningModule(nn.Module):
     def __init__(
-        self, similarity_model: SentenceSimilarityModelPretrained, temp: float
+        self,
+        model: SentenceSimilarityModel,
+        pairwise_similarity: nn.Module,
+        temp: float,
     ):
         super().__init__()
-        self.similarity_model = similarity_model
+        self.model = model
+        self.pairwise_similarity = pairwise_similarity
         self.temp = temp
 
     def forward(
@@ -254,22 +222,35 @@ class InBatchContrastiveLearningModule(nn.Module):
         inputs_neg: Optional[ModelInput] = None,
     ) -> Tuple[Tensor]:
         if inputs_neg is not None:
-            x1, x2, x_neg = self.similarity_model.forward_pretrained_model(
-                (inputs1, inputs2, inputs_neg)
+            inputs = {
+                k: torch.cat((inputs1[k], inputs2[k], inputs_neg[k]), dim=0)
+                for k in inputs1.keys()
+            }
+        else:
+            inputs = {
+                k: torch.cat((inputs1[k], inputs2[k]), dim=0) for k in inputs1.keys()
+            }
+        x = self.model.representation_model(inputs)
+        if inputs_neg is not None:
+            sections = (
+                inputs1["input_ids"].shape[0],
+                inputs2["input_ids"].shape[0],
+                inputs_neg["input_ids"].shape[0],
+            )
+            x1, x2, x_neg = list(
+                zip(torch.split(x[0], sections), torch.split(x[1], sections))
             )
         else:
-            x1, x2 = self.similarity_model.forward_pretrained_model((inputs1, inputs2))
+            sections = inputs1["input_ids"].shape[0], inputs2["input_ids"].shape[0]
+            x1, x2 = list(zip(torch.split(x[0], sections), torch.split(x[1], sections)))
         # DDP: Gather all embeddings if using distributed training
         if dist.is_initialized() and self.training:
             x1, x2 = dist_all_gather(x1), dist_all_gather(x2)
-            mask1 = dist_all_gather(inputs1["attention_mask"])
-            mask2 = dist_all_gather(inputs2["attention_mask"])
             if x_neg is not None:
                 x_neg = dist_all_gather(x_neg)
-                mask_neg = dist_all_gather(inputs_neg["attention_mask"])
-        sim = self.similarity_model.pairwise_similarity((x1, mask1), (x2, mask2))
+        sim = self.pairwise_similarity(x1, x2)
         if inputs_neg is not None:
-            sim_neg = self.similarity_model.similarity((x1, mask1), (x_neg, mask_neg))
+            sim_neg = self.model.similarity(x1, x_neg)
             sim = torch.cat((sim, sim_neg.unsqueeze(1)), dim=1)
         sim = sim / self.temp
         # (batch_size, batch_size)
@@ -284,19 +265,20 @@ def create_contrastive_learning(
     config = AutoConfig.from_pretrained(
         model_args.model_name_or_path, output_hidden_states=True, **asdict(model_args)
     )
+    pretrained_model = AutoModel.from_pretrained(
+        model_args.model_name_or_path, config=config
+    )
     if model_args.loss_rwmd:
-        representation_model = SentenceRepresentationModelPretrainedLastHidden(
-            model_args.model_name_or_path, config=config
+        representation_model = LastHiddenSentenceRepresentationModel(
+            pretrained_model, config.hidden_size
         )
         similarity = RelaxedWordMoverSimilarity()
         pairwise_similarity = PairwiseRelaxedWordMoverSimilarity()
     else:
-        representation_model = SentenceRepresentationModelPretrainedCLS(
-            model_args.model_name_or_path, config=config
+        representation_model = CLSSentenceRepresentationModel(
+            pretrained_model, config.hidden_size
         )
         similarity = nn.CosineSimilarity(dim=-1)
-        pairwise_similarity = nn.CosineSimilarity(dim=-1)
-    model = SentenceSimilarityModelPretrained(
-        representation_model, similarity, pairwise_similarity, config.hidden_size
-    )
-    return InBatchContrastiveLearningModule(model, model_args.temp)
+        pairwise_similarity = PairwiseCosineSimilarity()
+    model = SentenceSimilarityModel(representation_model, similarity)
+    return InBatchContrastiveLearningModule(model, pairwise_similarity, model_args.temp)

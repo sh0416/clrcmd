@@ -32,6 +32,6 @@ def batcher(inputs: List[Input], param: Dict) -> np.ndarray:
     batch2 = {k: v[len(inputs) :].to(param["device"]) for k, v in batch.items()}
     param["model"].eval()
     with torch.no_grad():
-        score = param["model"].similarity_model(inputs1=batch1, inputs2=batch2)
+        score = param["model"].model(inputs1=batch1, inputs2=batch2)
     param["model"].train()
     return score.cpu().numpy()
