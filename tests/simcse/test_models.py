@@ -1,6 +1,7 @@
-from simcse.models import PairwiseRelaxedWordMoverSimilarity, RelaxedWordMoverSimilarity
 import torch
 import torch.nn.functional as F
+
+from simcse.models import PairwiseRelaxedWordMoverSimilarity, RelaxedWordMoverSimilarity
 
 
 def test_pairwise_relaxed_word_mover_similarity():

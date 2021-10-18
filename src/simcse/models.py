@@ -1,6 +1,6 @@
 import logging
 from dataclasses import asdict
-from typing import Dict, Optional, Tuple, List
+from typing import Dict, List, Optional, Tuple
 
 import torch
 import torch.distributed as dist
@@ -92,12 +92,20 @@ class SentenceSimilarityModel(nn.Module):
         x1, x2 = self.representation_model(inputs1), self.representation_model(inputs2)
         return self.similarity(x1, x2)
 
+    def compute_heatmap(self, inputs1: ModelInput, inputs2: ModelInput) -> Tensor:
+        x1, x2 = self.representation_model(inputs1), self.representation_model(inputs2)
+        return self.similarity.compute_heatmap(x1, x2)
+
+
+def compute_heatmap(x1: Tensor, x2: Tensor) -> Tensor:
+    # Compute indice that produces maximum similarity
+    return F.cosine_similarity(x1.unsqueeze(-2), x2.unsqueeze(-3), dim=-1)
+
 
 def compute_alignment(
     x1: Tensor, x2: Tensor, mask1: Tensor, mask2: Tensor
 ) -> Tuple[Tensor, Tensor]:
-    # Compute indice that produces maximum similarity
-    sim = F.cosine_similarity(x1.unsqueeze(-2), x2.unsqueeze(-3), dim=-1)
+    sim = compute_heatmap(x1, x2)
     # Set similarity of invalid position to negative inf
     inf = torch.tensor(float("-inf"), device=sim.device)
     sim = torch.where(mask1.unsqueeze(-1).bool(), sim, inf)
@@ -135,6 +143,12 @@ class RelaxedWordMoverSimilarity(nn.Module):
         sim2 = masked_mean(sim2, mask2.bool(), dim=-1)
         sim = (sim1 + sim2) / 2
         return sim
+
+    def compute_heatmap(
+        self, x1: Tuple[Tensor, Tensor], x2: Tuple[Tensor, Tensor]
+    ) -> Tensor:
+        (x1, _), (x2, _) = x1, x2
+        return compute_heatmap(x1, x2)
 
 
 class PairwiseRelaxedWordMoverSimilarity(nn.Module):
@@ -214,7 +228,6 @@ class InBatchContrastiveLearningModule(nn.Module):
         self.model = model
         self.pairwise_similarity = pairwise_similarity
         self.temp = temp
-        self.coeff_mlm = coeff_mlm
 
     def forward(
         self,
@@ -248,9 +261,10 @@ class InBatchContrastiveLearningModule(nn.Module):
             x1, x2 = list(zip(torch.split(x[0], sections), torch.split(x[1], sections)))
         # DDP: Gather all embeddings if using distributed training
         if dist.is_initialized() and self.training:
-            x1, x2 = dist_all_gather(x1), dist_all_gather(x2)
+            x1 = dist_all_gather(x1[0]), dist_all_gather(x1[1])
+            x2 = dist_all_gather(x2[0]), dist_all_gather(x2[1])
             if x_neg is not None:
-                x_neg = dist_all_gather(x_neg)
+                x_neg = dist_all_gather(x_neg[0]), dist_all_gather(x_neg[1])
         sim = self.pairwise_similarity(x1, x2)
         if inputs_neg is not None:
             sim_neg = self.model.similarity(x1, x_neg)
