@@ -8,6 +8,7 @@ from torch import Tensor
 
 from simcse.models import ModelInput, SentenceSimilarityModel
 import xml.etree.ElementTree as ET
+from tokenizations import get_alignments
 
 
 class AlignmentPair(TypedDict):
@@ -83,32 +84,117 @@ def save_alignment(data: List[Alignment], filepath: str):
             f.write("</sentence>\n\n\n")
 
 
-def load_sentence_pairs(dirpath: str, source: str) -> List[Tuple[str, str]]:
-    with open(os.path.join(dirpath, f"STSint.testinput.{source}.sent1.txt")) as f:
-        sent1 = [x.strip() for x in f]
-    with open(os.path.join(dirpath, f"STSint.testinput.{source}.sent2.txt")) as f:
-        sent2 = [x.strip() for x in f]
-    assert len(sent1) == len(sent2), "Two file has different length"
-    assert all(map(lambda x: len(x) > 0, sent1)), "Some sentence are empty"
-    assert all(map(lambda x: len(x) > 0, sent2)), "Some sentence are empty"
-    return list(zip(sent1, sent2))
+class Instance(TypedDict):
+    id: int
+    sent1: str
+    sent2: str
+    sent1_chunk: List[str]  # gold standard chunk sentence
+    sent2_chunk: List[str]  # gold standard chunk sentence
 
 
-def load_chunked_sentence_pairs(
-    dirpath: str, source: str
-) -> List[Tuple[List[str], List[str]]]:
-    """Load chunked sentence (splitted by gold segmenter)"""
-    with open(os.path.join(dirpath, f"STSint.testinput.{source}.sent1.chunk.txt")) as f:
+def load_instances(
+    filepath_sent1: str,
+    filepath_sent2: str,
+    filepath_sent1_chunk: str,
+    filepath_sent2_chunk: str,
+) -> List[Instance]:
+    with open(filepath_sent1) as f:
         sent1 = [x.strip() for x in f]
-    with open(os.path.join(dirpath, f"STSint.testinput.{source}.sent2.chunk.txt")) as f:
+    with open(filepath_sent2) as f:
         sent2 = [x.strip() for x in f]
-    assert len(sent1) == len(sent2), "Two file has different length"
-    assert all(map(lambda x: len(x) > 0, sent1)), "Some sentence are empty"
-    assert all(map(lambda x: len(x) > 0, sent2)), "Some sentence are empty"
+    with open(filepath_sent1_chunk) as f:
+        sent1_chunk = [x.strip() for x in f]
+    with open(filepath_sent2_chunk) as f:
+        sent2_chunk = [x.strip() for x in f]
     pattern = re.compile(r"\[\s(.*?)\s\]")
-    sent1 = [pattern.findall(x) for x in sent1]
-    sent2 = [pattern.findall(x) for x in sent2]
-    return list(zip(sent1, sent2))
+    sent1_chunk = [pattern.findall(x) for x in sent1_chunk]
+    sent2_chunk = [pattern.findall(x) for x in sent2_chunk]
+    assert len(sent1) == len(sent2) == len(sent1_chunk) == len(sent2_chunk)
+    return [
+        {
+            "id": idx,
+            "sent1": s1,
+            "sent2": s2,
+            "sent1_chunk": s1_chunk,
+            "sent2_chunk": s2_chunk,
+        }
+        for idx, (s1, s2, s1_chunk, s2_chunk) in enumerate(
+            zip(sent1, sent2, sent1_chunk, sent2_chunk)
+        )
+    ]
+
+
+class PreprocessedInstance(TypedDict):
+    instance: Instance
+    sent1_token: List[str]  # Subword tokenized sequence for model heatmap
+    sent2_token: List[str]  # Subword tokenized sequence for model heatmap
+    inputs1: ModelInput
+    inputs2: ModelInput
+
+
+def preprocess_instances(
+    tokenizer, instances: List[Instance]
+) -> List[PreprocessedInstance]:
+    def tokenize(s: str):
+        return tokenizer.convert_ids_to_tokens(
+            tokenizer(s, add_special_tokens=False)["input_ids"]
+        )
+
+    prep_instances = []
+    for instance in instances:
+        sent1_token = tokenize(instance["sent1"])
+        sent2_token = tokenize(instance["sent2"])
+        inputs1 = tokenizer(instance["sent1"], return_tensors="pt")
+        inputs2 = tokenizer(instance["sent2"], return_tensors="pt")
+        prep_instances.append(
+            {
+                "instance": instance,
+                "sent1_token": sent1_token,
+                "sent2_token": sent2_token,
+                "inputs1": inputs1,
+                "inputs2": inputs2,
+            }
+        )
+    return prep_instances
+
+
+class InferedInstance(TypedDict):
+    instance: Instance
+    sent1_token: List[str]  # Subword tokenized sequence for model heatmap
+    sent2_token: List[str]  # Subword tokenized sequence for model heatmap
+    heatmap_token: np.ndarray
+    heatmap_chunk: np.ndarray
+
+
+def extract_heatmap(
+    model: SentenceSimilarityModel, prep_instances: List[PreprocessedInstance]
+) -> List[InferedInstance]:
+    infered_instances = []
+    for prep_instance in prep_instances:
+        # Compute heatmap
+        with torch.no_grad():
+            heatmap_token = model.compute_heatmap(
+                prep_instance["inputs1"], prep_instance["inputs2"]
+            )[0, 1:-1, 1:-1].numpy()
+        align_sent1_token2chunk, _ = get_alignments(
+            prep_instance["sent1_token"], prep_instance["instance"]["sent1_chunk"]
+        )
+        align_sent2_token2chunk, _ = get_alignments(
+            prep_instance["sent2_token"], prep_instance["instance"]["sent2_chunk"]
+        )
+        heatmap_chunk = pool_heatmap(
+            heatmap_token, (align_sent1_token2chunk, align_sent2_token2chunk)
+        )
+        infered_instances.append(
+            {
+                "instance": prep_instance["instance"],
+                "sent1_token": prep_instance["sent1_token"],
+                "sent2_token": prep_instance["sent2_token"],
+                "heatmap_token": heatmap_token,
+                "heatmap_chunk": heatmap_chunk,
+            }
+        )
+    return infered_instances
 
 
 TokensPair = Tuple[List[str], List[str]]
@@ -122,7 +208,6 @@ def pool_heatmap(
     sent2_max = max(max(x) for x in align_pair[1])
     heatmap_new = np.zeros((sent1_max + 1, sent2_max + 1))
     count = np.zeros((sent1_max + 1, sent2_max + 1))
-    print(heatmap_new.shape, heatmap.shape)
     for i in range(heatmap.shape[0]):
         for j in range(heatmap.shape[1]):
             for k in align_pair[0][i]:
