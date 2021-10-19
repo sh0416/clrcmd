@@ -119,7 +119,7 @@ def load_instances(
             "sent2_chunk": s2_chunk,
         }
         for idx, (s1, s2, s1_chunk, s2_chunk) in enumerate(
-            zip(sent1, sent2, sent1_chunk, sent2_chunk)
+            zip(sent1, sent2, sent1_chunk, sent2_chunk), start=1
         )
     ]
 
@@ -164,9 +164,10 @@ class InferedInstance(TypedDict):
     sent2_token: List[str]  # Subword tokenized sequence for model heatmap
     heatmap_token: np.ndarray
     heatmap_chunk: np.ndarray
+    pairs: List[AlignmentPair]
 
 
-def extract_heatmap(
+def inference(
     model: SentenceSimilarityModel, prep_instances: List[PreprocessedInstance]
 ) -> List[InferedInstance]:
     infered_instances = []
@@ -185,6 +186,33 @@ def extract_heatmap(
         heatmap_chunk = pool_heatmap(
             heatmap_token, (align_sent1_token2chunk, align_sent2_token2chunk)
         )
+        mask1 = heatmap_chunk == np.max(heatmap_chunk, axis=0, keepdims=True)
+        mask2 = heatmap_chunk == np.max(heatmap_chunk, axis=1, keepdims=True)
+        sent1_chunks, sent2_chunks = np.nonzero(mask1 & mask2)
+        align_sent1_chunk2word, _ = get_alignments(
+            prep_instance["instance"]["sent1_chunk"],
+            prep_instance["instance"]["sent1"].split(),
+        )
+        align_sent2_chunk2word, _ = get_alignments(
+            prep_instance["instance"]["sent2_chunk"],
+            prep_instance["instance"]["sent2"].split(),
+        )
+        sent1_word_ids = [
+            [y + 1 for y in align_sent1_chunk2word[x]] for x in sent1_chunks
+        ]
+        sent2_word_ids = [
+            [y + 1 for y in align_sent2_chunk2word[x]] for x in sent2_chunks
+        ]
+        pairs = [
+            {
+                "sent1_word_ids": s1,
+                "sent2_word_ids": s2,
+                "type": "EQUI",
+                "score": 5,
+                "comment": "",
+            }
+            for s1, s2 in zip(sent1_word_ids, sent2_word_ids)
+        ]
         infered_instances.append(
             {
                 "instance": prep_instance["instance"],
@@ -192,9 +220,24 @@ def extract_heatmap(
                 "sent2_token": prep_instance["sent2_token"],
                 "heatmap_token": heatmap_token,
                 "heatmap_chunk": heatmap_chunk,
+                "pairs": pairs,
             }
         )
     return infered_instances
+
+
+def save_infered_instances(infered_instances: List[InferedInstance], filepath: str):
+    alignments = []
+    for infered_instance in infered_instances:
+        alignments.append(
+            {
+                "id": infered_instance["instance"]["id"],
+                "sent1": infered_instance["instance"]["sent1"],
+                "sent2": infered_instance["instance"]["sent2"],
+                "pairs": infered_instance["pairs"],
+            }
+        )
+    save_alignment(alignments, filepath)
 
 
 TokensPair = Tuple[List[str], List[str]]
