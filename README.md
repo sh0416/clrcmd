@@ -35,3 +35,17 @@ python -m run_evaluate
 ### Evaluate
 * `run_evaluate.py` : Evaluate sentence representation quality using given benchmark data
 
+
+### Change Log
+* `STSint.testinput.answers-students.sent1.chunk.txt`
+ * 252th example: from `a closed path` to `a closed path.`
+ * 287th example: from `has no gaps` to `[ has no gaps ]`
+ * 315th example: from `is in a closed path,` to `[ is in a closed path, ]`
+ * 315th example: from `is in a closed path.` to `[ is in a closed path. ]`
+* `STSint.testinput.answers-students.sent1.txt`
+ * 287th example: `battery  terminal` to `battery terminal`
+ * 308th example: `switch z,  that` to `switch z, that`
+* `STSint.testinput.answers-students.sent2.chunk.txt`
+ * 287th example: `are not separated by the gap` to `[ are not separated by the gap ]`
+ * 315th example: `are` to `[ are ]`
+ * 315th example: `in closed paths` to `[ in closed path ]`

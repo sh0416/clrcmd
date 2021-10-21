@@ -1,14 +1,15 @@
-import os
+import logging
 import re
-from typing import List, TypedDict, Tuple, Optional
+import xml.etree.ElementTree as ET
+from typing import List, Optional, Tuple, TypedDict
 
 import numpy as np
 import torch
-from torch import Tensor
+from tokenizations import get_alignments
 
 from simcse.models import ModelInput, SentenceSimilarityModel
-import xml.etree.ElementTree as ET
-from tokenizations import get_alignments
+
+logger = logging.getLogger(__name__)
 
 
 class AlignmentPair(TypedDict):
@@ -106,10 +107,14 @@ def load_instances(
         sent1_chunk = [x.strip() for x in f]
     with open(filepath_sent2_chunk) as f:
         sent2_chunk = [x.strip() for x in f]
-    pattern = re.compile(r"\[\s(.*?)\s\]")
+    pattern = re.compile(r"\[\s?(.*?)\s?\]")
     sent1_chunk = [pattern.findall(x) for x in sent1_chunk]
     sent2_chunk = [pattern.findall(x) for x in sent2_chunk]
     assert len(sent1) == len(sent2) == len(sent1_chunk) == len(sent2_chunk)
+    for idx, (s1, s1_chunk) in enumerate(zip(sent1, sent1_chunk)):
+        assert s1 == " ".join(s1_chunk), idx
+    for idx, (s2, s2_chunk) in enumerate(zip(sent2, sent2_chunk)):
+        assert s2 == " ".join(s2_chunk), idx
     return [
         {
             "id": idx,
@@ -172,6 +177,7 @@ def inference(
 ) -> List[InferedInstance]:
     infered_instances = []
     for prep_instance in prep_instances:
+        logger.debug(f"{prep_instance}")
         # Compute heatmap
         with torch.no_grad():
             heatmap_token = model.compute_heatmap(
@@ -183,6 +189,8 @@ def inference(
         align_sent2_token2chunk, _ = get_alignments(
             prep_instance["sent2_token"], prep_instance["instance"]["sent2_chunk"]
         )
+        logger.debug(f"{align_sent1_token2chunk}")
+        logger.debug(f"{align_sent2_token2chunk}")
         heatmap_chunk = pool_heatmap(
             heatmap_token, (align_sent1_token2chunk, align_sent2_token2chunk)
         )
