@@ -1,0 +1,13351 @@
+<sentence id="1" status="">
+// A child in a blue and white team uniform chasing a soccer ball .
+// A young boy in a blue soccer uniform chasing a ball .
+<source>
+1 A :
+2 child :
+3 in :
+4 a :
+5 blue :
+6 and :
+7 white :
+8 team :
+9 uniform :
+10 chasing :
+11 a :
+12 soccer :
+13 ball :
+14 . :
+</source>
+<translation>
+1 A :
+2 young :
+3 boy :
+4 in :
+5 a :
+6 blue :
+7 soccer :
+8 uniform :
+9 chasing :
+10 a :
+11 ball :
+12 . :
+</translation>
+<alignment>
+3 4 5 6 7 8 9 <==> 4 5 6 7 8 // EQUI // 5 // 
+10 <==> 9 // EQUI // 5 // 
+11 12 13 <==> 10 11 // EQUI // 5 // 
+14 <==> 12 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="2" status="">
+// A man in a gray suit locking up a bicycle
+// A man and a woman standing on a city street .
+<source>
+1 A :
+2 man :
+3 in :
+4 a :
+5 gray :
+6 suit :
+7 locking :
+8 up :
+9 a :
+10 bicycle :
+</source>
+<translation>
+1 A :
+2 man :
+3 and :
+4 a :
+5 woman :
+6 standing :
+7 on :
+8 a :
+9 city :
+10 street :
+11 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 3 4 5 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="3" status="">
+// A dog in in a car .
+// A dog is biting a mop .
+<source>
+1 A :
+2 dog :
+3 in :
+4 in :
+5 a :
+6 car :
+7 . :
+</source>
+<translation>
+1 A :
+2 dog :
+3 is :
+4 biting :
+5 a :
+6 mop :
+7 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="4" status="">
+// A black dog walking beside a pool .
+// A black dog is walking along the side of a pool .
+<source>
+1 A :
+2 black :
+3 dog :
+4 walking :
+5 beside :
+6 a :
+7 pool :
+8 . :
+</source>
+<translation>
+1 A :
+2 black :
+3 dog :
+4 is :
+5 walking :
+6 along :
+7 the :
+8 side :
+9 of :
+10 a :
+11 pool :
+12 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+5 6 7 <==> 6 7 8 9 10 11 // EQUI // 5 // 
+8 <==> 12 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="5" status="">
+// The boy is looking up at the girl as another girl ignores them .
+// the boy is diving into the pool as the couple watch .
+<source>
+1 The :
+2 boy :
+3 is :
+4 looking :
+5 up :
+6 at :
+7 the :
+8 girl :
+9 as :
+10 another :
+11 girl :
+12 ignores :
+13 them :
+14 . :
+</source>
+<translation>
+1 the :
+2 boy :
+3 is :
+4 diving :
+5 into :
+6 the :
+7 pool :
+8 as :
+9 the :
+10 couple :
+11 watch :
+12 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="6" status="">
+// Two women holding checkered flags near an orange car .
+// Two ladies in skimpy clothes pose next to an old fashioned car .
+<source>
+1 Two :
+2 women :
+3 holding :
+4 checkered :
+5 flags :
+6 near :
+7 an :
+8 orange :
+9 car :
+10 . :
+</source>
+<translation>
+1 Two :
+2 ladies :
+3 in :
+4 skimpy :
+5 clothes :
+6 pose :
+7 next :
+8 to :
+9 an :
+10 old :
+11 fashioned :
+12 car :
+13 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+6 7 8 9 <==> 7 8 9 10 11 12 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="7" status="">
+// A hiker with a backpack is up on a misty mountain top .
+// A hiker climbing a rocky hill with fog surrounding him .
+<source>
+1 A :
+2 hiker :
+3 with :
+4 a :
+5 backpack :
+6 is :
+7 up :
+8 on :
+9 a :
+10 misty :
+11 mountain :
+12 top :
+13 . :
+</source>
+<translation>
+1 A :
+2 hiker :
+3 climbing :
+4 a :
+5 rocky :
+6 hill :
+7 with :
+8 fog :
+9 surrounding :
+10 him :
+11 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+13 <==> 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="8" status="">
+// A brown dog in running on grass .
+// A brown dog runs through the grass .
+<source>
+1 A :
+2 brown :
+3 dog :
+4 in :
+5 running :
+6 on :
+7 grass :
+8 . :
+</source>
+<translation>
+1 A :
+2 brown :
+3 dog :
+4 runs :
+5 through :
+6 the :
+7 grass :
+8 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+4 5 <==> 4 // EQUI // 5 // 
+6 7 <==> 5 6 7 // EQUI // 5 // 
+8 <==> 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="9" status="">
+// The dog returns the play toy to its master .
+// Three dogs race in the snow together .
+<source>
+1 The :
+2 dog :
+3 returns :
+4 the :
+5 play :
+6 toy :
+7 to :
+8 its :
+9 master :
+10 . :
+</source>
+<translation>
+1 Three :
+2 dogs :
+3 race :
+4 in :
+5 the :
+6 snow :
+7 together :
+8 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+10 <==> 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="10" status="">
+// two dogs are running across a grassy path .
+// Two dogs are in a grassy area .
+<source>
+1 two :
+2 dogs :
+3 are :
+4 running :
+5 across :
+6 a :
+7 grassy :
+8 path :
+9 . :
+</source>
+<translation>
+1 Two :
+2 dogs :
+3 are :
+4 in :
+5 a :
+6 grassy :
+7 area :
+8 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+5 6 7 8 <==> 4 5 6 7 // EQUI // 5 // 
+9 <==> 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="11" status="">
+// A woman stands with her arms out at her sides while another takes a picture .
+// A man stands in a crowd holding a white object .
+<source>
+1 A :
+2 woman :
+3 stands :
+4 with :
+5 her :
+6 arms :
+7 out :
+8 at :
+9 her :
+10 sides :
+11 while :
+12 another :
+13 takes :
+14 a :
+15 picture :
+16 . :
+</source>
+<translation>
+1 A :
+2 man :
+3 stands :
+4 in :
+5 a :
+6 crowd :
+7 holding :
+8 a :
+9 white :
+10 object :
+11 . :
+</translation>
+<alignment>
+3 <==> 3 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="12" status="">
+// A dog is jumping in the air to catch an orange Frisbee .
+// a white dog jumping in the air to catch a red Frisbee .
+<source>
+1 A :
+2 dog :
+3 is :
+4 jumping :
+5 in :
+6 the :
+7 air :
+8 to :
+9 catch :
+10 an :
+11 orange :
+12 Frisbee :
+13 . :
+</source>
+<translation>
+1 a :
+2 white :
+3 dog :
+4 jumping :
+5 in :
+6 the :
+7 air :
+8 to :
+9 catch :
+10 a :
+11 red :
+12 Frisbee :
+13 . :
+</translation>
+<alignment>
+3 4 <==> 4 // EQUI // 5 // 
+5 6 7 <==> 5 6 7 // EQUI // 5 // 
+8 9 <==> 8 9 // EQUI // 5 // 
+10 11 12 <==> 10 11 12 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="13" status="">
+// A woman and a man with a blue shirt are posing for a photograph .
+// a man and a woman posing for a picture
+<source>
+1 A :
+2 woman :
+3 and :
+4 a :
+5 man :
+6 with :
+7 a :
+8 blue :
+9 shirt :
+10 are :
+11 posing :
+12 for :
+13 a :
+14 photograph :
+15 . :
+</source>
+<translation>
+1 a :
+2 man :
+3 and :
+4 a :
+5 woman :
+6 posing :
+7 for :
+8 a :
+9 picture :
+</translation>
+<alignment>
+1 2 3 4 5 <==> 1 2 3 4 5 // EQUI // 5 // 
+10 11 <==> 6 // EQUI // 5 // 
+12 13 14 <==> 7 8 9 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="14" status="">
+// Three people stand in an outdoor glass structure .
+// Three people in a glass structure .
+<source>
+1 Three :
+2 people :
+3 stand :
+4 in :
+5 an :
+6 outdoor :
+7 glass :
+8 structure :
+9 . :
+</source>
+<translation>
+1 Three :
+2 people :
+3 in :
+4 a :
+5 glass :
+6 structure :
+7 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+4 5 6 7 8 <==> 3 4 5 6 // EQUI // 5 // 
+9 <==> 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="15" status="">
+// Young boy wearing a denim shirt sticks out his tongue .
+// A young boy wearing a denim jacket sticks his tongue out .
+<source>
+1 Young :
+2 boy :
+3 wearing :
+4 a :
+5 denim :
+6 shirt :
+7 sticks :
+8 out :
+9 his :
+10 tongue :
+11 . :
+</source>
+<translation>
+1 A :
+2 young :
+3 boy :
+4 wearing :
+5 a :
+6 denim :
+7 jacket :
+8 sticks :
+9 his :
+10 tongue :
+11 out :
+12 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 3 // EQUI // 5 // 
+3 <==> 4 // EQUI // 5 // 
+7 8 <==> 8 // EQUI // 5 // 
+9 10 <==> 9 10 // EQUI // 5 // 
+11 <==> 12 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="16" status="">
+// A brown dog is walking on the grass .
+// A dog chases another by a tree .
+<source>
+1 A :
+2 brown :
+3 dog :
+4 is :
+5 walking :
+6 on :
+7 the :
+8 grass :
+9 . :
+</source>
+<translation>
+1 A :
+2 dog :
+3 chases :
+4 another :
+5 by :
+6 a :
+7 tree :
+8 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 // EQUI // 5 // 
+6 7 8 <==> 5 6 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="17" status="">
+// Three boys playing soccer in a field
+// Three boys playing soccer .
+<source>
+1 Three :
+2 boys :
+3 playing :
+4 soccer :
+5 in :
+6 a :
+7 field :
+</source>
+<translation>
+1 Three :
+2 boys :
+3 playing :
+4 soccer :
+5 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 <==> 3 // EQUI // 5 // 
+4 <==> 4 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="18" status="">
+// A person is riding a skateboard in the air above a ramp .
+// A biker is riding along a track element located with a wooded area .
+<source>
+1 A :
+2 person :
+3 is :
+4 riding :
+5 a :
+6 skateboard :
+7 in :
+8 the :
+9 air :
+10 above :
+11 a :
+12 ramp :
+13 . :
+</source>
+<translation>
+1 A :
+2 biker :
+3 is :
+4 riding :
+5 along :
+6 a :
+7 track :
+8 element :
+9 located :
+10 with :
+11 a :
+12 wooded :
+13 area :
+14 . :
+</translation>
+<alignment>
+3 4 <==> 3 4 // EQUI // 5 // 
+13 <==> 14 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="19" status="">
+// Brown and white dog playing in the grass .
+// Black and white dog leaping for Frisbee .
+<source>
+1 Brown :
+2 and :
+3 white :
+4 dog :
+5 playing :
+6 in :
+7 the :
+8 grass :
+9 . :
+</source>
+<translation>
+1 Black :
+2 and :
+3 white :
+4 dog :
+5 leaping :
+6 for :
+7 Frisbee :
+8 . :
+</translation>
+<alignment>
+1 2 3 4 <==> 1 2 3 4 // EQUI // 5 // 
+5 <==> 5 // EQUI // 5 // 
+5 <==> 6 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="20" status="">
+// A boy is jumping into the water with a ball in his hand .
+// A little boy swimming underwater with a toy in his hand .
+<source>
+1 A :
+2 boy :
+3 is :
+4 jumping :
+5 into :
+6 the :
+7 water :
+8 with :
+9 a :
+10 ball :
+11 in :
+12 his :
+13 hand :
+14 . :
+</source>
+<translation>
+1 A :
+2 little :
+3 boy :
+4 swimming :
+5 underwater :
+6 with :
+7 a :
+8 toy :
+9 in :
+10 his :
+11 hand :
+12 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 3 // EQUI // 5 // 
+5 6 7 <==> 5 // EQUI // 5 // 
+11 12 13 <==> 9 10 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="21" status="">
+// A deer jumps a fence .
+// A deer jumping over a fence .
+<source>
+1 A :
+2 deer :
+3 jumps :
+4 a :
+5 fence :
+6 . :
+</source>
+<translation>
+1 A :
+2 deer :
+3 jumping :
+4 over :
+5 a :
+6 fence :
+7 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 <==> 3 4 // EQUI // 5 // 
+4 5 <==> 5 6 // EQUI // 5 // 
+6 <==> 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="22" status="">
+// Two young girls with dyed hair talk to two boys in black .
+// two girls with pink streaked hair and two boys with black hair standing next to a concrete building .
+<source>
+1 Two :
+2 young :
+3 girls :
+4 with :
+5 dyed :
+6 hair :
+7 talk :
+8 to :
+9 two :
+10 boys :
+11 in :
+12 black :
+13 . :
+</source>
+<translation>
+1 two :
+2 girls :
+3 with :
+4 pink :
+5 streaked :
+6 hair :
+7 and :
+8 two :
+9 boys :
+10 with :
+11 black :
+12 hair :
+13 standing :
+14 next :
+15 to :
+16 a :
+17 concrete :
+18 building :
+19 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 // EQUI // 5 // 
+4 5 6 <==> 3 4 5 6 // EQUI // 5 // 
+8 9 10 <==> 8 9 // EQUI // 5 // 
+11 12 <==> 10 11 12 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="23" status="">
+// Light brown dog running towards something at the beach .
+// A brown dog chases a blond one in the grass .
+<source>
+1 Light :
+2 brown :
+3 dog :
+4 running :
+5 towards :
+6 something :
+7 at :
+8 the :
+9 beach :
+10 . :
+</source>
+<translation>
+1 A :
+2 brown :
+3 dog :
+4 chases :
+5 a :
+6 blond :
+7 one :
+8 in :
+9 the :
+10 grass :
+11 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+4 <==> 4 // EQUI // 5 // 
+5 6 <==> 4 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="24" status="">
+// A man with a messenger bag in front of a gray tile wall .
+// Man in red jacket standing in front of lighthouse .
+<source>
+1 A :
+2 man :
+3 with :
+4 a :
+5 messenger :
+6 bag :
+7 in :
+8 front :
+9 of :
+10 a :
+11 gray :
+12 tile :
+13 wall :
+14 . :
+</source>
+<translation>
+1 Man :
+2 in :
+3 red :
+4 jacket :
+5 standing :
+6 in :
+7 front :
+8 of :
+9 lighthouse :
+10 . :
+</translation>
+<alignment>
+7 8 9 10 11 12 13 <==> 5 // EQUI // 5 // 
+14 <==> 6 7 8 9 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="25" status="">
+// A man crouching and holding a camera .
+// The crouching man is holding a large camera .
+<source>
+1 A :
+2 man :
+3 crouching :
+4 and :
+5 holding :
+6 a :
+7 camera :
+8 . :
+</source>
+<translation>
+1 The :
+2 crouching :
+3 man :
+4 is :
+5 holding :
+6 a :
+7 large :
+8 camera :
+9 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+5 <==> 4 5 // EQUI // 5 // 
+6 7 <==> 6 7 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="26" status="">
+// A girl wearing a pink coat splashes in rain puddles .
+// A girl in a pink jacket is walking through a large puddle .
+<source>
+1 A :
+2 girl :
+3 wearing :
+4 a :
+5 pink :
+6 coat :
+7 splashes :
+8 in :
+9 rain :
+10 puddles :
+11 . :
+</source>
+<translation>
+1 A :
+2 girl :
+3 in :
+4 a :
+5 pink :
+6 jacket :
+7 is :
+8 walking :
+9 through :
+10 a :
+11 large :
+12 puddle :
+13 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 <==> 3 4 5 6 // EQUI // 5 // 
+8 9 10 <==> 9 10 11 12 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="27" status="">
+// A man rollerblading on a metal bar .
+// Roller blades sliding on a railing .
+<source>
+1 A :
+2 man :
+3 rollerblading :
+4 on :
+5 a :
+6 metal :
+7 bar :
+8 . :
+</source>
+<translation>
+1 Roller :
+2 blades :
+3 sliding :
+4 on :
+5 a :
+6 railing :
+7 . :
+</translation>
+<alignment>
+3 <==> 1 2 // EQUI // 5 // 
+8 <==> 4 5 6 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="28" status="">
+// A small dog jumping with a ball in its mouth .
+// There is a brown dog swimming outside with a tennis ball in its mouth .
+<source>
+1 A :
+2 small :
+3 dog :
+4 jumping :
+5 with :
+6 a :
+7 ball :
+8 in :
+9 its :
+10 mouth :
+11 . :
+</source>
+<translation>
+1 There :
+2 is :
+3 a :
+4 brown :
+5 dog :
+6 swimming :
+7 outside :
+8 with :
+9 a :
+10 tennis :
+11 ball :
+12 in :
+13 its :
+14 mouth :
+15 . :
+</translation>
+<alignment>
+5 6 7 <==> 8 9 10 11 // EQUI // 5 // 
+8 9 10 <==> 12 13 14 // EQUI // 5 // 
+11 <==> 15 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="29" status="">
+// Kids playing ball in the park .
+// Two dogs playing by the shore .
+<source>
+1 Kids :
+2 playing :
+3 ball :
+4 in :
+5 the :
+6 park :
+7 . :
+</source>
+<translation>
+1 Two :
+2 dogs :
+3 playing :
+4 by :
+5 the :
+6 shore :
+7 . :
+</translation>
+<alignment>
+2 3 <==> 3 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="30" status="">
+// Woman in a black dress walking on the street .
+// A woman watches a dog jump down the stairs .
+<source>
+1 Woman :
+2 in :
+3 a :
+4 black :
+5 dress :
+6 walking :
+7 on :
+8 the :
+9 street :
+10 . :
+</source>
+<translation>
+1 A :
+2 woman :
+3 watches :
+4 a :
+5 dog :
+6 jump :
+7 down :
+8 the :
+9 stairs :
+10 . :
+</translation>
+<alignment>
+1 <==> 1 2 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="31" status="">
+// Five men dressed in tuxedos standing on a set of stairs
+// Five men in tuxedos are walking down steps .
+<source>
+1 Five :
+2 men :
+3 dressed :
+4 in :
+5 tuxedos :
+6 standing :
+7 on :
+8 a :
+9 set :
+10 of :
+11 stairs :
+</source>
+<translation>
+1 Five :
+2 men :
+3 in :
+4 tuxedos :
+5 are :
+6 walking :
+7 down :
+8 steps :
+9 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+4 5 <==> 3 4 // EQUI // 5 // 
+8 9 10 11 <==> 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="32" status="">
+// A dog is running toward the camera .
+// A brown and white dog running on grass .
+<source>
+1 A :
+2 dog :
+3 is :
+4 running :
+5 toward :
+6 the :
+7 camera :
+8 . :
+</source>
+<translation>
+1 A :
+2 brown :
+3 and :
+4 white :
+5 dog :
+6 running :
+7 on :
+8 grass :
+9 . :
+</translation>
+<alignment>
+3 4 <==> 6 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="33" status="">
+// a dog jumps into the water .
+// A small dog leaps in the water .
+<source>
+1 a :
+2 dog :
+3 jumps :
+4 into :
+5 the :
+6 water :
+7 . :
+</source>
+<translation>
+1 A :
+2 small :
+3 dog :
+4 leaps :
+5 in :
+6 the :
+7 water :
+8 . :
+</translation>
+<alignment>
+1 2 <==> 4 // EQUI // 5 // 
+3 <==> 1 2 3 // EQUI // 5 // 
+3 <==> 4 // EQUI // 5 // 
+4 5 6 <==> 5 6 7 // EQUI // 5 // 
+7 <==> 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="34" status="">
+// Two large dogs running in some grass .
+// Two brindle dogs running in the grass .
+<source>
+1 Two :
+2 large :
+3 dogs :
+4 running :
+5 in :
+6 some :
+7 grass :
+8 . :
+</source>
+<translation>
+1 Two :
+2 brindle :
+3 dogs :
+4 running :
+5 in :
+6 the :
+7 grass :
+8 . :
+</translation>
+<alignment>
+4 <==> 4 // EQUI // 5 // 
+5 6 7 <==> 5 6 7 // EQUI // 5 // 
+8 <==> 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="35" status="">
+// A boy stands in the pool at the bottom of a blue water slide .
+// A boy splashes into a pool , ejected from a water slide .
+<source>
+1 A :
+2 boy :
+3 stands :
+4 in :
+5 the :
+6 pool :
+7 at :
+8 the :
+9 bottom :
+10 of :
+11 a :
+12 blue :
+13 water :
+14 slide :
+15 . :
+</source>
+<translation>
+1 A :
+2 boy :
+3 splashes :
+4 into :
+5 a :
+6 pool :
+7 , :
+8 ejected :
+9 from :
+10 a :
+11 water :
+12 slide :
+13 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+4 5 6 <==> 4 5 6 // EQUI // 5 // 
+10 11 12 13 14 <==> 9 10 11 12 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="36" status="">
+// Two children ride saucers down a snowy hill .
+// Two children go sledding .
+<source>
+1 Two :
+2 children :
+3 ride :
+4 saucers :
+5 down :
+6 a :
+7 snowy :
+8 hill :
+9 . :
+</source>
+<translation>
+1 Two :
+2 children :
+3 go :
+4 sledding :
+5 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+9 <==> 5 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="37" status="">
+// A person climbs up a snowy hill while their dog follows .
+// A person climbs a snowy hill while a black dog follows .
+<source>
+1 A :
+2 person :
+3 climbs :
+4 up :
+5 a :
+6 snowy :
+7 hill :
+8 while :
+9 their :
+10 dog :
+11 follows :
+12 . :
+</source>
+<translation>
+1 A :
+2 person :
+3 climbs :
+4 a :
+5 snowy :
+6 hill :
+7 while :
+8 a :
+9 black :
+10 dog :
+11 follows :
+12 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 4 <==> 3 // EQUI // 5 // 
+5 6 7 <==> 4 5 6 // EQUI // 5 // 
+8 9 10 <==> 11 // EQUI // 5 // 
+11 <==> 7 8 9 10 // EQUI // 5 // 
+11 <==> 11 // EQUI // 5 // 
+12 <==> 12 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="38" status="">
+// A child is jumping into a swimming pool .
+// A dog jumping into a swimming pool .
+<source>
+1 A :
+2 child :
+3 is :
+4 jumping :
+5 into :
+6 a :
+7 swimming :
+8 pool :
+9 . :
+</source>
+<translation>
+1 A :
+2 dog :
+3 jumping :
+4 into :
+5 a :
+6 swimming :
+7 pool :
+8 . :
+</translation>
+<alignment>
+3 4 <==> 3 // EQUI // 5 // 
+5 6 7 8 <==> 4 5 6 7 // EQUI // 5 // 
+9 <==> 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="39" status="">
+// Four small children sit on tall stools at a resturaunt bar .
+// Four children sit on tall bar stools at a yellow and grey bar .
+<source>
+1 Four :
+2 small :
+3 children :
+4 sit :
+5 on :
+6 tall :
+7 stools :
+8 at :
+9 a :
+10 resturaunt :
+11 bar :
+12 . :
+</source>
+<translation>
+1 Four :
+2 children :
+3 sit :
+4 on :
+5 tall :
+6 bar :
+7 stools :
+8 at :
+9 a :
+10 yellow :
+11 and :
+12 grey :
+13 bar :
+14 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 // EQUI // 5 // 
+4 <==> 3 // EQUI // 5 // 
+5 6 7 <==> 4 5 6 7 // EQUI // 5 // 
+8 9 10 11 <==> 8 9 10 11 12 13 // EQUI // 5 // 
+12 <==> 14 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="40" status="">
+// The black and white dog runs through the grass .
+// A black and white dog is running through grass .
+<source>
+1 The :
+2 black :
+3 and :
+4 white :
+5 dog :
+6 runs :
+7 through :
+8 the :
+9 grass :
+10 . :
+</source>
+<translation>
+1 A :
+2 black :
+3 and :
+4 white :
+5 dog :
+6 is :
+7 running :
+8 through :
+9 grass :
+10 . :
+</translation>
+<alignment>
+1 2 3 4 5 <==> 1 2 3 4 5 // EQUI // 5 // 
+6 <==> 6 7 // EQUI // 5 // 
+7 8 9 <==> 8 9 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="41" status="">
+// A girl in a pink shirt is sprawling her limbs out in midair .
+// A man dressed in a Santa suit is climbing up a large concrete building .
+<source>
+1 A :
+2 girl :
+3 in :
+4 a :
+5 pink :
+6 shirt :
+7 is :
+8 sprawling :
+9 her :
+10 limbs :
+11 out :
+12 in :
+13 midair :
+14 . :
+</source>
+<translation>
+1 A :
+2 man :
+3 dressed :
+4 in :
+5 a :
+6 Santa :
+7 suit :
+8 is :
+9 climbing :
+10 up :
+11 a :
+12 large :
+13 concrete :
+14 building :
+15 . :
+</translation>
+<alignment>
+3 4 5 6 <==> 15 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="42" status="">
+// A tan and white dog retrieving a ball on a gravel path .
+// A large dog walks along a gravel path in the woods .
+<source>
+1 A :
+2 tan :
+3 and :
+4 white :
+5 dog :
+6 retrieving :
+7 a :
+8 ball :
+9 on :
+10 a :
+11 gravel :
+12 path :
+13 . :
+</source>
+<translation>
+1 A :
+2 large :
+3 dog :
+4 walks :
+5 along :
+6 a :
+7 gravel :
+8 path :
+9 in :
+10 the :
+11 woods :
+12 . :
+</translation>
+<alignment>
+1 2 3 4 5 <==> 1 2 3 // EQUI // 5 // 
+9 10 11 12 <==> 5 6 7 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="43" status="">
+// a boy in a grey hat is carrying a soccer ball by a reddish colored wall .
+// A small boy is carrying a soccer ball .
+<source>
+1 a :
+2 boy :
+3 in :
+4 a :
+5 grey :
+6 hat :
+7 is :
+8 carrying :
+9 a :
+10 soccer :
+11 ball :
+12 by :
+13 a :
+14 reddish :
+15 colored :
+16 wall :
+17 . :
+</source>
+<translation>
+1 A :
+2 small :
+3 boy :
+4 is :
+5 carrying :
+6 a :
+7 soccer :
+8 ball :
+9 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 3 // EQUI // 5 // 
+7 8 <==> 4 5 // EQUI // 5 // 
+9 10 11 <==> 6 7 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="44" status="">
+// A person wearing scuba gear is swimming underwater water .
+// A person is scuba diving in very clear blue water .
+<source>
+1 A :
+2 person :
+3 wearing :
+4 scuba :
+5 gear :
+6 is :
+7 swimming :
+8 underwater :
+9 water :
+10 . :
+</source>
+<translation>
+1 A :
+2 person :
+3 is :
+4 scuba :
+5 diving :
+6 in :
+7 very :
+8 clear :
+9 blue :
+10 water :
+11 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+4 5 <==> 3 4 5 // EQUI // 5 // 
+8 9 <==> 6 7 8 9 10 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="45" status="">
+// A white dog walking in the snow .
+// A black and tan dog walking through the snow .
+<source>
+1 A :
+2 white :
+3 dog :
+4 walking :
+5 in :
+6 the :
+7 snow :
+8 . :
+</source>
+<translation>
+1 A :
+2 black :
+3 and :
+4 tan :
+5 dog :
+6 walking :
+7 through :
+8 the :
+9 snow :
+10 . :
+</translation>
+<alignment>
+4 <==> 6 // EQUI // 5 // 
+5 6 7 <==> 7 8 9 // EQUI // 5 // 
+8 <==> 10 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="46" status="">
+// A woman placing a baby on a skateboard on the beach .
+// a woman holds a small baby on a skateboard at the beach
+<source>
+1 A :
+2 woman :
+3 placing :
+4 a :
+5 baby :
+6 on :
+7 a :
+8 skateboard :
+9 on :
+10 the :
+11 beach :
+12 . :
+</source>
+<translation>
+1 a :
+2 woman :
+3 holds :
+4 a :
+5 small :
+6 baby :
+7 on :
+8 a :
+9 skateboard :
+10 at :
+11 the :
+12 beach :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+4 5 <==> 4 5 6 // EQUI // 5 // 
+6 7 8 <==> 7 8 9 // EQUI // 5 // 
+9 10 11 <==> 10 11 12 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="47" status="">
+// A young boy jumping into a lake .
+// The boy is jumping into a lake .
+<source>
+1 A :
+2 young :
+3 boy :
+4 jumping :
+5 into :
+6 a :
+7 lake :
+8 . :
+</source>
+<translation>
+1 The :
+2 boy :
+3 is :
+4 jumping :
+5 into :
+6 a :
+7 lake :
+8 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 // EQUI // 5 // 
+4 <==> 3 4 // EQUI // 5 // 
+5 6 7 <==> 5 6 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="48" status="">
+// A man water skis while attached to a parachute .
+// A man kite surfing creates a wave .
+<source>
+1 A :
+2 man :
+3 water :
+4 skis :
+5 while :
+6 attached :
+7 to :
+8 a :
+9 parachute :
+10 . :
+</source>
+<translation>
+1 A :
+2 man :
+3 kite :
+4 surfing :
+5 creates :
+6 a :
+7 wave :
+8 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="49" status="">
+// A white dog looks at a black puppy in the snow .
+// A big white dog and a small black dog sit in the snow .
+<source>
+1 A :
+2 white :
+3 dog :
+4 looks :
+5 at :
+6 a :
+7 black :
+8 puppy :
+9 in :
+10 the :
+11 snow :
+12 . :
+</source>
+<translation>
+1 A :
+2 big :
+3 white :
+4 dog :
+5 and :
+6 a :
+7 small :
+8 black :
+9 dog :
+10 sit :
+11 in :
+12 the :
+13 snow :
+14 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 4 5 6 7 8 9 // EQUI // 5 // 
+9 10 11 <==> 11 12 13 // EQUI // 5 // 
+12 <==> 14 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="50" status="">
+// A blue and white soccer team playing against each other .
+// A topless woman with her face painted is covered in mud .
+<source>
+1 A :
+2 blue :
+3 and :
+4 white :
+5 soccer :
+6 team :
+7 playing :
+8 against :
+9 each :
+10 other :
+11 . :
+</source>
+<translation>
+1 A :
+2 topless :
+3 woman :
+4 with :
+5 her :
+6 face :
+7 painted :
+8 is :
+9 covered :
+10 in :
+11 mud :
+12 . :
+</translation>
+<alignment>
+7 <==> 7 // EQUI // 5 // 
+11 <==> 12 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="51" status="">
+// a white dog running in the snow
+// The dogs are running in the snow .
+<source>
+1 a :
+2 white :
+3 dog :
+4 running :
+5 in :
+6 the :
+7 snow :
+</source>
+<translation>
+1 The :
+2 dogs :
+3 are :
+4 running :
+5 in :
+6 the :
+7 snow :
+8 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 // EQUI // 5 // 
+5 6 7 <==> 5 6 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="52" status="">
+// A young boy wearing a blue visor swings a bat .
+// A young boy with a visor on plays ball with his bat in the street .
+<source>
+1 A :
+2 young :
+3 boy :
+4 wearing :
+5 a :
+6 blue :
+7 visor :
+8 swings :
+9 a :
+10 bat :
+11 . :
+</source>
+<translation>
+1 A :
+2 young :
+3 boy :
+4 with :
+5 a :
+6 visor :
+7 on :
+8 plays :
+9 ball :
+10 with :
+11 his :
+12 bat :
+13 in :
+14 the :
+15 street :
+16 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+5 6 7 <==> 7 // EQUI // 5 // 
+9 10 <==> 10 11 12 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="53" status="">
+// a group of people white water rafting in a blue raft .
+// A group of people paddle their blue inflatable raft down the rapids .
+<source>
+1 a :
+2 group :
+3 of :
+4 people :
+5 white :
+6 water :
+7 rafting :
+8 in :
+9 a :
+10 blue :
+11 raft :
+12 . :
+</source>
+<translation>
+1 A :
+2 group :
+3 of :
+4 people :
+5 paddle :
+6 their :
+7 blue :
+8 inflatable :
+9 raft :
+10 down :
+11 the :
+12 rapids :
+13 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 4 <==> 3 4 // EQUI // 5 // 
+8 9 10 11 <==> 6 7 8 9 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="54" status="">
+// A pair of dogs playing with a purple ball .
+// Two dogs play with purple football .
+<source>
+1 A :
+2 pair :
+3 of :
+4 dogs :
+5 playing :
+6 with :
+7 a :
+8 purple :
+9 ball :
+10 . :
+</source>
+<translation>
+1 Two :
+2 dogs :
+3 play :
+4 with :
+5 purple :
+6 football :
+7 . :
+</translation>
+<alignment>
+1 2 3 4 <==> 1 2 // EQUI // 5 // 
+5 <==> 3 // EQUI // 5 // 
+6 7 8 9 <==> 4 5 6 // EQUI // 5 // 
+10 <==> 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="55" status="">
+// A dog shakes off water
+// A dog shakes his head .
+<source>
+1 A :
+2 dog :
+3 shakes :
+4 off :
+5 water :
+</source>
+<translation>
+1 A :
+2 dog :
+3 shakes :
+4 his :
+5 head :
+6 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 <==> 3 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="56" status="">
+// A boy wearing a red shirt runs across the grass with a furry dog .
+// A sports fan is wearing face paint in the stands .
+<source>
+1 A :
+2 boy :
+3 wearing :
+4 a :
+5 red :
+6 shirt :
+7 runs :
+8 across :
+9 the :
+10 grass :
+11 with :
+12 a :
+13 furry :
+14 dog :
+15 . :
+</source>
+<translation>
+1 A :
+2 sports :
+3 fan :
+4 is :
+5 wearing :
+6 face :
+7 paint :
+8 in :
+9 the :
+10 stands :
+11 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 3 // EQUI // 5 // 
+8 9 10 <==> 8 9 10 // EQUI // 5 // 
+11 12 13 14 <==> 6 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="57" status="">
+// Two young children are walking across an open field .
+// Two small children walking in a field .
+<source>
+1 Two :
+2 young :
+3 children :
+4 are :
+5 walking :
+6 across :
+7 an :
+8 open :
+9 field :
+10 . :
+</source>
+<translation>
+1 Two :
+2 small :
+3 children :
+4 walking :
+5 in :
+6 a :
+7 field :
+8 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+4 5 <==> 4 // EQUI // 5 // 
+6 7 8 9 <==> 5 6 7 // EQUI // 5 // 
+10 <==> 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="58" status="">
+// The brown dog is running on the grass .
+// The skinny brown dog is running through the tall green grass .
+<source>
+1 The :
+2 brown :
+3 dog :
+4 is :
+5 running :
+6 on :
+7 the :
+8 grass :
+9 . :
+</source>
+<translation>
+1 The :
+2 skinny :
+3 brown :
+4 dog :
+5 is :
+6 running :
+7 through :
+8 the :
+9 tall :
+10 green :
+11 grass :
+12 . :
+</translation>
+<alignment>
+4 5 <==> 5 6 // EQUI // 5 // 
+6 7 8 <==> 7 8 9 10 11 // EQUI // 5 // 
+9 <==> 12 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="59" status="">
+// A man with his arms raised at the top of a mountain .
+// A person in a red shirt is standing , with arms raised , at the top of a mountain .
+<source>
+1 A :
+2 man :
+3 with :
+4 his :
+5 arms :
+6 raised :
+7 at :
+8 the :
+9 top :
+10 of :
+11 a :
+12 mountain :
+13 . :
+</source>
+<translation>
+1 A :
+2 person :
+3 in :
+4 a :
+5 red :
+6 shirt :
+7 is :
+8 standing :
+9 , :
+10 with :
+11 arms :
+12 raised :
+13 , :
+14 at :
+15 the :
+16 top :
+17 of :
+18 a :
+19 mountain :
+20 . :
+</translation>
+<alignment>
+3 4 5 <==> 12 // EQUI // 5 // 
+7 8 9 <==> 14 15 16 // EQUI // 5 // 
+10 11 12 <==> 17 18 19 // EQUI // 5 // 
+13 <==> 13 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="60" status="">
+// Three children stand on or near a fence .
+// The three children are standing on and by a fence .
+<source>
+1 Three :
+2 children :
+3 stand :
+4 on :
+5 or :
+6 near :
+7 a :
+8 fence :
+9 . :
+</source>
+<translation>
+1 The :
+2 three :
+3 children :
+4 are :
+5 standing :
+6 on :
+7 and :
+8 by :
+9 a :
+10 fence :
+11 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 3 // EQUI // 5 // 
+3 <==> 4 5 // EQUI // 5 // 
+4 5 6 7 8 <==> 6 7 8 9 10 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="61" status="">
+// A group of four children dancing in a backyard .
+// A group of children do stretches on colored mats .
+<source>
+1 A :
+2 group :
+3 of :
+4 four :
+5 children :
+6 dancing :
+7 in :
+8 a :
+9 backyard :
+10 . :
+</source>
+<translation>
+1 A :
+2 group :
+3 of :
+4 children :
+5 do :
+6 stretches :
+7 on :
+8 colored :
+9 mats :
+10 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 4 5 <==> 3 4 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="62" status="">
+// Two constructions workers sit on a beam taking a break .
+// The man is putting on his shirt near an elevator .
+<source>
+1 Two :
+2 constructions :
+3 workers :
+4 sit :
+5 on :
+6 a :
+7 beam :
+8 taking :
+9 a :
+10 break :
+11 . :
+</source>
+<translation>
+1 The :
+2 man :
+3 is :
+4 putting :
+5 on :
+6 his :
+7 shirt :
+8 near :
+9 an :
+10 elevator :
+11 . :
+</translation>
+<alignment>
+1 2 3 <==> 8 9 10 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="63" status="">
+// A man is holding a very long leash attached to a very large dog who is smelling the grass .
+// A man holds a long leash with a large gray dog attached to it .
+<source>
+1 A :
+2 man :
+3 is :
+4 holding :
+5 a :
+6 very :
+7 long :
+8 leash :
+9 attached :
+10 to :
+11 a :
+12 very :
+13 large :
+14 dog :
+15 who :
+16 is :
+17 smelling :
+18 the :
+19 grass :
+20 . :
+</source>
+<translation>
+1 A :
+2 man :
+3 holds :
+4 a :
+5 long :
+6 leash :
+7 with :
+8 a :
+9 large :
+10 gray :
+11 dog :
+12 attached :
+13 to :
+14 it :
+15 . :
+</translation>
+<alignment>
+3 4 <==> 3 // EQUI // 5 // 
+5 6 7 8 <==> 4 5 6 // EQUI // 5 // 
+9 <==> 13 14 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="64" status="">
+// This is a boat on the water with mountains in the background .
+// A white boat on glassy water with mountains in the background .
+<source>
+1 This :
+2 is :
+3 a :
+4 boat :
+5 on :
+6 the :
+7 water :
+8 with :
+9 mountains :
+10 in :
+11 the :
+12 background :
+13 . :
+</source>
+<translation>
+1 A :
+2 white :
+3 boat :
+4 on :
+5 glassy :
+6 water :
+7 with :
+8 mountains :
+9 in :
+10 the :
+11 background :
+12 . :
+</translation>
+<alignment>
+3 4 <==> 1 2 3 // EQUI // 5 // 
+8 9 <==> 7 8 // EQUI // 5 // 
+10 11 12 <==> 9 10 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="65" status="">
+// Two boys are jumping into a pool .
+// Two boys are in midair jumping into an inground pool .
+<source>
+1 Two :
+2 boys :
+3 are :
+4 jumping :
+5 into :
+6 a :
+7 pool :
+8 . :
+</source>
+<translation>
+1 Two :
+2 boys :
+3 are :
+4 in :
+5 midair :
+6 jumping :
+7 into :
+8 an :
+9 inground :
+10 pool :
+11 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 4 <==> 6 // EQUI // 5 // 
+5 6 7 <==> 7 8 9 10 // EQUI // 5 // 
+8 <==> 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="66" status="">
+// Scuba diver submerged in water .
+// The scuba diver is underwater .
+<source>
+1 Scuba :
+2 diver :
+3 submerged :
+4 in :
+5 water :
+6 . :
+</source>
+<translation>
+1 The :
+2 scuba :
+3 diver :
+4 is :
+5 underwater :
+6 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 3 // EQUI // 5 // 
+3 4 5 <==> 4 5 // EQUI // 5 // 
+6 <==> 6 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="67" status="">
+// The brown and black dog sprints across the snow .
+// A black dog is running quickly along the ground .
+<source>
+1 The :
+2 brown :
+3 and :
+4 black :
+5 dog :
+6 sprints :
+7 across :
+8 the :
+9 snow :
+10 . :
+</source>
+<translation>
+1 A :
+2 black :
+3 dog :
+4 is :
+5 running :
+6 quickly :
+7 along :
+8 the :
+9 ground :
+10 . :
+</translation>
+<alignment>
+6 <==> 4 5 6 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="68" status="">
+// A black dog jumps through the water .
+// A dog walks through the snow .
+<source>
+1 A :
+2 black :
+3 dog :
+4 jumps :
+5 through :
+6 the :
+7 water :
+8 . :
+</source>
+<translation>
+1 A :
+2 dog :
+3 walks :
+4 through :
+5 the :
+6 snow :
+7 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 // EQUI // 5 // 
+8 <==> 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="69" status="">
+// A brown dog walks in the grass with it's tongue hanging out .
+// A grey dog walks in the green grass , tongue hanging out .
+<source>
+1 A :
+2 brown :
+3 dog :
+4 walks :
+5 in :
+6 the :
+7 grass :
+8 with :
+9 it's :
+10 tongue :
+11 hanging :
+12 out :
+13 . :
+</source>
+<translation>
+1 A :
+2 grey :
+3 dog :
+4 walks :
+5 in :
+6 the :
+7 green :
+8 grass :
+9 , :
+10 tongue :
+11 hanging :
+12 out :
+13 . :
+</translation>
+<alignment>
+4 <==> 4 // EQUI // 5 // 
+5 6 7 <==> 5 6 7 8 // EQUI // 5 // 
+11 12 <==> 11 12 // EQUI // 5 // 
+13 <==> 13 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="70" status="">
+// A person in a striped fleece clips a carabiner onto a metal line .
+// A young woman in a helmet attaches a pulley to a cable .
+<source>
+1 A :
+2 person :
+3 in :
+4 a :
+5 striped :
+6 fleece :
+7 clips :
+8 a :
+9 carabiner :
+10 onto :
+11 a :
+12 metal :
+13 line :
+14 . :
+</source>
+<translation>
+1 A :
+2 young :
+3 woman :
+4 in :
+5 a :
+6 helmet :
+7 attaches :
+8 a :
+9 pulley :
+10 to :
+11 a :
+12 cable :
+13 . :
+</translation>
+<alignment>
+7 <==> 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="71" status="">
+// A lean dog runs through green grass .
+// A brown dog and two black dogs in an overgrown grassy field .
+<source>
+1 A :
+2 lean :
+3 dog :
+4 runs :
+5 through :
+6 green :
+7 grass :
+8 . :
+</source>
+<translation>
+1 A :
+2 brown :
+3 dog :
+4 and :
+5 two :
+6 black :
+7 dogs :
+8 in :
+9 an :
+10 overgrown :
+11 grassy :
+12 field :
+13 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 4 5 6 7 // EQUI // 5 // 
+5 6 7 <==> 8 9 10 11 12 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="72" status="">
+// Many cars parked on a mountain .
+// A group of cars parked on a hill
+<source>
+1 Many :
+2 cars :
+3 parked :
+4 on :
+5 a :
+6 mountain :
+7 . :
+</source>
+<translation>
+1 A :
+2 group :
+3 of :
+4 cars :
+5 parked :
+6 on :
+7 a :
+8 hill :
+</translation>
+<alignment>
+1 2 <==> 1 2 3 4 // EQUI // 5 // 
+3 <==> 5 // EQUI // 5 // 
+4 5 6 <==> 6 7 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="73" status="">
+// A light brown dog is running in the water .
+// A brown and white dog running into the water
+<source>
+1 A :
+2 light :
+3 brown :
+4 dog :
+5 is :
+6 running :
+7 in :
+8 the :
+9 water :
+10 . :
+</source>
+<translation>
+1 A :
+2 brown :
+3 and :
+4 white :
+5 dog :
+6 running :
+7 into :
+8 the :
+9 water :
+</translation>
+<alignment>
+5 6 <==> 6 // EQUI // 5 // 
+7 8 9 <==> 7 8 9 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="74" status="">
+// three dogs playing on a beach
+// A boy standing on a beach .
+<source>
+1 three :
+2 dogs :
+3 playing :
+4 on :
+5 a :
+6 beach :
+</source>
+<translation>
+1 A :
+2 boy :
+3 standing :
+4 on :
+5 a :
+6 beach :
+7 . :
+</translation>
+<alignment>
+4 5 6 <==> 4 5 6 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="75" status="">
+// a dog jumps into the pond .
+// the skateboarder jumps into the air .
+<source>
+1 a :
+2 dog :
+3 jumps :
+4 into :
+5 the :
+6 pond :
+7 . :
+</source>
+<translation>
+1 the :
+2 skateboarder :
+3 jumps :
+4 into :
+5 the :
+6 air :
+7 . :
+</translation>
+<alignment>
+1 2 <==> 3 // EQUI // 5 // 
+3 <==> 3 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="76" status="">
+// A white and black dog is jumping into a pool .
+// A woman in a black apron is standing in front of a mirror .
+<source>
+1 A :
+2 white :
+3 and :
+4 black :
+5 dog :
+6 is :
+7 jumping :
+8 into :
+9 a :
+10 pool :
+11 . :
+</source>
+<translation>
+1 A :
+2 woman :
+3 in :
+4 a :
+5 black :
+6 apron :
+7 is :
+8 standing :
+9 in :
+10 front :
+11 of :
+12 a :
+13 mirror :
+14 . :
+</translation>
+<alignment>
+1 2 3 4 5 <==> 3 4 5 6 // EQUI // 5 // 
+8 9 10 <==> 9 10 11 12 13 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="77" status="">
+// A brown dog is running through green grass .
+// A brown dog is running though a river .
+<source>
+1 A :
+2 brown :
+3 dog :
+4 is :
+5 running :
+6 through :
+7 green :
+8 grass :
+9 . :
+</source>
+<translation>
+1 A :
+2 brown :
+3 dog :
+4 is :
+5 running :
+6 though :
+7 a :
+8 river :
+9 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+4 5 <==> 4 5 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="78" status="">
+// Three children playing on rocks near a lake
+// Three men playing baseball .
+<source>
+1 Three :
+2 children :
+3 playing :
+4 on :
+5 rocks :
+6 near :
+7 a :
+8 lake :
+</source>
+<translation>
+1 Three :
+2 men :
+3 playing :
+4 baseball :
+5 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 <==> 3 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="79" status="">
+// A man in black shaving a ice sculpture .
+// A man has a chainsaw and is carving a block of ice .
+<source>
+1 A :
+2 man :
+3 in :
+4 black :
+5 shaving :
+6 a :
+7 ice :
+8 sculpture :
+9 . :
+</source>
+<translation>
+1 A :
+2 man :
+3 has :
+4 a :
+5 chainsaw :
+6 and :
+7 is :
+8 carving :
+9 a :
+10 block :
+11 of :
+12 ice :
+13 . :
+</translation>
+<alignment>
+6 7 8 <==> 9 10 11 12 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="80" status="">
+// A brown and white dog with a pink collar is barking at a brown dog with a blue collar in the snow .
+// The dog with the red collar is bearing it's teeth at the dog with the blue collar .
+<source>
+1 A :
+2 brown :
+3 and :
+4 white :
+5 dog :
+6 with :
+7 a :
+8 pink :
+9 collar :
+10 is :
+11 barking :
+12 at :
+13 a :
+14 brown :
+15 dog :
+16 with :
+17 a :
+18 blue :
+19 collar :
+20 in :
+21 the :
+22 snow :
+23 . :
+</source>
+<translation>
+1 The :
+2 dog :
+3 with :
+4 the :
+5 red :
+6 collar :
+7 is :
+8 bearing :
+9 it's :
+10 teeth :
+11 at :
+12 the :
+13 dog :
+14 with :
+15 the :
+16 blue :
+17 collar :
+18 . :
+</translation>
+<alignment>
+1 2 3 4 5 <==> 1 2 // EQUI // 5 // 
+6 7 8 9 <==> 3 4 5 6 // EQUI // 5 // 
+12 13 14 15 <==> 11 12 13 // EQUI // 5 // 
+16 17 18 19 <==> 14 15 16 17 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="81" status="">
+// A dog looking at the camera in snow .
+// A dog is walking in a tire track in the snow .
+<source>
+1 A :
+2 dog :
+3 looking :
+4 at :
+5 the :
+6 camera :
+7 in :
+8 snow :
+9 . :
+</source>
+<translation>
+1 A :
+2 dog :
+3 is :
+4 walking :
+5 in :
+6 a :
+7 tire :
+8 track :
+9 in :
+10 the :
+11 snow :
+12 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+7 8 <==> 9 10 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="82" status="">
+// A surfer is riding on a breaking wave .
+// A surfer is riding a wave .
+<source>
+1 A :
+2 surfer :
+3 is :
+4 riding :
+5 on :
+6 a :
+7 breaking :
+8 wave :
+9 . :
+</source>
+<translation>
+1 A :
+2 surfer :
+3 is :
+4 riding :
+5 a :
+6 wave :
+7 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 4 <==> 3 4 // EQUI // 5 // 
+5 6 7 8 <==> 5 6 // EQUI // 5 // 
+9 <==> 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="83" status="">
+// The # 2 greyhound dog is running around a track .
+// a muzzled greyhound dog is running around a track
+<source>
+1 The :
+2 # :
+3 2 :
+4 greyhound :
+5 dog :
+6 is :
+7 running :
+8 around :
+9 a :
+10 track :
+11 . :
+</source>
+<translation>
+1 a :
+2 muzzled :
+3 greyhound :
+4 dog :
+5 is :
+6 running :
+7 around :
+8 a :
+9 track :
+</translation>
+<alignment>
+6 7 <==> 5 6 // EQUI // 5 // 
+8 9 10 <==> 7 8 9 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="84" status="">
+// A black dog is running after a white dog in the snow .
+// Black dog chasing brown dog through snow
+<source>
+1 A :
+2 black :
+3 dog :
+4 is :
+5 running :
+6 after :
+7 a :
+8 white :
+9 dog :
+10 in :
+11 the :
+12 snow :
+13 . :
+</source>
+<translation>
+1 Black :
+2 dog :
+3 chasing :
+4 brown :
+5 dog :
+6 through :
+7 snow :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 // EQUI // 5 // 
+7 8 9 <==> 4 5 // EQUI // 5 // 
+10 11 12 <==> 6 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="85" status="">
+// A man wearing an orange coat speaks to another as they walk in the snow .
+// A man and woman dressedin old fashion clothing sit outside at a table .
+<source>
+1 A :
+2 man :
+3 wearing :
+4 an :
+5 orange :
+6 coat :
+7 speaks :
+8 to :
+9 another :
+10 as :
+11 they :
+12 walk :
+13 in :
+14 the :
+15 snow :
+16 . :
+</source>
+<translation>
+1 A :
+2 man :
+3 and :
+4 woman :
+5 dressedin :
+6 old :
+7 fashion :
+8 clothing :
+9 sit :
+10 outside :
+11 at :
+12 a :
+13 table :
+14 . :
+</translation>
+<alignment>
+3 <==> 5 // EQUI // 5 // 
+10 11 <==> 1 2 3 4 // EQUI // 5 // 
+13 14 15 <==> 10 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="86" status="">
+// Dog running on shore beside two geese in water
+// A black dog running along the sandy shoreline of a body of water while two ducks swim nearby .
+<source>
+1 Dog :
+2 running :
+3 on :
+4 shore :
+5 beside :
+6 two :
+7 geese :
+8 in :
+9 water :
+</source>
+<translation>
+1 A :
+2 black :
+3 dog :
+4 running :
+5 along :
+6 the :
+7 sandy :
+8 shoreline :
+9 of :
+10 a :
+11 body :
+12 of :
+13 water :
+14 while :
+15 two :
+16 ducks :
+17 swim :
+18 nearby :
+19 . :
+</translation>
+<alignment>
+1 <==> 1 2 3 // EQUI // 5 // 
+2 <==> 4 // EQUI // 5 // 
+3 4 <==> 5 6 7 8 // EQUI // 5 // 
+8 9 <==> 18 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="87" status="">
+// A group of people in boats racing towards the shore .
+// A group of people stand together and pose in front of a house .
+<source>
+1 A :
+2 group :
+3 of :
+4 people :
+5 in :
+6 boats :
+7 racing :
+8 towards :
+9 the :
+10 shore :
+11 . :
+</source>
+<translation>
+1 A :
+2 group :
+3 of :
+4 people :
+5 stand :
+6 together :
+7 and :
+8 pose :
+9 in :
+10 front :
+11 of :
+12 a :
+13 house :
+14 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+8 9 10 <==> 14 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="88" status="">
+// A family is playing on the beach with their dog .
+// A naked little girl being thrown into the air .
+<source>
+1 A :
+2 family :
+3 is :
+4 playing :
+5 on :
+6 the :
+7 beach :
+8 with :
+9 their :
+10 dog :
+11 . :
+</source>
+<translation>
+1 A :
+2 naked :
+3 little :
+4 girl :
+5 being :
+6 thrown :
+7 into :
+8 the :
+9 air :
+10 . :
+</translation>
+<alignment>
+3 4 <==> 5 6 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="89" status="">
+// A man is wind sailing in the ocean .
+// A dog is running through the ocean .
+<source>
+1 A :
+2 man :
+3 is :
+4 wind :
+5 sailing :
+6 in :
+7 the :
+8 ocean :
+9 . :
+</source>
+<translation>
+1 A :
+2 dog :
+3 is :
+4 running :
+5 through :
+6 the :
+7 ocean :
+8 . :
+</translation>
+<alignment>
+6 7 8 <==> 5 6 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="90" status="">
+// A small dog runs through a grassy field .
+// Two dogs bound across the grass .
+<source>
+1 A :
+2 small :
+3 dog :
+4 runs :
+5 through :
+6 a :
+7 grassy :
+8 field :
+9 . :
+</source>
+<translation>
+1 Two :
+2 dogs :
+3 bound :
+4 across :
+5 the :
+6 grass :
+7 . :
+</translation>
+<alignment>
+4 <==> 3 // EQUI // 5 // 
+5 6 7 8 <==> 4 5 6 // EQUI // 5 // 
+9 <==> 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="91" status="">
+// A young child blows on an orange wand to make a bubble .
+// An Asian child is blowing bubbles from an orange bubble hoop .
+<source>
+1 A :
+2 young :
+3 child :
+4 blows :
+5 on :
+6 an :
+7 orange :
+8 wand :
+9 to :
+10 make :
+11 a :
+12 bubble :
+13 . :
+</source>
+<translation>
+1 An :
+2 Asian :
+3 child :
+4 is :
+5 blowing :
+6 bubbles :
+7 from :
+8 an :
+9 orange :
+10 bubble :
+11 hoop :
+12 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+9 10 <==> 4 5 // EQUI // 5 // 
+11 12 <==> 6 // EQUI // 5 // 
+13 <==> 12 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="92" status="">
+// two woman sit on a park bench .
+// Two women sitting on a bench by the water .
+<source>
+1 two :
+2 woman :
+3 sit :
+4 on :
+5 a :
+6 park :
+7 bench :
+8 . :
+</source>
+<translation>
+1 Two :
+2 women :
+3 sitting :
+4 on :
+5 a :
+6 bench :
+7 by :
+8 the :
+9 water :
+10 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 <==> 3 // EQUI // 5 // 
+4 5 6 7 <==> 4 5 6 // EQUI // 5 // 
+8 <==> 10 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="93" status="">
+// a bird lands in the water .
+// a boat floats in the water .
+<source>
+1 a :
+2 bird :
+3 lands :
+4 in :
+5 the :
+6 water :
+7 . :
+</source>
+<translation>
+1 a :
+2 boat :
+3 floats :
+4 in :
+5 the :
+6 water :
+7 . :
+</translation>
+<alignment>
+4 5 6 <==> 4 5 6 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="94" status="">
+// Two young men are juggling multi-colored blocks with people watching .
+// Two men stand juggling colored boxes while other men stand on a balcony .
+<source>
+1 Two :
+2 young :
+3 men :
+4 are :
+5 juggling :
+6 multi-colored :
+7 blocks :
+8 with :
+9 people :
+10 watching :
+11 . :
+</source>
+<translation>
+1 Two :
+2 men :
+3 stand :
+4 juggling :
+5 colored :
+6 boxes :
+7 while :
+8 other :
+9 men :
+10 stand :
+11 on :
+12 a :
+13 balcony :
+14 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 // EQUI // 5 // 
+4 5 <==> 3 4 // EQUI // 5 // 
+10 <==> 14 // EQUI // 5 // 
+11 <==> 14 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="95" status="">
+// A person is skijoring with a dog in the mountains .
+// A brown dog is playing with a ball in the water .
+<source>
+1 A :
+2 person :
+3 is :
+4 skijoring :
+5 with :
+6 a :
+7 dog :
+8 in :
+9 the :
+10 mountains :
+11 . :
+</source>
+<translation>
+1 A :
+2 brown :
+3 dog :
+4 is :
+5 playing :
+6 with :
+7 a :
+8 ball :
+9 in :
+10 the :
+11 water :
+12 . :
+</translation>
+<alignment>
+3 4 <==> 12 // EQUI // 5 // 
+5 6 7 <==> 1 2 3 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="96" status="">
+// A black dog runs through a muddy bank .
+// A lean dog runs through a wooded area .
+<source>
+1 A :
+2 black :
+3 dog :
+4 runs :
+5 through :
+6 a :
+7 muddy :
+8 bank :
+9 . :
+</source>
+<translation>
+1 A :
+2 lean :
+3 dog :
+4 runs :
+5 through :
+6 a :
+7 wooded :
+8 area :
+9 . :
+</translation>
+<alignment>
+4 <==> 4 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="97" status="">
+// The brown dog is playing in the snow .
+// A black dog is playing in the snow .
+<source>
+1 The :
+2 brown :
+3 dog :
+4 is :
+5 playing :
+6 in :
+7 the :
+8 snow :
+9 . :
+</source>
+<translation>
+1 A :
+2 black :
+3 dog :
+4 is :
+5 playing :
+6 in :
+7 the :
+8 snow :
+9 . :
+</translation>
+<alignment>
+4 5 <==> 4 5 // EQUI // 5 // 
+6 7 8 <==> 6 7 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="98" status="">
+// The person is doing a handstand on the beach .
+// A kid is doing a hand-stand on the beach .
+<source>
+1 The :
+2 person :
+3 is :
+4 doing :
+5 a :
+6 handstand :
+7 on :
+8 the :
+9 beach :
+10 . :
+</source>
+<translation>
+1 A :
+2 kid :
+3 is :
+4 doing :
+5 a :
+6 hand-stand :
+7 on :
+8 the :
+9 beach :
+10 . :
+</translation>
+<alignment>
+5 6 <==> 5 6 // EQUI // 5 // 
+7 8 9 <==> 7 8 9 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="99" status="">
+// A tan girl in a floral bikini is swimming in dark blue waters .
+// a little girl in a flowered bathingsuit runs through the sand at the beach
+<source>
+1 A :
+2 tan :
+3 girl :
+4 in :
+5 a :
+6 floral :
+7 bikini :
+8 is :
+9 swimming :
+10 in :
+11 dark :
+12 blue :
+13 waters :
+14 . :
+</source>
+<translation>
+1 a :
+2 little :
+3 girl :
+4 in :
+5 a :
+6 flowered :
+7 bathingsuit :
+8 runs :
+9 through :
+10 the :
+11 sand :
+12 at :
+13 the :
+14 beach :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+4 5 6 7 <==> 4 5 6 7 // EQUI // 5 // 
+10 11 12 13 <==> 9 10 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="100" status="">
+// A black dog is running through the snow .
+// The German shepherd dog is running through the snow .
+<source>
+1 A :
+2 black :
+3 dog :
+4 is :
+5 running :
+6 through :
+7 the :
+8 snow :
+9 . :
+</source>
+<translation>
+1 The :
+2 German :
+3 shepherd :
+4 dog :
+5 is :
+6 running :
+7 through :
+8 the :
+9 snow :
+10 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 4 // EQUI // 5 // 
+6 7 8 <==> 7 8 9 // EQUI // 5 // 
+9 <==> 10 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="101" status="">
+// The large dog wading in the water and shaking .
+// Three dark dogs swimming and one of them has a ball .
+<source>
+1 The :
+2 large :
+3 dog :
+4 wading :
+5 in :
+6 the :
+7 water :
+8 and :
+9 shaking :
+10 . :
+</source>
+<translation>
+1 Three :
+2 dark :
+3 dogs :
+4 swimming :
+5 and :
+6 one :
+7 of :
+8 them :
+9 has :
+10 a :
+11 ball :
+12 . :
+</translation>
+<alignment>
+4 <==> 5 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="102" status="">
+// Two dogs are playing around in the dirt .
+// A dancer posing for the camera in a red and white dress .
+<source>
+1 Two :
+2 dogs :
+3 are :
+4 playing :
+5 around :
+6 in :
+7 the :
+8 dirt :
+9 . :
+</source>
+<translation>
+1 A :
+2 dancer :
+3 posing :
+4 for :
+5 the :
+6 camera :
+7 in :
+8 a :
+9 red :
+10 and :
+11 white :
+12 dress :
+13 . :
+</translation>
+<alignment>
+6 7 8 <==> 4 5 6 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="103" status="">
+// A dog running across the sand
+// A dog running through the water .
+<source>
+1 A :
+2 dog :
+3 running :
+4 across :
+5 the :
+6 sand :
+</source>
+<translation>
+1 A :
+2 dog :
+3 running :
+4 through :
+5 the :
+6 water :
+7 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="104" status="">
+// A white and tan dog runs through the tall green grass .
+// A medium sized brown and white streaked dog is running through tall grass .
+<source>
+1 A :
+2 white :
+3 and :
+4 tan :
+5 dog :
+6 runs :
+7 through :
+8 the :
+9 tall :
+10 green :
+11 grass :
+12 . :
+</source>
+<translation>
+1 A :
+2 medium :
+3 sized :
+4 brown :
+5 and :
+6 white :
+7 streaked :
+8 dog :
+9 is :
+10 running :
+11 through :
+12 tall :
+13 grass :
+14 . :
+</translation>
+<alignment>
+1 2 3 4 5 <==> 1 2 3 4 5 6 7 8 // EQUI // 5 // 
+6 <==> 9 10 // EQUI // 5 // 
+7 8 9 10 11 <==> 11 12 13 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="105" status="">
+// A group of four hiking through a snowy forest .
+// A group of people hike through a snowy wooded area .
+<source>
+1 A :
+2 group :
+3 of :
+4 four :
+5 hiking :
+6 through :
+7 a :
+8 snowy :
+9 forest :
+10 . :
+</source>
+<translation>
+1 A :
+2 group :
+3 of :
+4 people :
+5 hike :
+6 through :
+7 a :
+8 snowy :
+9 wooded :
+10 area :
+11 . :
+</translation>
+<alignment>
+5 <==> 5 // EQUI // 5 // 
+6 7 8 9 <==> 6 7 8 9 10 // EQUI // 5 // 
+10 <==> 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="106" status="">
+// A man in plaid shirt hits a tree with an Axe .
+// A man in a plaid shirt uses a tool by a tree .
+<source>
+1 A :
+2 man :
+3 in :
+4 plaid :
+5 shirt :
+6 hits :
+7 a :
+8 tree :
+9 with :
+10 an :
+11 Axe :
+12 . :
+</source>
+<translation>
+1 A :
+2 man :
+3 in :
+4 a :
+5 plaid :
+6 shirt :
+7 uses :
+8 a :
+9 tool :
+10 by :
+11 a :
+12 tree :
+13 . :
+</translation>
+<alignment>
+3 4 5 <==> 3 4 5 6 // EQUI // 5 // 
+7 8 <==> 10 11 12 // EQUI // 5 // 
+9 10 11 <==> 8 9 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="107" status="">
+// A smiling man and a baby girl posing for photo .
+// A smiling man holds a small child wearing pink and red .
+<source>
+1 A :
+2 smiling :
+3 man :
+4 and :
+5 a :
+6 baby :
+7 girl :
+8 posing :
+9 for :
+10 photo :
+11 . :
+</source>
+<translation>
+1 A :
+2 smiling :
+3 man :
+4 holds :
+5 a :
+6 small :
+7 child :
+8 wearing :
+9 pink :
+10 and :
+11 red :
+12 . :
+</translation>
+<alignment>
+1 2 3 4 5 6 7 <==> 1 2 3 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="108" status="">
+// White dog outside with two people in background .
+// Little boy coming at camera down blue slide , smiling woman in background .
+<source>
+1 White :
+2 dog :
+3 outside :
+4 with :
+5 two :
+6 people :
+7 in :
+8 background :
+9 . :
+</source>
+<translation>
+1 Little :
+2 boy :
+3 coming :
+4 at :
+5 camera :
+6 down :
+7 blue :
+8 slide :
+9 , :
+10 smiling :
+11 woman :
+12 in :
+13 background :
+14 . :
+</translation>
+<alignment>
+7 8 <==> 12 13 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="109" status="">
+// Three dogs are playing in the water .
+// Three dogs run in the snow .
+<source>
+1 Three :
+2 dogs :
+3 are :
+4 playing :
+5 in :
+6 the :
+7 water :
+8 . :
+</source>
+<translation>
+1 Three :
+2 dogs :
+3 run :
+4 in :
+5 the :
+6 snow :
+7 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+8 <==> 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="110" status="">
+// A girl jumping on a sand dune at the ocean .
+// The little girl jumps up into the air with the sand beneath her .
+<source>
+1 A :
+2 girl :
+3 jumping :
+4 on :
+5 a :
+6 sand :
+7 dune :
+8 at :
+9 the :
+10 ocean :
+11 . :
+</source>
+<translation>
+1 The :
+2 little :
+3 girl :
+4 jumps :
+5 up :
+6 into :
+7 the :
+8 air :
+9 with :
+10 the :
+11 sand :
+12 beneath :
+13 her :
+14 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 3 // EQUI // 5 // 
+3 <==> 4 5 // EQUI // 5 // 
+4 5 6 7 <==> 9 10 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="111" status="">
+// A shirtless man rock climbs .
+// A man rock climbing .
+<source>
+1 A :
+2 shirtless :
+3 man :
+4 rock :
+5 climbs :
+6 . :
+</source>
+<translation>
+1 A :
+2 man :
+3 rock :
+4 climbing :
+5 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 // EQUI // 5 // 
+4 5 <==> 3 4 // EQUI // 5 // 
+6 <==> 5 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="112" status="">
+// An adult male wearing a backpack walks and looks to the left .
+// A man wearing a backpack looking to the side .
+<source>
+1 An :
+2 adult :
+3 male :
+4 wearing :
+5 a :
+6 backpack :
+7 walks :
+8 and :
+9 looks :
+10 to :
+11 the :
+12 left :
+13 . :
+</source>
+<translation>
+1 A :
+2 man :
+3 wearing :
+4 a :
+5 backpack :
+6 looking :
+7 to :
+8 the :
+9 side :
+10 . :
+</translation>
+<alignment>
+5 6 <==> 4 5 // EQUI // 5 // 
+9 <==> 6 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="113" status="">
+// A black and white dog jumping high to catch a ball .
+// Two black and white dogs run across a green field .
+<source>
+1 A :
+2 black :
+3 and :
+4 white :
+5 dog :
+6 jumping :
+7 high :
+8 to :
+9 catch :
+10 a :
+11 ball :
+12 . :
+</source>
+<translation>
+1 Two :
+2 black :
+3 and :
+4 white :
+5 dogs :
+6 run :
+7 across :
+8 a :
+9 green :
+10 field :
+11 . :
+</translation>
+<alignment>
+1 2 3 4 5 <==> 1 2 3 4 5 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="114" status="">
+// A snowboarder goes down a ramp .
+// A snowboarder going over a ramp .
+<source>
+1 A :
+2 snowboarder :
+3 goes :
+4 down :
+5 a :
+6 ramp :
+7 . :
+</source>
+<translation>
+1 A :
+2 snowboarder :
+3 going :
+4 over :
+5 a :
+6 ramp :
+7 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+5 6 <==> 5 6 // EQUI // 5 // 
+7 <==> 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="115" status="">
+// A young man and woman sitting on a bench outside are kissing .
+// The man and woman sitting on a bench are kissing .
+<source>
+1 A :
+2 young :
+3 man :
+4 and :
+5 woman :
+6 sitting :
+7 on :
+8 a :
+9 bench :
+10 outside :
+11 are :
+12 kissing :
+13 . :
+</source>
+<translation>
+1 The :
+2 man :
+3 and :
+4 woman :
+5 sitting :
+6 on :
+7 a :
+8 bench :
+9 are :
+10 kissing :
+11 . :
+</translation>
+<alignment>
+1 2 3 4 5 <==> 1 2 3 4 // EQUI // 5 // 
+6 <==> 5 // EQUI // 5 // 
+7 8 9 <==> 6 7 8 // EQUI // 5 // 
+11 12 <==> 9 10 // EQUI // 5 // 
+13 <==> 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="116" status="">
+// The woman is holding the harness that the brown and white dog is wearing .
+// A man and woman are looking at artwork that is on easels and clipped to a fencing wall .
+<source>
+1 The :
+2 woman :
+3 is :
+4 holding :
+5 the :
+6 harness :
+7 that :
+8 the :
+9 brown :
+10 and :
+11 white :
+12 dog :
+13 is :
+14 wearing :
+15 . :
+</source>
+<translation>
+1 A :
+2 man :
+3 and :
+4 woman :
+5 are :
+6 looking :
+7 at :
+8 artwork :
+9 that :
+10 is :
+11 on :
+12 easels :
+13 and :
+14 clipped :
+15 to :
+16 a :
+17 fencing :
+18 wall :
+19 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 3 4 // EQUI // 5 // 
+5 6 <==> 14 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="117" status="">
+// A wet child shivers under a towel at a pool .
+// A wet child is shivering in a towel in front of a pool .
+<source>
+1 A :
+2 wet :
+3 child :
+4 shivers :
+5 under :
+6 a :
+7 towel :
+8 at :
+9 a :
+10 pool :
+11 . :
+</source>
+<translation>
+1 A :
+2 wet :
+3 child :
+4 is :
+5 shivering :
+6 in :
+7 a :
+8 towel :
+9 in :
+10 front :
+11 of :
+12 a :
+13 pool :
+14 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+4 <==> 4 5 // EQUI // 5 // 
+5 6 7 <==> 6 7 8 // EQUI // 5 // 
+8 9 10 <==> 9 10 11 12 13 // EQUI // 5 // 
+11 <==> 14 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="118" status="">
+// A white and brown dog rolls on it's back in the sand .
+// A dog lying on its back in the sand .
+<source>
+1 A :
+2 white :
+3 and :
+4 brown :
+5 dog :
+6 rolls :
+7 on :
+8 it's :
+9 back :
+10 in :
+11 the :
+12 sand :
+13 . :
+</source>
+<translation>
+1 A :
+2 dog :
+3 lying :
+4 on :
+5 its :
+6 back :
+7 in :
+8 the :
+9 sand :
+10 . :
+</translation>
+<alignment>
+1 2 3 4 5 <==> 1 2 // EQUI // 5 // 
+7 8 9 <==> 4 5 6 // EQUI // 5 // 
+10 11 12 <==> 7 8 9 // EQUI // 5 // 
+13 <==> 10 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="119" status="">
+// A large brown dog is walking along side a river .
+// A brown dog walks on the rocks near a river .
+<source>
+1 A :
+2 large :
+3 brown :
+4 dog :
+5 is :
+6 walking :
+7 along :
+8 side :
+9 a :
+10 river :
+11 . :
+</source>
+<translation>
+1 A :
+2 brown :
+3 dog :
+4 walks :
+5 on :
+6 the :
+7 rocks :
+8 near :
+9 a :
+10 river :
+11 . :
+</translation>
+<alignment>
+5 6 <==> 4 // EQUI // 5 // 
+7 8 9 10 <==> 8 9 10 // EQUI // 5 // 
+11 <==> 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="120" status="">
+// A man wearing a blue shirt crouches on a rocky cliff .
+// a man sits on a rock .
+<source>
+1 A :
+2 man :
+3 wearing :
+4 a :
+5 blue :
+6 shirt :
+7 crouches :
+8 on :
+9 a :
+10 rocky :
+11 cliff :
+12 . :
+</source>
+<translation>
+1 a :
+2 man :
+3 sits :
+4 on :
+5 a :
+6 rock :
+7 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+8 9 10 11 <==> 4 5 6 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="121" status="">
+// A boy waves around a sparkler .
+// A young boy is twisting a sparkler around in the air .
+<source>
+1 A :
+2 boy :
+3 waves :
+4 around :
+5 a :
+6 sparkler :
+7 . :
+</source>
+<translation>
+1 A :
+2 young :
+3 boy :
+4 is :
+5 twisting :
+6 a :
+7 sparkler :
+8 around :
+9 in :
+10 the :
+11 air :
+12 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 3 // EQUI // 5 // 
+3 4 <==> 8 // EQUI // 5 // 
+5 6 <==> 6 7 // EQUI // 5 // 
+7 <==> 12 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="122" status="">
+// A brown dog leaping from a dock into the water .
+// A tan dog leaps into the water .
+<source>
+1 A :
+2 brown :
+3 dog :
+4 leaping :
+5 from :
+6 a :
+7 dock :
+8 into :
+9 the :
+10 water :
+11 . :
+</source>
+<translation>
+1 A :
+2 tan :
+3 dog :
+4 leaps :
+5 into :
+6 the :
+7 water :
+8 . :
+</translation>
+<alignment>
+1 2 3 <==> 4 // EQUI // 5 // 
+4 <==> 4 // EQUI // 5 // 
+8 9 10 <==> 5 6 7 // EQUI // 5 // 
+11 <==> 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="123" status="">
+// Two children are on a fairground ride .
+// Two children are on a giant inflatable slide .
+<source>
+1 Two :
+2 children :
+3 are :
+4 on :
+5 a :
+6 fairground :
+7 ride :
+8 . :
+</source>
+<translation>
+1 Two :
+2 children :
+3 are :
+4 on :
+5 a :
+6 giant :
+7 inflatable :
+8 slide :
+9 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="124" status="">
+// A boy with a broken arm is resting in a bed .
+// A boy with a broken arm is sleeping .
+<source>
+1 A :
+2 boy :
+3 with :
+4 a :
+5 broken :
+6 arm :
+7 is :
+8 resting :
+9 in :
+10 a :
+11 bed :
+12 . :
+</source>
+<translation>
+1 A :
+2 boy :
+3 with :
+4 a :
+5 broken :
+6 arm :
+7 is :
+8 sleeping :
+9 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 4 5 6 <==> 3 4 5 6 // EQUI // 5 // 
+7 8 <==> 7 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="125" status="">
+// A brown dog lunges for a yellow toy .
+// A brown dog chasing a yellow toy .
+<source>
+1 A :
+2 brown :
+3 dog :
+4 lunges :
+5 for :
+6 a :
+7 yellow :
+8 toy :
+9 . :
+</source>
+<translation>
+1 A :
+2 brown :
+3 dog :
+4 chasing :
+5 a :
+6 yellow :
+7 toy :
+8 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+5 6 7 8 <==> 5 6 7 // EQUI // 5 // 
+9 <==> 4 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="126" status="">
+// three little boys cover themselves with bubbles .
+// Three children standing by a pool are covered in foam bubbles .
+<source>
+1 three :
+2 little :
+3 boys :
+4 cover :
+5 themselves :
+6 with :
+7 bubbles :
+8 . :
+</source>
+<translation>
+1 Three :
+2 children :
+3 standing :
+4 by :
+5 a :
+6 pool :
+7 are :
+8 covered :
+9 in :
+10 foam :
+11 bubbles :
+12 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 // EQUI // 5 // 
+6 7 <==> 9 10 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="127" status="">
+// Two dogs ankle-deep in water .
+// Two brown dogs play in the water .
+<source>
+1 Two :
+2 dogs :
+3 ankle-deep :
+4 in :
+5 water :
+6 . :
+</source>
+<translation>
+1 Two :
+2 brown :
+3 dogs :
+4 play :
+5 in :
+6 the :
+7 water :
+8 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 3 // EQUI // 5 // 
+4 5 <==> 5 6 7 // EQUI // 5 // 
+6 <==> 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="128" status="">
+// A man and a woman are standing in front of a building
+// Two girls are sitting on an ATV on the sand in front of a bridge .
+<source>
+1 A :
+2 man :
+3 and :
+4 a :
+5 woman :
+6 are :
+7 standing :
+8 in :
+9 front :
+10 of :
+11 a :
+12 building :
+</source>
+<translation>
+1 Two :
+2 girls :
+3 are :
+4 sitting :
+5 on :
+6 an :
+7 ATV :
+8 on :
+9 the :
+10 sand :
+11 in :
+12 front :
+13 of :
+14 a :
+15 bridge :
+16 . :
+</translation>
+<alignment>
+8 9 10 11 12 <==> 11 12 13 14 15 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="129" status="">
+// A black dog walking through water .
+// Two black dogs walking through the snow .
+<source>
+1 A :
+2 black :
+3 dog :
+4 walking :
+5 through :
+6 water :
+7 . :
+</source>
+<translation>
+1 Two :
+2 black :
+3 dogs :
+4 walking :
+5 through :
+6 the :
+7 snow :
+8 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+4 <==> 4 // EQUI // 5 // 
+5 6 <==> 5 6 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="130" status="">
+// Two kids splashing in the water .
+// Two dogs play together on the bed .
+<source>
+1 Two :
+2 kids :
+3 splashing :
+4 in :
+5 the :
+6 water :
+7 . :
+</source>
+<translation>
+1 Two :
+2 dogs :
+3 play :
+4 together :
+5 on :
+6 the :
+7 bed :
+8 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 <==> 3 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="131" status="">
+// A black dog with a gemmed collar is sitting on white carpet .
+// A black dog with a blue collar is sitting on beige carpet .
+<source>
+1 A :
+2 black :
+3 dog :
+4 with :
+5 a :
+6 gemmed :
+7 collar :
+8 is :
+9 sitting :
+10 on :
+11 white :
+12 carpet :
+13 . :
+</source>
+<translation>
+1 A :
+2 black :
+3 dog :
+4 with :
+5 a :
+6 blue :
+7 collar :
+8 is :
+9 sitting :
+10 on :
+11 beige :
+12 carpet :
+13 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+4 5 6 7 <==> 4 5 6 7 // EQUI // 5 // 
+8 9 <==> 8 9 // EQUI // 5 // 
+13 <==> 13 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="132" status="">
+// Three dogs on grass running towards the camera .
+// Several large dogs are running through a large grassy area .
+<source>
+1 Three :
+2 dogs :
+3 on :
+4 grass :
+5 running :
+6 towards :
+7 the :
+8 camera :
+9 . :
+</source>
+<translation>
+1 Several :
+2 large :
+3 dogs :
+4 are :
+5 running :
+6 through :
+7 a :
+8 large :
+9 grassy :
+10 area :
+11 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 3 // EQUI // 5 // 
+3 4 <==> 6 7 8 9 10 // EQUI // 5 // 
+5 <==> 4 5 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="133" status="">
+// A person wearing jeans sits on top of a horse saddle .
+// The girl is sitting on top of a saddle .
+<source>
+1 A :
+2 person :
+3 wearing :
+4 jeans :
+5 sits :
+6 on :
+7 top :
+8 of :
+9 a :
+10 horse :
+11 saddle :
+12 . :
+</source>
+<translation>
+1 The :
+2 girl :
+3 is :
+4 sitting :
+5 on :
+6 top :
+7 of :
+8 a :
+9 saddle :
+10 . :
+</translation>
+<alignment>
+5 <==> 3 4 // EQUI // 5 // 
+6 7 <==> 5 6 // EQUI // 5 // 
+8 9 10 11 <==> 7 8 9 // EQUI // 5 // 
+12 <==> 10 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="134" status="">
+// A white dog bounding through snow
+// A large white dog is bounding through a snowy field .
+<source>
+1 A :
+2 white :
+3 dog :
+4 bounding :
+5 through :
+6 snow :
+</source>
+<translation>
+1 A :
+2 large :
+3 white :
+4 dog :
+5 is :
+6 bounding :
+7 through :
+8 a :
+9 snowy :
+10 field :
+11 . :
+</translation>
+<alignment>
+1 2 3 <==> 5 6 // EQUI // 5 // 
+5 6 <==> 7 8 9 10 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="135" status="">
+// Many people run in a race on a street .
+// A puppy running along a street .
+<source>
+1 Many :
+2 people :
+3 run :
+4 in :
+5 a :
+6 race :
+7 on :
+8 a :
+9 street :
+10 . :
+</source>
+<translation>
+1 A :
+2 puppy :
+3 running :
+4 along :
+5 a :
+6 street :
+7 . :
+</translation>
+<alignment>
+7 8 9 <==> 4 5 6 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="136" status="">
+// A dog swimming in a lake has sunshine shining on him .
+// A dog swims while carrying a stick in its mouth .
+<source>
+1 A :
+2 dog :
+3 swimming :
+4 in :
+5 a :
+6 lake :
+7 has :
+8 sunshine :
+9 shining :
+10 on :
+11 him :
+12 . :
+</source>
+<translation>
+1 A :
+2 dog :
+3 swims :
+4 while :
+5 carrying :
+6 a :
+7 stick :
+8 in :
+9 its :
+10 mouth :
+11 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 <==> 3 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="137" status="">
+// A girl in a pink jacket is walking through a large puddle .
+// A young boy is splashing through a puddle of water .
+<source>
+1 A :
+2 girl :
+3 in :
+4 a :
+5 pink :
+6 jacket :
+7 is :
+8 walking :
+9 through :
+10 a :
+11 large :
+12 puddle :
+13 . :
+</source>
+<translation>
+1 A :
+2 young :
+3 boy :
+4 is :
+5 splashing :
+6 through :
+7 a :
+8 puddle :
+9 of :
+10 water :
+11 . :
+</translation>
+<alignment>
+9 10 11 12 <==> 6 7 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="138" status="">
+// A girl sits on a red play structure
+// A little girl on a red jungle gym .
+<source>
+1 A :
+2 girl :
+3 sits :
+4 on :
+5 a :
+6 red :
+7 play :
+8 structure :
+</source>
+<translation>
+1 A :
+2 little :
+3 girl :
+4 on :
+5 a :
+6 red :
+7 jungle :
+8 gym :
+9 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 3 // EQUI // 5 // 
+4 5 6 7 8 <==> 4 5 6 7 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="139" status="">
+// A group of people in front of a red fire truck .
+// A group of people are standing around a red fire truck .
+<source>
+1 A :
+2 group :
+3 of :
+4 people :
+5 in :
+6 front :
+7 of :
+8 a :
+9 red :
+10 fire :
+11 truck :
+12 . :
+</source>
+<translation>
+1 A :
+2 group :
+3 of :
+4 people :
+5 are :
+6 standing :
+7 around :
+8 a :
+9 red :
+10 fire :
+11 truck :
+12 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 4 <==> 3 4 // EQUI // 5 // 
+5 6 7 8 9 10 11 <==> 7 8 9 10 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="140" status="">
+// The black and white dog runs through the grass .
+// three black and white dogs running through a watery field .
+<source>
+1 The :
+2 black :
+3 and :
+4 white :
+5 dog :
+6 runs :
+7 through :
+8 the :
+9 grass :
+10 . :
+</source>
+<translation>
+1 three :
+2 black :
+3 and :
+4 white :
+5 dogs :
+6 running :
+7 through :
+8 a :
+9 watery :
+10 field :
+11 . :
+</translation>
+<alignment>
+1 2 3 4 5 <==> 1 2 3 4 5 // EQUI // 5 // 
+6 <==> 6 // EQUI // 5 // 
+10 <==> 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="141" status="">
+// A boy in red jumping into a sandbox .
+// A dog swimming in a pond
+<source>
+1 A :
+2 boy :
+3 in :
+4 red :
+5 jumping :
+6 into :
+7 a :
+8 sandbox :
+9 . :
+</source>
+<translation>
+1 A :
+2 dog :
+3 swimming :
+4 in :
+5 a :
+6 pond :
+</translation>
+<alignment>
+9 <==> 1 2 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="142" status="">
+// A boy wearing a blue jacket swings a bat at a white ball .
+// A young boy in a blue jacket swings a bat at a ball .
+<source>
+1 A :
+2 boy :
+3 wearing :
+4 a :
+5 blue :
+6 jacket :
+7 swings :
+8 a :
+9 bat :
+10 at :
+11 a :
+12 white :
+13 ball :
+14 . :
+</source>
+<translation>
+1 A :
+2 young :
+3 boy :
+4 in :
+5 a :
+6 blue :
+7 jacket :
+8 swings :
+9 a :
+10 bat :
+11 at :
+12 a :
+13 ball :
+14 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 3 // EQUI // 5 // 
+4 5 6 <==> 4 5 6 7 // EQUI // 5 // 
+7 <==> 8 // EQUI // 5 // 
+8 9 <==> 9 10 // EQUI // 5 // 
+10 11 12 13 <==> 11 12 13 // EQUI // 5 // 
+14 <==> 14 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="143" status="">
+// Three dogs are playing in the white snow .
+// Three dogs play with a Frisbee in a snowy field .
+<source>
+1 Three :
+2 dogs :
+3 are :
+4 playing :
+5 in :
+6 the :
+7 white :
+8 snow :
+9 . :
+</source>
+<translation>
+1 Three :
+2 dogs :
+3 play :
+4 with :
+5 a :
+6 Frisbee :
+7 in :
+8 a :
+9 snowy :
+10 field :
+11 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 4 <==> 3 // EQUI // 5 // 
+5 6 7 8 <==> 7 8 9 10 // EQUI // 5 // 
+9 <==> 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="144" status="">
+// A man in a black wetsuit is surfung in the waves .
+// A surfer in a black wet suit surfs on a medium wave .
+<source>
+1 A :
+2 man :
+3 in :
+4 a :
+5 black :
+6 wetsuit :
+7 is :
+8 surfung :
+9 in :
+10 the :
+11 waves :
+12 . :
+</source>
+<translation>
+1 A :
+2 surfer :
+3 in :
+4 a :
+5 black :
+6 wet :
+7 suit :
+8 surfs :
+9 on :
+10 a :
+11 medium :
+12 wave :
+13 . :
+</translation>
+<alignment>
+3 4 5 6 <==> 3 4 5 6 7 // EQUI // 5 // 
+7 8 <==> 8 // EQUI // 5 // 
+12 <==> 1 2 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="145" status="">
+// A black dog jumping into a lake .
+// A black dog runs very fast in a field in a park .
+<source>
+1 A :
+2 black :
+3 dog :
+4 jumping :
+5 into :
+6 a :
+7 lake :
+8 . :
+</source>
+<translation>
+1 A :
+2 black :
+3 dog :
+4 runs :
+5 very :
+6 fast :
+7 in :
+8 a :
+9 field :
+10 in :
+11 a :
+12 park :
+13 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+8 <==> 13 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="146" status="">
+// Two dogs playing in the snow .
+// Two black dogs in the snow .
+<source>
+1 Two :
+2 dogs :
+3 playing :
+4 in :
+5 the :
+6 snow :
+7 . :
+</source>
+<translation>
+1 Two :
+2 black :
+3 dogs :
+4 in :
+5 the :
+6 snow :
+7 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 3 // EQUI // 5 // 
+4 5 6 <==> 4 5 6 // EQUI // 5 // 
+7 <==> 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="147" status="">
+// Two dogs run on the grass .
+// A dog running on the grass .
+<source>
+1 Two :
+2 dogs :
+3 run :
+4 on :
+5 the :
+6 grass :
+7 . :
+</source>
+<translation>
+1 A :
+2 dog :
+3 running :
+4 on :
+5 the :
+6 grass :
+7 . :
+</translation>
+<alignment>
+3 <==> 1 2 // EQUI // 5 // 
+4 5 6 <==> 4 5 6 // EQUI // 5 // 
+7 <==> 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="148" status="">
+// A tennis player hitting the ball .
+// Two boys splashing in the surf .
+<source>
+1 A :
+2 tennis :
+3 player :
+4 hitting :
+5 the :
+6 ball :
+7 . :
+</source>
+<translation>
+1 Two :
+2 boys :
+3 splashing :
+4 in :
+5 the :
+6 surf :
+7 . :
+</translation>
+<alignment>
+4 <==> 3 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="149" status="">
+// A man wearing a orange vest is canoeing in the blue water .
+// A man in an orange jacket raising his hands to the sky in the sand .
+<source>
+1 A :
+2 man :
+3 wearing :
+4 a :
+5 orange :
+6 vest :
+7 is :
+8 canoeing :
+9 in :
+10 the :
+11 blue :
+12 water :
+13 . :
+</source>
+<translation>
+1 A :
+2 man :
+3 in :
+4 an :
+5 orange :
+6 jacket :
+7 raising :
+8 his :
+9 hands :
+10 to :
+11 the :
+12 sky :
+13 in :
+14 the :
+15 sand :
+16 . :
+</translation>
+<alignment>
+3 4 5 6 <==> 3 4 5 6 // EQUI // 5 // 
+9 10 11 12 <==> 16 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="150" status="">
+// A black dog asleep in a car .
+// A black and tan dog sleeps in the car .
+<source>
+1 A :
+2 black :
+3 dog :
+4 asleep :
+5 in :
+6 a :
+7 car :
+8 . :
+</source>
+<translation>
+1 A :
+2 black :
+3 and :
+4 tan :
+5 dog :
+6 sleeps :
+7 in :
+8 the :
+9 car :
+10 . :
+</translation>
+<alignment>
+1 2 3 <==> 6 // EQUI // 5 // 
+4 <==> 6 // EQUI // 5 // 
+5 6 7 <==> 7 8 9 // EQUI // 5 // 
+8 <==> 10 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="151" status="">
+// A group of men play rugby .
+// A group of men are playing ball together .
+<source>
+1 A :
+2 group :
+3 of :
+4 men :
+5 play :
+6 rugby :
+7 . :
+</source>
+<translation>
+1 A :
+2 group :
+3 of :
+4 men :
+5 are :
+6 playing :
+7 ball :
+8 together :
+9 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 4 <==> 3 4 // EQUI // 5 // 
+5 6 <==> 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="152" status="">
+// A man is riding a kayak through water .
+// A man kayaks in rough water .
+<source>
+1 A :
+2 man :
+3 is :
+4 riding :
+5 a :
+6 kayak :
+7 through :
+8 water :
+9 . :
+</source>
+<translation>
+1 A :
+2 man :
+3 kayaks :
+4 in :
+5 rough :
+6 water :
+7 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 4 5 6 <==> 3 // EQUI // 5 // 
+7 8 <==> 4 5 6 // EQUI // 5 // 
+9 <==> 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="153" status="">
+// A brown dog is jumping up to catch a green strap in it's mouth .
+// A grey dog jumps to bite a green leash .
+<source>
+1 A :
+2 brown :
+3 dog :
+4 is :
+5 jumping :
+6 up :
+7 to :
+8 catch :
+9 a :
+10 green :
+11 strap :
+12 in :
+13 it's :
+14 mouth :
+15 . :
+</source>
+<translation>
+1 A :
+2 grey :
+3 dog :
+4 jumps :
+5 to :
+6 bite :
+7 a :
+8 green :
+9 leash :
+10 . :
+</translation>
+<alignment>
+4 5 6 <==> 4 // EQUI // 5 // 
+7 8 <==> 5 6 // EQUI // 5 // 
+9 10 11 <==> 7 8 9 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="154" status="">
+// A brown dog is sniffing a white dog that is lying on the floor .
+// Dog sniffing another dog lying under furniture .
+<source>
+1 A :
+2 brown :
+3 dog :
+4 is :
+5 sniffing :
+6 a :
+7 white :
+8 dog :
+9 that :
+10 is :
+11 lying :
+12 on :
+13 the :
+14 floor :
+15 . :
+</source>
+<translation>
+1 Dog :
+2 sniffing :
+3 another :
+4 dog :
+5 lying :
+6 under :
+7 furniture :
+8 . :
+</translation>
+<alignment>
+4 5 <==> 2 // EQUI // 5 // 
+10 11 <==> 3 4 // EQUI // 5 // 
+10 11 <==> 5 // EQUI // 5 // 
+15 <==> 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="155" status="">
+// A black and grey dog runs in a field with it's tongue hanging out .
+// A black dog with a red collar walks through the grass with his mouth open and tongue hanging out .
+<source>
+1 A :
+2 black :
+3 and :
+4 grey :
+5 dog :
+6 runs :
+7 in :
+8 a :
+9 field :
+10 with :
+11 it's :
+12 tongue :
+13 hanging :
+14 out :
+15 . :
+</source>
+<translation>
+1 A :
+2 black :
+3 dog :
+4 with :
+5 a :
+6 red :
+7 collar :
+8 walks :
+9 through :
+10 the :
+11 grass :
+12 with :
+13 his :
+14 mouth :
+15 open :
+16 and :
+17 tongue :
+18 hanging :
+19 out :
+20 . :
+</translation>
+<alignment>
+1 2 3 4 5 <==> 1 2 3 // EQUI // 5 // 
+7 8 9 <==> 9 10 11 // EQUI // 5 // 
+10 11 12 <==> 17 // EQUI // 5 // 
+13 14 <==> 18 19 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="156" status="">
+// A young girl running on the beach .
+// A little girl running at on the shore of a beach .
+<source>
+1 A :
+2 young :
+3 girl :
+4 running :
+5 on :
+6 the :
+7 beach :
+8 . :
+</source>
+<translation>
+1 A :
+2 little :
+3 girl :
+4 running :
+5 at :
+6 on :
+7 the :
+8 shore :
+9 of :
+10 a :
+11 beach :
+12 . :
+</translation>
+<alignment>
+4 <==> 4 // EQUI // 5 // 
+5 6 7 <==> 9 10 11 // EQUI // 5 // 
+8 <==> 12 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="157" status="">
+// A rugby player in dark gear is carrying a light colored rugby ball with arm outstretched .
+// A brown dog splashes in the water while carrying a ball in it's mouth .
+<source>
+1 A :
+2 rugby :
+3 player :
+4 in :
+5 dark :
+6 gear :
+7 is :
+8 carrying :
+9 a :
+10 light :
+11 colored :
+12 rugby :
+13 ball :
+14 with :
+15 arm :
+16 outstretched :
+17 . :
+</source>
+<translation>
+1 A :
+2 brown :
+3 dog :
+4 splashes :
+5 in :
+6 the :
+7 water :
+8 while :
+9 carrying :
+10 a :
+11 ball :
+12 in :
+13 it's :
+14 mouth :
+15 . :
+</translation>
+<alignment>
+7 8 <==> 8 9 // EQUI // 5 // 
+9 10 11 12 13 <==> 10 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="158" status="">
+// Two dogs groom each other .
+// Two dogs jumping on each other .
+<source>
+1 Two :
+2 dogs :
+3 groom :
+4 each :
+5 other :
+6 . :
+</source>
+<translation>
+1 Two :
+2 dogs :
+3 jumping :
+4 on :
+5 each :
+6 other :
+7 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+4 5 <==> 5 6 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="159" status="">
+// Two dogs , the white one standing on a Frisbee , playing together on grass .
+// Two dogs play on the grass .
+<source>
+1 Two :
+2 dogs :
+3 , :
+4 the :
+5 white :
+6 one :
+7 standing :
+8 on :
+9 a :
+10 Frisbee :
+11 , :
+12 playing :
+13 together :
+14 on :
+15 grass :
+16 . :
+</source>
+<translation>
+1 Two :
+2 dogs :
+3 play :
+4 on :
+5 the :
+6 grass :
+7 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+12 <==> 3 // EQUI // 5 // 
+14 15 <==> 4 5 6 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="160" status="">
+// A boy receives a light saber for Christmas .
+// A boy holds a light saber in front of a Christmas tree .
+<source>
+1 A :
+2 boy :
+3 receives :
+4 a :
+5 light :
+6 saber :
+7 for :
+8 Christmas :
+9 . :
+</source>
+<translation>
+1 A :
+2 boy :
+3 holds :
+4 a :
+5 light :
+6 saber :
+7 in :
+8 front :
+9 of :
+10 a :
+11 Christmas :
+12 tree :
+13 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+4 5 6 <==> 4 5 6 // EQUI // 5 // 
+7 8 <==> 7 8 9 10 11 12 // EQUI // 5 // 
+9 <==> 13 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="161" status="">
+// The man sits on a sofa under the bridge and litter is all around him .
+// A man is sitting on a couch under an expressway ledge .
+<source>
+1 The :
+2 man :
+3 sits :
+4 on :
+5 a :
+6 sofa :
+7 under :
+8 the :
+9 bridge :
+10 and :
+11 litter :
+12 is :
+13 all :
+14 around :
+15 him :
+16 . :
+</source>
+<translation>
+1 A :
+2 man :
+3 is :
+4 sitting :
+5 on :
+6 a :
+7 couch :
+8 under :
+9 an :
+10 expressway :
+11 ledge :
+12 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 <==> 3 4 // EQUI // 5 // 
+4 5 6 <==> 5 6 7 // EQUI // 5 // 
+7 8 9 <==> 8 9 10 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="162" status="">
+// The white and brown dog runs across the grass .
+// A brown and white dog runs across the grass .
+<source>
+1 The :
+2 white :
+3 and :
+4 brown :
+5 dog :
+6 runs :
+7 across :
+8 the :
+9 grass :
+10 . :
+</source>
+<translation>
+1 A :
+2 brown :
+3 and :
+4 white :
+5 dog :
+6 runs :
+7 across :
+8 the :
+9 grass :
+10 . :
+</translation>
+<alignment>
+1 2 3 4 5 <==> 1 2 3 4 5 // EQUI // 5 // 
+6 <==> 6 // EQUI // 5 // 
+7 8 9 <==> 7 8 9 // EQUI // 5 // 
+10 <==> 10 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="163" status="">
+// A brown dog biting a horse 's leg .
+// A dog nips at the leg of a horse .
+<source>
+1 A :
+2 brown :
+3 dog :
+4 biting :
+5 a :
+6 horse :
+7 's :
+8 leg :
+9 . :
+</source>
+<translation>
+1 A :
+2 dog :
+3 nips :
+4 at :
+5 the :
+6 leg :
+7 of :
+8 a :
+9 horse :
+10 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 // EQUI // 5 // 
+5 6 <==> 7 8 9 // EQUI // 5 // 
+7 8 <==> 4 5 6 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="164" status="">
+// a young baby girl wearing a white outfit swinging in a baby swing
+// a young girl wearing a black and red swimsuit swinging on a swing
+<source>
+1 a :
+2 young :
+3 baby :
+4 girl :
+5 wearing :
+6 a :
+7 white :
+8 outfit :
+9 swinging :
+10 in :
+11 a :
+12 baby :
+13 swing :
+</source>
+<translation>
+1 a :
+2 young :
+3 girl :
+4 wearing :
+5 a :
+6 black :
+7 and :
+8 red :
+9 swimsuit :
+10 swinging :
+11 on :
+12 a :
+13 swing :
+</translation>
+<alignment>
+1 2 3 4 <==> 1 2 3 // EQUI // 5 // 
+9 <==> 10 // EQUI // 5 // 
+10 11 12 13 <==> 11 12 13 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="165" status="">
+// A white dog with light brown markings has a stick in his mouth and his paws in the snow .
+// A white dog holds a stick in its mouth while it runs through snow .
+<source>
+1 A :
+2 white :
+3 dog :
+4 with :
+5 light :
+6 brown :
+7 markings :
+8 has :
+9 a :
+10 stick :
+11 in :
+12 his :
+13 mouth :
+14 and :
+15 his :
+16 paws :
+17 in :
+18 the :
+19 snow :
+20 . :
+</source>
+<translation>
+1 A :
+2 white :
+3 dog :
+4 holds :
+5 a :
+6 stick :
+7 in :
+8 its :
+9 mouth :
+10 while :
+11 it :
+12 runs :
+13 through :
+14 snow :
+15 . :
+</translation>
+<alignment>
+9 10 <==> 5 6 // EQUI // 5 // 
+11 12 13 <==> 7 8 9 // EQUI // 5 // 
+17 18 19 <==> 13 14 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="166" status="">
+// A brown dog runs through the water in the ocean .
+// A brown dog runs through the water as a wave comes .
+<source>
+1 A :
+2 brown :
+3 dog :
+4 runs :
+5 through :
+6 the :
+7 water :
+8 in :
+9 the :
+10 ocean :
+11 . :
+</source>
+<translation>
+1 A :
+2 brown :
+3 dog :
+4 runs :
+5 through :
+6 the :
+7 water :
+8 as :
+9 a :
+10 wave :
+11 comes :
+12 . :
+</translation>
+<alignment>
+1 2 3 <==> 4 // EQUI // 5 // 
+4 <==> 1 2 3 // EQUI // 5 // 
+4 <==> 4 // EQUI // 5 // 
+5 6 7 <==> 5 6 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="167" status="">
+// Two dogs play in the grass .
+// Two dogs are playing in the grass .
+<source>
+1 Two :
+2 dogs :
+3 play :
+4 in :
+5 the :
+6 grass :
+7 . :
+</source>
+<translation>
+1 Two :
+2 dogs :
+3 are :
+4 playing :
+5 in :
+6 the :
+7 grass :
+8 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 <==> 3 4 // EQUI // 5 // 
+4 5 6 <==> 5 6 7 // EQUI // 5 // 
+7 <==> 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="168" status="">
+// Two men on the side of a barge
+// A man is lying the grass with long hair and beard .
+<source>
+1 Two :
+2 men :
+3 on :
+4 the :
+5 side :
+6 of :
+7 a :
+8 barge :
+</source>
+<translation>
+1 A :
+2 man :
+3 is :
+4 lying :
+5 the :
+6 grass :
+7 with :
+8 long :
+9 hair :
+10 and :
+11 beard :
+12 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+6 7 8 <==> 7 8 9 10 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="169" status="">
+// A man juggles at the beach .
+// A man in swim trunks is juggling on the beach
+<source>
+1 A :
+2 man :
+3 juggles :
+4 at :
+5 the :
+6 beach :
+7 . :
+</source>
+<translation>
+1 A :
+2 man :
+3 in :
+4 swim :
+5 trunks :
+6 is :
+7 juggling :
+8 on :
+9 the :
+10 beach :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+4 5 6 <==> 8 9 10 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="170" status="">
+// Two people and a dog are in the snow .
+// Two people playing on a snowy hill .
+<source>
+1 Two :
+2 people :
+3 and :
+4 a :
+5 dog :
+6 are :
+7 in :
+8 the :
+9 snow :
+10 . :
+</source>
+<translation>
+1 Two :
+2 people :
+3 playing :
+4 on :
+5 a :
+6 snowy :
+7 hill :
+8 . :
+</translation>
+<alignment>
+1 2 3 4 5 <==> 1 2 // EQUI // 5 // 
+7 8 9 <==> 4 5 6 7 // EQUI // 5 // 
+10 <==> 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="171" status="">
+// The man is standing on the shore hitting a ball with a paddle .
+// Two teenage girls are standing on beside the beach listening to ipods .
+<source>
+1 The :
+2 man :
+3 is :
+4 standing :
+5 on :
+6 the :
+7 shore :
+8 hitting :
+9 a :
+10 ball :
+11 with :
+12 a :
+13 paddle :
+14 . :
+</source>
+<translation>
+1 Two :
+2 teenage :
+3 girls :
+4 are :
+5 standing :
+6 on :
+7 beside :
+8 the :
+9 beach :
+10 listening :
+11 to :
+12 ipods :
+13 . :
+</translation>
+<alignment>
+5 6 7 <==> 6 7 8 9 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="172" status="">
+// Two girls walking in the ocean .
+// two girls walking in the street
+<source>
+1 Two :
+2 girls :
+3 walking :
+4 in :
+5 the :
+6 ocean :
+7 . :
+</source>
+<translation>
+1 two :
+2 girls :
+3 walking :
+4 in :
+5 the :
+6 street :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+7 <==> 3 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="173" status="">
+// A man jumps off of one rooftop onto another .
+// A young man jumps from one balcony to another .
+<source>
+1 A :
+2 man :
+3 jumps :
+4 off :
+5 of :
+6 one :
+7 rooftop :
+8 onto :
+9 another :
+10 . :
+</source>
+<translation>
+1 A :
+2 young :
+3 man :
+4 jumps :
+5 from :
+6 one :
+7 balcony :
+8 to :
+9 another :
+10 . :
+</translation>
+<alignment>
+3 4 <==> 4 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="174" status="">
+// a woman playing with two young boys at a park
+// A woman and three kids play at a park .
+<source>
+1 a :
+2 woman :
+3 playing :
+4 with :
+5 two :
+6 young :
+7 boys :
+8 at :
+9 a :
+10 park :
+</source>
+<translation>
+1 A :
+2 woman :
+3 and :
+4 three :
+5 kids :
+6 play :
+7 at :
+8 a :
+9 park :
+10 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 3 4 5 // EQUI // 5 // 
+3 <==> 6 // EQUI // 5 // 
+8 9 10 <==> 7 8 9 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="175" status="">
+// A man wearing glasses stands in front of a snowy mountain .
+// A man wearing black shorts is standing in front of a snow covered mountain .
+<source>
+1 A :
+2 man :
+3 wearing :
+4 glasses :
+5 stands :
+6 in :
+7 front :
+8 of :
+9 a :
+10 snowy :
+11 mountain :
+12 . :
+</source>
+<translation>
+1 A :
+2 man :
+3 wearing :
+4 black :
+5 shorts :
+6 is :
+7 standing :
+8 in :
+9 front :
+10 of :
+11 a :
+12 snow :
+13 covered :
+14 mountain :
+15 . :
+</translation>
+<alignment>
+5 <==> 6 7 // EQUI // 5 // 
+6 7 8 9 10 11 <==> 8 9 10 11 12 13 14 // EQUI // 5 // 
+12 <==> 15 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="176" status="">
+// Three boys playing soccer in a field
+// Three boys playing soccer .
+<source>
+1 Three :
+2 boys :
+3 playing :
+4 soccer :
+5 in :
+6 a :
+7 field :
+</source>
+<translation>
+1 Three :
+2 boys :
+3 playing :
+4 soccer :
+5 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 <==> 3 // EQUI // 5 // 
+4 <==> 4 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="177" status="">
+// A black dog is running through the snow .
+// A black pit bull dog is running through the dirt .
+<source>
+1 A :
+2 black :
+3 dog :
+4 is :
+5 running :
+6 through :
+7 the :
+8 snow :
+9 . :
+</source>
+<translation>
+1 A :
+2 black :
+3 pit :
+4 bull :
+5 dog :
+6 is :
+7 running :
+8 through :
+9 the :
+10 dirt :
+11 . :
+</translation>
+<alignment>
+4 5 <==> 6 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="178" status="">
+// Two girls taking a picture of themselves
+// Two blonde girls are taking a picture of themselves .
+<source>
+1 Two :
+2 girls :
+3 taking :
+4 a :
+5 picture :
+6 of :
+7 themselves :
+</source>
+<translation>
+1 Two :
+2 blonde :
+3 girls :
+4 are :
+5 taking :
+6 a :
+7 picture :
+8 of :
+9 themselves :
+10 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 3 // EQUI // 5 // 
+3 <==> 4 5 // EQUI // 5 // 
+4 5 <==> 6 7 // EQUI // 5 // 
+6 7 <==> 8 9 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="179" status="">
+// a man wearing a grey jacket standing on the side of a street .
+// A boy wearing a blue life jacket is holding onto the side of a green boat .
+<source>
+1 a :
+2 man :
+3 wearing :
+4 a :
+5 grey :
+6 jacket :
+7 standing :
+8 on :
+9 the :
+10 side :
+11 of :
+12 a :
+13 street :
+14 . :
+</source>
+<translation>
+1 A :
+2 boy :
+3 wearing :
+4 a :
+5 blue :
+6 life :
+7 jacket :
+8 is :
+9 holding :
+10 onto :
+11 the :
+12 side :
+13 of :
+14 a :
+15 green :
+16 boat :
+17 . :
+</translation>
+<alignment>
+4 5 6 <==> 4 5 6 7 // EQUI // 5 // 
+8 9 10 <==> 10 11 12 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="180" status="">
+// A black dog jumps in the snow .
+// A black dog jumping over tire tracks in the snow .
+<source>
+1 A :
+2 black :
+3 dog :
+4 jumps :
+5 in :
+6 the :
+7 snow :
+8 . :
+</source>
+<translation>
+1 A :
+2 black :
+3 dog :
+4 jumping :
+5 over :
+6 tire :
+7 tracks :
+8 in :
+9 the :
+10 snow :
+11 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+4 <==> 4 // EQUI // 5 // 
+5 6 7 <==> 8 9 10 // EQUI // 5 // 
+8 <==> 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="181" status="">
+// child hanging upside down from a tree swing
+// A girl is by a tree hanging upside-down from a swing .
+<source>
+1 child :
+2 hanging :
+3 upside :
+4 down :
+5 from :
+6 a :
+7 tree :
+8 swing :
+</source>
+<translation>
+1 A :
+2 girl :
+3 is :
+4 by :
+5 a :
+6 tree :
+7 hanging :
+8 upside-down :
+9 from :
+10 a :
+11 swing :
+12 . :
+</translation>
+<alignment>
+2 <==> 7 // EQUI // 5 // 
+3 4 <==> 8 // EQUI // 5 // 
+5 6 7 8 <==> 9 10 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="182" status="">
+// A black and white dog is running through a snowy field .
+// A black , brown and white dog running through a field .
+<source>
+1 A :
+2 black :
+3 and :
+4 white :
+5 dog :
+6 is :
+7 running :
+8 through :
+9 a :
+10 snowy :
+11 field :
+12 . :
+</source>
+<translation>
+1 A :
+2 black :
+3 , :
+4 brown :
+5 and :
+6 white :
+7 dog :
+8 running :
+9 through :
+10 a :
+11 field :
+12 . :
+</translation>
+<alignment>
+6 7 <==> 1 2 3 4 5 6 7 // EQUI // 5 // 
+6 7 <==> 8 // EQUI // 5 // 
+8 9 10 11 <==> 9 10 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="183" status="">
+// A man riding his bike on the beach by the ocean .
+// A man walking his cow down the side of the road .
+<source>
+1 A :
+2 man :
+3 riding :
+4 his :
+5 bike :
+6 on :
+7 the :
+8 beach :
+9 by :
+10 the :
+11 ocean :
+12 . :
+</source>
+<translation>
+1 A :
+2 man :
+3 walking :
+4 his :
+5 cow :
+6 down :
+7 the :
+8 side :
+9 of :
+10 the :
+11 road :
+12 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+6 7 8 <==> 6 // EQUI // 5 // 
+9 10 11 <==> 9 10 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="184" status="">
+// A boy jumps into a not-so-crowded public pool .
+// A man jumps while on a snowboard .
+<source>
+1 A :
+2 boy :
+3 jumps :
+4 into :
+5 a :
+6 not-so-crowded :
+7 public :
+8 pool :
+9 . :
+</source>
+<translation>
+1 A :
+2 man :
+3 jumps :
+4 while :
+5 on :
+6 a :
+7 snowboard :
+8 . :
+</translation>
+<alignment>
+3 <==> 3 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="185" status="">
+// A brown dog jumps high in the grass .
+// A brown dog digs in the sand .
+<source>
+1 A :
+2 brown :
+3 dog :
+4 jumps :
+5 high :
+6 in :
+7 the :
+8 grass :
+9 . :
+</source>
+<translation>
+1 A :
+2 brown :
+3 dog :
+4 digs :
+5 in :
+6 the :
+7 sand :
+8 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+6 7 8 <==> 5 6 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="186" status="">
+// a group of old men walking down the street
+// A couple walking down the street .
+<source>
+1 a :
+2 group :
+3 of :
+4 old :
+5 men :
+6 walking :
+7 down :
+8 the :
+9 street :
+</source>
+<translation>
+1 A :
+2 couple :
+3 walking :
+4 down :
+5 the :
+6 street :
+7 . :
+</translation>
+<alignment>
+8 9 <==> 5 6 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="187" status="">
+// A group of people are camping out on some rocks .
+// A group of people are standing beside a fire truck .
+<source>
+1 A :
+2 group :
+3 of :
+4 people :
+5 are :
+6 camping :
+7 out :
+8 on :
+9 some :
+10 rocks :
+11 . :
+</source>
+<translation>
+1 A :
+2 group :
+3 of :
+4 people :
+5 are :
+6 standing :
+7 beside :
+8 a :
+9 fire :
+10 truck :
+11 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="188" status="">
+// The two dogs are playing fetch in the snow .
+// The dogs play in the snow .
+<source>
+1 The :
+2 two :
+3 dogs :
+4 are :
+5 playing :
+6 fetch :
+7 in :
+8 the :
+9 snow :
+10 . :
+</source>
+<translation>
+1 The :
+2 dogs :
+3 play :
+4 in :
+5 the :
+6 snow :
+7 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 // EQUI // 5 // 
+4 5 6 <==> 3 // EQUI // 5 // 
+7 8 9 <==> 4 5 6 // EQUI // 5 // 
+10 <==> 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="189" status="">
+// Dog is jumping down a ramp .
+// A girls is jumping in the sand .
+<source>
+1 Dog :
+2 is :
+3 jumping :
+4 down :
+5 a :
+6 ramp :
+7 . :
+</source>
+<translation>
+1 A :
+2 girls :
+3 is :
+4 jumping :
+5 in :
+6 the :
+7 sand :
+8 . :
+</translation>
+<alignment>
+2 3 <==> 3 4 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="190" status="">
+// Three greyhounds racing on a track
+// Five greyhounds are racing on a sand track .
+<source>
+1 Three :
+2 greyhounds :
+3 racing :
+4 on :
+5 a :
+6 track :
+</source>
+<translation>
+1 Five :
+2 greyhounds :
+3 are :
+4 racing :
+5 on :
+6 a :
+7 sand :
+8 track :
+9 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 <==> 3 4 // EQUI // 5 // 
+4 5 6 <==> 5 6 7 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="191" status="">
+// Two black dogs are playing on the grass .
+// Two black dogs are playing in a grassy plain .
+<source>
+1 Two :
+2 black :
+3 dogs :
+4 are :
+5 playing :
+6 on :
+7 the :
+8 grass :
+9 . :
+</source>
+<translation>
+1 Two :
+2 black :
+3 dogs :
+4 are :
+5 playing :
+6 in :
+7 a :
+8 grassy :
+9 plain :
+10 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+4 5 <==> 4 5 // EQUI // 5 // 
+6 7 8 <==> 6 7 8 9 // EQUI // 5 // 
+9 <==> 10 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="192" status="">
+// A little brown dog is running on the grass .
+// The brown dog is running on the grass .
+<source>
+1 A :
+2 little :
+3 brown :
+4 dog :
+5 is :
+6 running :
+7 on :
+8 the :
+9 grass :
+10 . :
+</source>
+<translation>
+1 The :
+2 brown :
+3 dog :
+4 is :
+5 running :
+6 on :
+7 the :
+8 grass :
+9 . :
+</translation>
+<alignment>
+1 2 3 4 <==> 1 2 3 // EQUI // 5 // 
+7 8 9 <==> 6 7 8 // EQUI // 5 // 
+10 <==> 9 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="193" status="">
+// A boy wearing a yellow shirt and blue pants is climbing a tree in a hilly area .
+// A boy wearing a yellow shirt and blue pants is climbing on a tree branch in a grassy field .
+<source>
+1 A :
+2 boy :
+3 wearing :
+4 a :
+5 yellow :
+6 shirt :
+7 and :
+8 blue :
+9 pants :
+10 is :
+11 climbing :
+12 a :
+13 tree :
+14 in :
+15 a :
+16 hilly :
+17 area :
+18 . :
+</source>
+<translation>
+1 A :
+2 boy :
+3 wearing :
+4 a :
+5 yellow :
+6 shirt :
+7 and :
+8 blue :
+9 pants :
+10 is :
+11 climbing :
+12 on :
+13 a :
+14 tree :
+15 branch :
+16 in :
+17 a :
+18 grassy :
+19 field :
+20 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 <==> 3 // EQUI // 5 // 
+4 5 6 7 8 9 <==> 4 5 6 7 8 9 // EQUI // 5 // 
+10 11 <==> 10 11 // EQUI // 5 // 
+12 13 <==> 12 13 14 15 // EQUI // 5 // 
+18 <==> 20 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="194" status="">
+// A harnessed dog leaps over a log as another dog follows behind .
+// A brown and white dog is leaping over a log in a field while another dog follows behind it .
+<source>
+1 A :
+2 harnessed :
+3 dog :
+4 leaps :
+5 over :
+6 a :
+7 log :
+8 as :
+9 another :
+10 dog :
+11 follows :
+12 behind :
+13 . :
+</source>
+<translation>
+1 A :
+2 brown :
+3 and :
+4 white :
+5 dog :
+6 is :
+7 leaping :
+8 over :
+9 a :
+10 log :
+11 in :
+12 a :
+13 field :
+14 while :
+15 another :
+16 dog :
+17 follows :
+18 behind :
+19 it :
+20 . :
+</translation>
+<alignment>
+4 <==> 6 7 // EQUI // 5 // 
+5 6 7 <==> 8 9 10 // EQUI // 5 // 
+8 9 10 <==> 17 // EQUI // 5 // 
+11 <==> 14 15 16 // EQUI // 5 // 
+11 <==> 17 // EQUI // 5 // 
+12 <==> 18 // EQUI // 5 // 
+13 <==> 20 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="195" status="">
+// A small brown dog jumping up to catch a tennis ball .
+// a wet dog chasing a white ball
+<source>
+1 A :
+2 small :
+3 brown :
+4 dog :
+5 jumping :
+6 up :
+7 to :
+8 catch :
+9 a :
+10 tennis :
+11 ball :
+12 . :
+</source>
+<translation>
+1 a :
+2 wet :
+3 dog :
+4 chasing :
+5 a :
+6 white :
+7 ball :
+</translation>
+<alignment>
+7 8 <==> 4 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="196" status="">
+// a dog runs through the water .
+// A dog runs through the grass .
+<source>
+1 a :
+2 dog :
+3 runs :
+4 through :
+5 the :
+6 water :
+7 . :
+</source>
+<translation>
+1 A :
+2 dog :
+3 runs :
+4 through :
+5 the :
+6 grass :
+7 . :
+</translation>
+<alignment>
+1 2 <==> 3 // EQUI // 5 // 
+3 <==> 1 2 // EQUI // 5 // 
+3 <==> 3 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="197" status="">
+// A girl is doing a trick on her trampoline .
+// A girl does a handstand on a trampoline .
+<source>
+1 A :
+2 girl :
+3 is :
+4 doing :
+5 a :
+6 trick :
+7 on :
+8 her :
+9 trampoline :
+10 . :
+</source>
+<translation>
+1 A :
+2 girl :
+3 does :
+4 a :
+5 handstand :
+6 on :
+7 a :
+8 trampoline :
+9 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+7 8 9 <==> 6 7 8 // EQUI // 5 // 
+10 <==> 9 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="198" status="">
+// People with numbers on their chests are running in a pack .
+// A group of people are running a race .
+<source>
+1 People :
+2 with :
+3 numbers :
+4 on :
+5 their :
+6 chests :
+7 are :
+8 running :
+9 in :
+10 a :
+11 pack :
+12 . :
+</source>
+<translation>
+1 A :
+2 group :
+3 of :
+4 people :
+5 are :
+6 running :
+7 a :
+8 race :
+9 . :
+</translation>
+<alignment>
+1 <==> 3 4 // EQUI // 5 // 
+7 8 <==> 5 6 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="199" status="">
+// A black dog walking through splashing water in a rocky creek .
+// A black dog splashes through greenish water .
+<source>
+1 A :
+2 black :
+3 dog :
+4 walking :
+5 through :
+6 splashing :
+7 water :
+8 in :
+9 a :
+10 rocky :
+11 creek :
+12 . :
+</source>
+<translation>
+1 A :
+2 black :
+3 dog :
+4 splashes :
+5 through :
+6 greenish :
+7 water :
+8 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+5 6 7 <==> 5 6 7 // EQUI // 5 // 
+12 <==> 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="200" status="">
+// Child sliding in the snow .
+// Man sleeping on the street .
+<source>
+1 Child :
+2 sliding :
+3 in :
+4 the :
+5 snow :
+6 . :
+</source>
+<translation>
+1 Man :
+2 sleeping :
+3 on :
+4 the :
+5 street :
+6 . :
+</translation>
+<alignment>
+1 <==> 1 // EQUI // 5 // 
+3 4 5 <==> 3 4 5 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="201" status="">
+// A dog runs through a very wooded area .
+// A dog running through a creek .
+<source>
+1 A :
+2 dog :
+3 runs :
+4 through :
+5 a :
+6 very :
+7 wooded :
+8 area :
+9 . :
+</source>
+<translation>
+1 A :
+2 dog :
+3 running :
+4 through :
+5 a :
+6 creek :
+7 . :
+</translation>
+<alignment>
+3 <==> 1 2 // EQUI // 5 // 
+3 <==> 3 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="202" status="">
+// A brown dog and a tan dog are playing in tall grass .
+// A black and brown dog with a red ball overhead plays in the grass .
+<source>
+1 A :
+2 brown :
+3 dog :
+4 and :
+5 a :
+6 tan :
+7 dog :
+8 are :
+9 playing :
+10 in :
+11 tall :
+12 grass :
+13 . :
+</source>
+<translation>
+1 A :
+2 black :
+3 and :
+4 brown :
+5 dog :
+6 with :
+7 a :
+8 red :
+9 ball :
+10 overhead :
+11 plays :
+12 in :
+13 the :
+14 grass :
+15 . :
+</translation>
+<alignment>
+1 2 3 4 5 6 7 <==> 1 2 3 4 5 // EQUI // 5 // 
+8 9 <==> 11 // EQUI // 5 // 
+10 11 12 <==> 12 13 14 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="203" status="">
+// A person is squeezing through an opening in the rock face .
+// A medium sized brown dog is running through an open white wooded area .
+<source>
+1 A :
+2 person :
+3 is :
+4 squeezing :
+5 through :
+6 an :
+7 opening :
+8 in :
+9 the :
+10 rock :
+11 face :
+12 . :
+</source>
+<translation>
+1 A :
+2 medium :
+3 sized :
+4 brown :
+5 dog :
+6 is :
+7 running :
+8 through :
+9 an :
+10 open :
+11 white :
+12 wooded :
+13 area :
+14 . :
+</translation>
+<alignment>
+8 9 10 11 <==> 8 9 10 11 12 13 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="204" status="">
+// Six dogs running on the sandy beach .
+// Six dogs walking beside the beach .
+<source>
+1 Six :
+2 dogs :
+3 running :
+4 on :
+5 the :
+6 sandy :
+7 beach :
+8 . :
+</source>
+<translation>
+1 Six :
+2 dogs :
+3 walking :
+4 beside :
+5 the :
+6 beach :
+7 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+4 5 6 7 <==> 4 5 6 // EQUI // 5 // 
+8 <==> 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="205" status="">
+// Two people are walking through some water .
+// Two girls are walking by a tree in front of a brick building .
+<source>
+1 Two :
+2 people :
+3 are :
+4 walking :
+5 through :
+6 some :
+7 water :
+8 . :
+</source>
+<translation>
+1 Two :
+2 girls :
+3 are :
+4 walking :
+5 by :
+6 a :
+7 tree :
+8 in :
+9 front :
+10 of :
+11 a :
+12 brick :
+13 building :
+14 . :
+</translation>
+<alignment>
+1 2 <==> 3 4 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="206" status="">
+// A woman and a dog rowing down a wide river .
+// Woman and dog in rowboat on the water .
+<source>
+1 A :
+2 woman :
+3 and :
+4 a :
+5 dog :
+6 rowing :
+7 down :
+8 a :
+9 wide :
+10 river :
+11 . :
+</source>
+<translation>
+1 Woman :
+2 and :
+3 dog :
+4 in :
+5 rowboat :
+6 on :
+7 the :
+8 water :
+9 . :
+</translation>
+<alignment>
+1 2 3 4 5 <==> 1 2 3 // EQUI // 5 // 
+11 <==> 9 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="207" status="">
+// Three dogs are playing in the water .
+// Three dogs swim in the water .
+<source>
+1 Three :
+2 dogs :
+3 are :
+4 playing :
+5 in :
+6 the :
+7 water :
+8 . :
+</source>
+<translation>
+1 Three :
+2 dogs :
+3 swim :
+4 in :
+5 the :
+6 water :
+7 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+5 6 7 <==> 4 5 6 // EQUI // 5 // 
+8 <==> 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="208" status="">
+// A young boy in a blue jacket swings a bat at a ball .
+// A young boy wearing a blue visor swings a bat .
+<source>
+1 A :
+2 young :
+3 boy :
+4 in :
+5 a :
+6 blue :
+7 jacket :
+8 swings :
+9 a :
+10 bat :
+11 at :
+12 a :
+13 ball :
+14 . :
+</source>
+<translation>
+1 A :
+2 young :
+3 boy :
+4 wearing :
+5 a :
+6 blue :
+7 visor :
+8 swings :
+9 a :
+10 bat :
+11 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+4 5 6 7 <==> 4 5 6 7 // EQUI // 5 // 
+8 <==> 8 // EQUI // 5 // 
+9 10 <==> 9 10 // EQUI // 5 // 
+14 <==> 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="209" status="">
+// Three individuals are posing on skis behind a "no skiing" sign .
+// Three people on skis are standing behind a no skiing sign .
+<source>
+1 Three :
+2 individuals :
+3 are :
+4 posing :
+5 on :
+6 skis :
+7 behind :
+8 a :
+9 "no :
+10 skiing" :
+11 sign :
+12 . :
+</source>
+<translation>
+1 Three :
+2 people :
+3 on :
+4 skis :
+5 are :
+6 standing :
+7 behind :
+8 a :
+9 no :
+10 skiing :
+11 sign :
+12 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+5 6 <==> 3 4 // EQUI // 5 // 
+7 8 9 10 11 <==> 7 8 9 10 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="210" status="">
+// A female DJ holds up a Michael Jackson album .
+// a girl holding a picture of Michael Jackson smiling
+<source>
+1 A :
+2 female :
+3 DJ :
+4 holds :
+5 up :
+6 a :
+7 Michael :
+8 Jackson :
+9 album :
+10 . :
+</source>
+<translation>
+1 a :
+2 girl :
+3 holding :
+4 a :
+5 picture :
+6 of :
+7 Michael :
+8 Jackson :
+9 smiling :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 // EQUI // 5 // 
+4 5 <==> 3 // EQUI // 5 // 
+6 7 8 9 <==> 4 5 6 7 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="211" status="">
+// The black and white dog is running on the grass .
+// A black and white dog swims in blue water .
+<source>
+1 The :
+2 black :
+3 and :
+4 white :
+5 dog :
+6 is :
+7 running :
+8 on :
+9 the :
+10 grass :
+11 . :
+</source>
+<translation>
+1 A :
+2 black :
+3 and :
+4 white :
+5 dog :
+6 swims :
+7 in :
+8 blue :
+9 water :
+10 . :
+</translation>
+<alignment>
+1 2 3 4 5 <==> 1 2 3 4 5 // EQUI // 5 // 
+6 7 <==> 6 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="212" status="">
+// Two teenage girls , one is smiling .
+// A little girl on a kid swing .
+<source>
+1 Two :
+2 teenage :
+3 girls :
+4 , :
+5 one :
+6 is :
+7 smiling :
+8 . :
+</source>
+<translation>
+1 A :
+2 little :
+3 girl :
+4 on :
+5 a :
+6 kid :
+7 swing :
+8 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+8 <==> 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="213" status="">
+// A brown and black dog walks in the white snow .
+// A brown and black dog walks in the snow with it's tongue hanging out .
+<source>
+1 A :
+2 brown :
+3 and :
+4 black :
+5 dog :
+6 walks :
+7 in :
+8 the :
+9 white :
+10 snow :
+11 . :
+</source>
+<translation>
+1 A :
+2 brown :
+3 and :
+4 black :
+5 dog :
+6 walks :
+7 in :
+8 the :
+9 snow :
+10 with :
+11 it's :
+12 tongue :
+13 hanging :
+14 out :
+15 . :
+</translation>
+<alignment>
+1 2 3 4 5 <==> 6 // EQUI // 5 // 
+6 <==> 1 2 3 4 5 // EQUI // 5 // 
+6 <==> 6 // EQUI // 5 // 
+7 8 9 10 <==> 7 8 9 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="214" status="">
+// Two teenagers huddle in a doorway in the rain .
+// Two people wearing hoodies huddle on a doorstep in the rain .
+<source>
+1 Two :
+2 teenagers :
+3 huddle :
+4 in :
+5 a :
+6 doorway :
+7 in :
+8 the :
+9 rain :
+10 . :
+</source>
+<translation>
+1 Two :
+2 people :
+3 wearing :
+4 hoodies :
+5 huddle :
+6 on :
+7 a :
+8 doorstep :
+9 in :
+10 the :
+11 rain :
+12 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 <==> 5 // EQUI // 5 // 
+4 5 6 <==> 6 7 8 // EQUI // 5 // 
+7 8 9 <==> 9 10 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="215" status="">
+// a boy swinging on a swing .
+// The girl is on a swing .
+<source>
+1 a :
+2 boy :
+3 swinging :
+4 on :
+5 a :
+6 swing :
+7 . :
+</source>
+<translation>
+1 The :
+2 girl :
+3 is :
+4 on :
+5 a :
+6 swing :
+7 . :
+</translation>
+<alignment>
+4 5 6 <==> 4 5 6 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="216" status="">
+// A young girl doing a back flip in the water .
+// a young girl wearing purple running through water
+<source>
+1 A :
+2 young :
+3 girl :
+4 doing :
+5 a :
+6 back :
+7 flip :
+8 in :
+9 the :
+10 water :
+11 . :
+</source>
+<translation>
+1 a :
+2 young :
+3 girl :
+4 wearing :
+5 purple :
+6 running :
+7 through :
+8 water :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+8 9 10 <==> 7 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="217" status="">
+// A man is riding a bicycle on a dirt path .
+// Two dogs running along dirt path .
+<source>
+1 A :
+2 man :
+3 is :
+4 riding :
+5 a :
+6 bicycle :
+7 on :
+8 a :
+9 dirt :
+10 path :
+11 . :
+</source>
+<translation>
+1 Two :
+2 dogs :
+3 running :
+4 along :
+5 dirt :
+6 path :
+7 . :
+</translation>
+<alignment>
+7 8 9 10 <==> 4 5 6 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="218" status="">
+// A light brown dog runs down a path happily .
+// A pale dog runs down a path .
+<source>
+1 A :
+2 light :
+3 brown :
+4 dog :
+5 runs :
+6 down :
+7 a :
+8 path :
+9 happily :
+10 . :
+</source>
+<translation>
+1 A :
+2 pale :
+3 dog :
+4 runs :
+5 down :
+6 a :
+7 path :
+8 . :
+</translation>
+<alignment>
+5 <==> 1 2 3 // EQUI // 5 // 
+5 <==> 4 // EQUI // 5 // 
+6 7 8 <==> 5 6 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="219" status="">
+// A girl does a back bend on the beach .
+// A girl doing a back bend at the beach .
+<source>
+1 A :
+2 girl :
+3 does :
+4 a :
+5 back :
+6 bend :
+7 on :
+8 the :
+9 beach :
+10 . :
+</source>
+<translation>
+1 A :
+2 girl :
+3 doing :
+4 a :
+5 back :
+6 bend :
+7 at :
+8 the :
+9 beach :
+10 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 <==> 3 // EQUI // 5 // 
+4 5 6 <==> 4 5 6 // EQUI // 5 // 
+7 8 9 <==> 7 8 9 // EQUI // 5 // 
+10 <==> 10 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="220" status="">
+// Two older men in front of a bus .
+// Two men step off the bus together .
+<source>
+1 Two :
+2 older :
+3 men :
+4 in :
+5 front :
+6 of :
+7 a :
+8 bus :
+9 . :
+</source>
+<translation>
+1 Two :
+2 men :
+3 step :
+4 off :
+5 the :
+6 bus :
+7 together :
+8 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 // EQUI // 5 // 
+4 5 6 7 8 <==> 5 6 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="221" status="">
+// A little girl walks on a boardwalk with blue domes in the background .
+// A man going over a jump on his bike with a river in the background
+<source>
+1 A :
+2 little :
+3 girl :
+4 walks :
+5 on :
+6 a :
+7 boardwalk :
+8 with :
+9 blue :
+10 domes :
+11 in :
+12 the :
+13 background :
+14 . :
+</source>
+<translation>
+1 A :
+2 man :
+3 going :
+4 over :
+5 a :
+6 jump :
+7 on :
+8 his :
+9 bike :
+10 with :
+11 a :
+12 river :
+13 in :
+14 the :
+15 background :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 // EQUI // 5 // 
+11 12 13 <==> 13 14 15 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="222" status="">
+// A man on a bike nest to a river .
+// A man on a bike does a very high jump .
+<source>
+1 A :
+2 man :
+3 on :
+4 a :
+5 bike :
+6 nest :
+7 to :
+8 a :
+9 river :
+10 . :
+</source>
+<translation>
+1 A :
+2 man :
+3 on :
+4 a :
+5 bike :
+6 does :
+7 a :
+8 very :
+9 high :
+10 jump :
+11 . :
+</translation>
+<alignment>
+3 4 5 <==> 3 4 5 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="223" status="">
+// Black and white dog running through water .
+// A black and white dog is running through grass .
+<source>
+1 Black :
+2 and :
+3 white :
+4 dog :
+5 running :
+6 through :
+7 water :
+8 . :
+</source>
+<translation>
+1 A :
+2 black :
+3 and :
+4 white :
+5 dog :
+6 is :
+7 running :
+8 through :
+9 grass :
+10 . :
+</translation>
+<alignment>
+1 2 3 4 <==> 1 2 3 4 5 // EQUI // 5 // 
+5 <==> 6 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="224" status="">
+// A dalmation is running along the beach .
+// A white dog is running on sand .
+<source>
+1 A :
+2 dalmation :
+3 is :
+4 running :
+5 along :
+6 the :
+7 beach :
+8 . :
+</source>
+<translation>
+1 A :
+2 white :
+3 dog :
+4 is :
+5 running :
+6 on :
+7 sand :
+8 . :
+</translation>
+<alignment>
+3 4 <==> 4 5 // EQUI // 5 // 
+5 6 7 <==> 6 7 // EQUI // 5 // 
+8 <==> 1 2 3 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="225" status="">
+// A dog leaps out of the water towards shore .
+// a tan dog jumping through the water towards the shore .
+<source>
+1 A :
+2 dog :
+3 leaps :
+4 out :
+5 of :
+6 the :
+7 water :
+8 towards :
+9 shore :
+10 . :
+</source>
+<translation>
+1 a :
+2 tan :
+3 dog :
+4 jumping :
+5 through :
+6 the :
+7 water :
+8 towards :
+9 the :
+10 shore :
+11 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 3 // EQUI // 5 // 
+3 <==> 4 // EQUI // 5 // 
+4 5 6 7 <==> 5 6 7 // EQUI // 5 // 
+8 9 <==> 8 9 10 // EQUI // 5 // 
+10 <==> 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="226" status="">
+// two dogs play in the grass .
+// Two dogs play in the water .
+<source>
+1 two :
+2 dogs :
+3 play :
+4 in :
+5 the :
+6 grass :
+7 . :
+</source>
+<translation>
+1 Two :
+2 dogs :
+3 play :
+4 in :
+5 the :
+6 water :
+7 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 <==> 3 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="227" status="">
+// A wet white dog is splashing in the water with a stick in it's mouth .
+// A white dogs treads the water with sticks in its mouth .
+<source>
+1 A :
+2 wet :
+3 white :
+4 dog :
+5 is :
+6 splashing :
+7 in :
+8 the :
+9 water :
+10 with :
+11 a :
+12 stick :
+13 in :
+14 it's :
+15 mouth :
+16 . :
+</source>
+<translation>
+1 A :
+2 white :
+3 dogs :
+4 treads :
+5 the :
+6 water :
+7 with :
+8 sticks :
+9 in :
+10 its :
+11 mouth :
+12 . :
+</translation>
+<alignment>
+1 2 3 4 <==> 1 2 3 // EQUI // 5 // 
+7 8 9 <==> 5 6 // EQUI // 5 // 
+10 11 12 <==> 7 8 // EQUI // 5 // 
+13 14 15 <==> 9 10 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="228" status="">
+// A blonde dog is catching a ball in its mouth in the snow .
+// A little blonde girl is sitting on a green chair .
+<source>
+1 A :
+2 blonde :
+3 dog :
+4 is :
+5 catching :
+6 a :
+7 ball :
+8 in :
+9 its :
+10 mouth :
+11 in :
+12 the :
+13 snow :
+14 . :
+</source>
+<translation>
+1 A :
+2 little :
+3 blonde :
+4 girl :
+5 is :
+6 sitting :
+7 on :
+8 a :
+9 green :
+10 chair :
+11 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 4 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="229" status="">
+// two puppies playing around in the grass
+// Two puppies play in the grass
+<source>
+1 two :
+2 puppies :
+3 playing :
+4 around :
+5 in :
+6 the :
+7 grass :
+</source>
+<translation>
+1 Two :
+2 puppies :
+3 play :
+4 in :
+5 the :
+6 grass :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 4 <==> 3 // EQUI // 5 // 
+5 6 7 <==> 4 5 6 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="230" status="">
+// Two dogs run on a dirt area near a forest .
+// Two dogs run down a dirt path in the forest .
+<source>
+1 Two :
+2 dogs :
+3 run :
+4 on :
+5 a :
+6 dirt :
+7 area :
+8 near :
+9 a :
+10 forest :
+11 . :
+</source>
+<translation>
+1 Two :
+2 dogs :
+3 run :
+4 down :
+5 a :
+6 dirt :
+7 path :
+8 in :
+9 the :
+10 forest :
+11 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 <==> 3 // EQUI // 5 // 
+4 5 6 7 <==> 4 5 6 7 // EQUI // 5 // 
+8 9 10 <==> 8 9 10 // EQUI // 5 // 
+11 <==> 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="231" status="">
+// The brown and white dog is running across the sand with a red object in his mouth .
+// A dog is running along a beach with a red object in its mouth .
+<source>
+1 The :
+2 brown :
+3 and :
+4 white :
+5 dog :
+6 is :
+7 running :
+8 across :
+9 the :
+10 sand :
+11 with :
+12 a :
+13 red :
+14 object :
+15 in :
+16 his :
+17 mouth :
+18 . :
+</source>
+<translation>
+1 A :
+2 dog :
+3 is :
+4 running :
+5 along :
+6 a :
+7 beach :
+8 with :
+9 a :
+10 red :
+11 object :
+12 in :
+13 its :
+14 mouth :
+15 . :
+</translation>
+<alignment>
+1 2 3 4 5 <==> 1 2 // EQUI // 5 // 
+6 7 <==> 3 4 // EQUI // 5 // 
+8 9 10 <==> 5 6 7 // EQUI // 5 // 
+11 12 13 14 <==> 8 9 10 11 // EQUI // 5 // 
+15 16 17 <==> 12 13 14 // EQUI // 5 // 
+18 <==> 15 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="232" status="">
+// Two dogs are playing in the snow .
+// The dogs are running in the snow .
+<source>
+1 Two :
+2 dogs :
+3 are :
+4 playing :
+5 in :
+6 the :
+7 snow :
+8 . :
+</source>
+<translation>
+1 The :
+2 dogs :
+3 are :
+4 running :
+5 in :
+6 the :
+7 snow :
+8 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+5 6 7 <==> 5 6 7 // EQUI // 5 // 
+8 <==> 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="233" status="">
+// A brown dog jumps high on a field of grass .
+// A brown dog running in field of long green grass .
+<source>
+1 A :
+2 brown :
+3 dog :
+4 jumps :
+5 high :
+6 on :
+7 a :
+8 field :
+9 of :
+10 grass :
+11 . :
+</source>
+<translation>
+1 A :
+2 brown :
+3 dog :
+4 running :
+5 in :
+6 field :
+7 of :
+8 long :
+9 green :
+10 grass :
+11 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+6 7 8 <==> 5 6 // EQUI // 5 // 
+9 10 <==> 7 8 9 10 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="234" status="">
+// Boat sails in rough water .
+// A man is kayaking in rough waters .
+<source>
+1 Boat :
+2 sails :
+3 in :
+4 rough :
+5 water :
+6 . :
+</source>
+<translation>
+1 A :
+2 man :
+3 is :
+4 kayaking :
+5 in :
+6 rough :
+7 waters :
+8 . :
+</translation>
+<alignment>
+3 4 5 <==> 5 6 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="235" status="">
+// The girl is playing along with the images on the big screen .
+// Three girls holding umbrellas with their backs to the camera .
+<source>
+1 The :
+2 girl :
+3 is :
+4 playing :
+5 along :
+6 with :
+7 the :
+8 images :
+9 on :
+10 the :
+11 big :
+12 screen :
+13 . :
+</source>
+<translation>
+1 Three :
+2 girls :
+3 holding :
+4 umbrellas :
+5 with :
+6 their :
+7 backs :
+8 to :
+9 the :
+10 camera :
+11 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+6 7 8 <==> 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="236" status="">
+// A dog with its two front paws on a rock in a field .
+// A dog is running in a field .
+<source>
+1 A :
+2 dog :
+3 with :
+4 its :
+5 two :
+6 front :
+7 paws :
+8 on :
+9 a :
+10 rock :
+11 in :
+12 a :
+13 field :
+14 . :
+</source>
+<translation>
+1 A :
+2 dog :
+3 is :
+4 running :
+5 in :
+6 a :
+7 field :
+8 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+11 12 13 <==> 5 6 7 // EQUI // 5 // 
+14 <==> 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="237" status="">
+// A man is rock climbing on a natural rock .
+// A woman with glowing shoes at an outdoor event .
+<source>
+1 A :
+2 man :
+3 is :
+4 rock :
+5 climbing :
+6 on :
+7 a :
+8 natural :
+9 rock :
+10 . :
+</source>
+<translation>
+1 A :
+2 woman :
+3 with :
+4 glowing :
+5 shoes :
+6 at :
+7 an :
+8 outdoor :
+9 event :
+10 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+6 7 8 9 <==> 6 7 8 9 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="238" status="">
+// Two dogs holding one Frisbee in their mouths .
+// Two dogs holding a single black Frisbee in their mouths
+<source>
+1 Two :
+2 dogs :
+3 holding :
+4 one :
+5 Frisbee :
+6 in :
+7 their :
+8 mouths :
+9 . :
+</source>
+<translation>
+1 Two :
+2 dogs :
+3 holding :
+4 a :
+5 single :
+6 black :
+7 Frisbee :
+8 in :
+9 their :
+10 mouths :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 <==> 3 // EQUI // 5 // 
+4 5 <==> 4 5 6 7 // EQUI // 5 // 
+6 7 8 <==> 8 9 10 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="239" status="">
+// Two people are in bed .
+// Two boxers are in the ring .
+<source>
+1 Two :
+2 people :
+3 are :
+4 in :
+5 bed :
+6 . :
+</source>
+<translation>
+1 Two :
+2 boxers :
+3 are :
+4 in :
+5 the :
+6 ring :
+7 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+6 <==> 4 5 6 // EQUI // 5 // 
+6 <==> 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="240" status="">
+// A brown and white dog running on grass .
+// A brown and white dog running fast in a fenced yard .
+<source>
+1 A :
+2 brown :
+3 and :
+4 white :
+5 dog :
+6 running :
+7 on :
+8 grass :
+9 . :
+</source>
+<translation>
+1 A :
+2 brown :
+3 and :
+4 white :
+5 dog :
+6 running :
+7 fast :
+8 in :
+9 a :
+10 fenced :
+11 yard :
+12 . :
+</translation>
+<alignment>
+1 2 3 4 5 <==> 1 2 3 4 5 // EQUI // 5 // 
+6 <==> 6 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="241" status="">
+// A dog is jumping over a log with ears flying and tongue out .
+// A dog leaps over a log in the woods .
+<source>
+1 A :
+2 dog :
+3 is :
+4 jumping :
+5 over :
+6 a :
+7 log :
+8 with :
+9 ears :
+10 flying :
+11 and :
+12 tongue :
+13 out :
+14 . :
+</source>
+<translation>
+1 A :
+2 dog :
+3 leaps :
+4 over :
+5 a :
+6 log :
+7 in :
+8 the :
+9 woods :
+10 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 4 <==> 3 // EQUI // 5 // 
+5 6 7 <==> 4 5 6 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="242" status="">
+// A man climbs a snowy mountain .
+// A hiker moves up a snowy mountain .
+<source>
+1 A :
+2 man :
+3 climbs :
+4 a :
+5 snowy :
+6 mountain :
+7 . :
+</source>
+<translation>
+1 A :
+2 hiker :
+3 moves :
+4 up :
+5 a :
+6 snowy :
+7 mountain :
+8 . :
+</translation>
+<alignment>
+4 5 6 <==> 5 6 7 // EQUI // 5 // 
+7 <==> 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="243" status="">
+// a man walks two dogs on leashes down the street
+// A man walks two dogs in the city .
+<source>
+1 a :
+2 man :
+3 walks :
+4 two :
+5 dogs :
+6 on :
+7 leashes :
+8 down :
+9 the :
+10 street :
+</source>
+<translation>
+1 A :
+2 man :
+3 walks :
+4 two :
+5 dogs :
+6 in :
+7 the :
+8 city :
+9 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 <==> 3 // EQUI // 5 // 
+4 5 <==> 4 5 // EQUI // 5 // 
+8 9 10 <==> 6 7 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="244" status="">
+// The beagle is walking on the beach at the waterline .
+// A beagle walks along the calm shore .
+<source>
+1 The :
+2 beagle :
+3 is :
+4 walking :
+5 on :
+6 the :
+7 beach :
+8 at :
+9 the :
+10 waterline :
+11 . :
+</source>
+<translation>
+1 A :
+2 beagle :
+3 walks :
+4 along :
+5 the :
+6 calm :
+7 shore :
+8 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 4 <==> 3 // EQUI // 5 // 
+8 9 10 <==> 4 5 6 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="245" status="">
+// Two Asian men and Asian woman sit in black massage chairs .
+// Two Asian men and a woman are relaxing in massage chairs .
+<source>
+1 Two :
+2 Asian :
+3 men :
+4 and :
+5 Asian :
+6 woman :
+7 sit :
+8 in :
+9 black :
+10 massage :
+11 chairs :
+12 . :
+</source>
+<translation>
+1 Two :
+2 Asian :
+3 men :
+4 and :
+5 a :
+6 woman :
+7 are :
+8 relaxing :
+9 in :
+10 massage :
+11 chairs :
+12 . :
+</translation>
+<alignment>
+1 2 3 4 5 6 <==> 1 2 3 4 5 6 // EQUI // 5 // 
+8 9 10 11 <==> 9 10 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="246" status="">
+// Two dogs fighting in the snow .
+// Two dogs playing in the snow .
+<source>
+1 Two :
+2 dogs :
+3 fighting :
+4 in :
+5 the :
+6 snow :
+7 . :
+</source>
+<translation>
+1 Two :
+2 dogs :
+3 playing :
+4 in :
+5 the :
+6 snow :
+7 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+4 5 6 <==> 4 5 6 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="247" status="">
+// a white dog is running through the snow .
+// A little white dog running through the sand .
+<source>
+1 a :
+2 white :
+3 dog :
+4 is :
+5 running :
+6 through :
+7 the :
+8 snow :
+9 . :
+</source>
+<translation>
+1 A :
+2 little :
+3 white :
+4 dog :
+5 running :
+6 through :
+7 the :
+8 sand :
+9 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 4 // EQUI // 5 // 
+4 5 <==> 5 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="248" status="">
+// A boy wearing a red shirt runs along a beach .
+// A boy wearing a red sweater runs along a colorful beach .
+<source>
+1 A :
+2 boy :
+3 wearing :
+4 a :
+5 red :
+6 shirt :
+7 runs :
+8 along :
+9 a :
+10 beach :
+11 . :
+</source>
+<translation>
+1 A :
+2 boy :
+3 wearing :
+4 a :
+5 red :
+6 sweater :
+7 runs :
+8 along :
+9 a :
+10 colorful :
+11 beach :
+12 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 <==> 3 // EQUI // 5 // 
+7 <==> 7 // EQUI // 5 // 
+8 9 10 <==> 8 9 10 11 // EQUI // 5 // 
+11 <==> 12 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="249" status="">
+// Two large black dogs are playing in a grassy field .
+// Two white dogs are running together .
+<source>
+1 Two :
+2 large :
+3 black :
+4 dogs :
+5 are :
+6 playing :
+7 in :
+8 a :
+9 grassy :
+10 field :
+11 . :
+</source>
+<translation>
+1 Two :
+2 white :
+3 dogs :
+4 are :
+5 running :
+6 together :
+7 . :
+</translation>
+<alignment>
+5 6 <==> 6 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="250" status="">
+// A brown and white dog is walking next to a man on a skateboard .
+// A brown and white dog is running down a ramp .
+<source>
+1 A :
+2 brown :
+3 and :
+4 white :
+5 dog :
+6 is :
+7 walking :
+8 next :
+9 to :
+10 a :
+11 man :
+12 on :
+13 a :
+14 skateboard :
+15 . :
+</source>
+<translation>
+1 A :
+2 brown :
+3 and :
+4 white :
+5 dog :
+6 is :
+7 running :
+8 down :
+9 a :
+10 ramp :
+11 . :
+</translation>
+<alignment>
+1 2 3 4 5 <==> 1 2 3 4 5 // EQUI // 5 // 
+12 13 14 <==> 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="251" status="">
+// two puppies playing around in the grass
+// Two dogs are wrestling in the grass .
+<source>
+1 two :
+2 puppies :
+3 playing :
+4 around :
+5 in :
+6 the :
+7 grass :
+</source>
+<translation>
+1 Two :
+2 dogs :
+3 are :
+4 wrestling :
+5 in :
+6 the :
+7 grass :
+8 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 4 <==> 8 // EQUI // 5 // 
+5 6 7 <==> 5 6 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="252" status="">
+// The tan and white dog is running in the field .
+// The brown and white dogs run through the field .
+<source>
+1 The :
+2 tan :
+3 and :
+4 white :
+5 dog :
+6 is :
+7 running :
+8 in :
+9 the :
+10 field :
+11 . :
+</source>
+<translation>
+1 The :
+2 brown :
+3 and :
+4 white :
+5 dogs :
+6 run :
+7 through :
+8 the :
+9 field :
+10 . :
+</translation>
+<alignment>
+8 9 10 <==> 7 8 9 // EQUI // 5 // 
+11 <==> 10 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="253" status="">
+// A woman does a handstand on the beach .
+// a blond girl doing a handstand on a beach
+<source>
+1 A :
+2 woman :
+3 does :
+4 a :
+5 handstand :
+6 on :
+7 the :
+8 beach :
+9 . :
+</source>
+<translation>
+1 a :
+2 blond :
+3 girl :
+4 doing :
+5 a :
+6 handstand :
+7 on :
+8 a :
+9 beach :
+</translation>
+<alignment>
+3 <==> 4 // EQUI // 5 // 
+4 5 <==> 5 6 // EQUI // 5 // 
+6 7 8 <==> 7 8 9 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="254" status="">
+// A black and white dog is swimming in a large green lake .
+// A black dog runs fast into shallow water .
+<source>
+1 A :
+2 black :
+3 and :
+4 white :
+5 dog :
+6 is :
+7 swimming :
+8 in :
+9 a :
+10 large :
+11 green :
+12 lake :
+13 . :
+</source>
+<translation>
+1 A :
+2 black :
+3 dog :
+4 runs :
+5 fast :
+6 into :
+7 shallow :
+8 water :
+9 . :
+</translation>
+<alignment>
+1 2 3 4 5 <==> 1 2 3 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="255" status="">
+// A dog is running through the snow .
+// A brown dog is running through the field .
+<source>
+1 A :
+2 dog :
+3 is :
+4 running :
+5 through :
+6 the :
+7 snow :
+8 . :
+</source>
+<translation>
+1 A :
+2 brown :
+3 dog :
+4 is :
+5 running :
+6 through :
+7 the :
+8 field :
+9 . :
+</translation>
+<alignment>
+3 4 <==> 4 5 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="256" status="">
+// A white and brown dog is running over grass .
+// A brown and white dog is running across the grass .
+<source>
+1 A :
+2 white :
+3 and :
+4 brown :
+5 dog :
+6 is :
+7 running :
+8 over :
+9 grass :
+10 . :
+</source>
+<translation>
+1 A :
+2 brown :
+3 and :
+4 white :
+5 dog :
+6 is :
+7 running :
+8 across :
+9 the :
+10 grass :
+11 . :
+</translation>
+<alignment>
+1 2 3 4 5 <==> 1 2 3 4 5 // EQUI // 5 // 
+6 7 <==> 6 7 // EQUI // 5 // 
+8 9 <==> 8 9 10 // EQUI // 5 // 
+10 <==> 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="257" status="">
+// a skateboarder doing a trick on a ramp
+// A skateboarder riding up to a slope .
+<source>
+1 a :
+2 skateboarder :
+3 doing :
+4 a :
+5 trick :
+6 on :
+7 a :
+8 ramp :
+</source>
+<translation>
+1 A :
+2 skateboarder :
+3 riding :
+4 up :
+5 to :
+6 a :
+7 slope :
+8 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="258" status="">
+// A man in a batman suit running .
+// A man in a batman costume is running a race .
+<source>
+1 A :
+2 man :
+3 in :
+4 a :
+5 batman :
+6 suit :
+7 running :
+8 . :
+</source>
+<translation>
+1 A :
+2 man :
+3 in :
+4 a :
+5 batman :
+6 costume :
+7 is :
+8 running :
+9 a :
+10 race :
+11 . :
+</translation>
+<alignment>
+3 4 5 6 <==> 3 4 5 6 // EQUI // 5 // 
+7 <==> 7 8 // EQUI // 5 // 
+8 <==> 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="259" status="">
+// A brown dog chews on an orange ball .
+// A dog has an orange ball in its mouth .
+<source>
+1 A :
+2 brown :
+3 dog :
+4 chews :
+5 on :
+6 an :
+7 orange :
+8 ball :
+9 . :
+</source>
+<translation>
+1 A :
+2 dog :
+3 has :
+4 an :
+5 orange :
+6 ball :
+7 in :
+8 its :
+9 mouth :
+10 . :
+</translation>
+<alignment>
+5 6 7 8 <==> 4 5 6 // EQUI // 5 // 
+9 <==> 10 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="260" status="">
+// Two dogs are playing on the beach together .
+// Two black dogs are playing in a grass .
+<source>
+1 Two :
+2 dogs :
+3 are :
+4 playing :
+5 on :
+6 the :
+7 beach :
+8 together :
+9 . :
+</source>
+<translation>
+1 Two :
+2 black :
+3 dogs :
+4 are :
+5 playing :
+6 in :
+7 a :
+8 grass :
+9 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 3 // EQUI // 5 // 
+3 4 <==> 4 5 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="261" status="">
+// These children are playing on a trampoline outdoors .
+// four children are playing on a trampoline .
+<source>
+1 These :
+2 children :
+3 are :
+4 playing :
+5 on :
+6 a :
+7 trampoline :
+8 outdoors :
+9 . :
+</source>
+<translation>
+1 four :
+2 children :
+3 are :
+4 playing :
+5 on :
+6 a :
+7 trampoline :
+8 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 4 <==> 3 4 // EQUI // 5 // 
+5 6 7 <==> 5 6 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="262" status="">
+// The large brown and white dog is running through the snow .
+// St. Bernard dog running in the snowy field .
+<source>
+1 The :
+2 large :
+3 brown :
+4 and :
+5 white :
+6 dog :
+7 is :
+8 running :
+9 through :
+10 the :
+11 snow :
+12 . :
+</source>
+<translation>
+1 St. :
+2 Bernard :
+3 dog :
+4 running :
+5 in :
+6 the :
+7 snowy :
+8 field :
+9 . :
+</translation>
+<alignment>
+7 8 <==> 4 // EQUI // 5 // 
+9 10 11 <==> 5 6 7 8 // EQUI // 5 // 
+12 <==> 9 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="263" status="">
+// A black and white dog jumping into the air .
+// A black and white dog jumping over an obstacle .
+<source>
+1 A :
+2 black :
+3 and :
+4 white :
+5 dog :
+6 jumping :
+7 into :
+8 the :
+9 air :
+10 . :
+</source>
+<translation>
+1 A :
+2 black :
+3 and :
+4 white :
+5 dog :
+6 jumping :
+7 over :
+8 an :
+9 obstacle :
+10 . :
+</translation>
+<alignment>
+1 2 3 4 5 <==> 1 2 3 4 5 // EQUI // 5 // 
+6 <==> 6 // EQUI // 5 // 
+10 <==> 10 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="264" status="">
+// A young girl , in an orange dress , holding a tennis racket .
+// A girl in a dress holds a tennis racket .
+<source>
+1 A :
+2 young :
+3 girl :
+4 , :
+5 in :
+6 an :
+7 orange :
+8 dress :
+9 , :
+10 holding :
+11 a :
+12 tennis :
+13 racket :
+14 . :
+</source>
+<translation>
+1 A :
+2 girl :
+3 in :
+4 a :
+5 dress :
+6 holds :
+7 a :
+8 tennis :
+9 racket :
+10 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 // EQUI // 5 // 
+5 6 7 8 <==> 3 4 5 // EQUI // 5 // 
+10 <==> 6 // EQUI // 5 // 
+11 12 13 <==> 7 8 9 // EQUI // 5 // 
+14 <==> 10 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="265" status="">
+// A white dog runs on a beach .
+// The white dog is running along the beach .
+<source>
+1 A :
+2 white :
+3 dog :
+4 runs :
+5 on :
+6 a :
+7 beach :
+8 . :
+</source>
+<translation>
+1 The :
+2 white :
+3 dog :
+4 is :
+5 running :
+6 along :
+7 the :
+8 beach :
+9 . :
+</translation>
+<alignment>
+4 <==> 4 5 // EQUI // 5 // 
+5 6 7 <==> 6 7 8 // EQUI // 5 // 
+8 <==> 9 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="266" status="">
+// A man and dog on a rocky seashore .
+// Man and dog standing on rocks next to water
+<source>
+1 A :
+2 man :
+3 and :
+4 dog :
+5 on :
+6 a :
+7 rocky :
+8 seashore :
+9 . :
+</source>
+<translation>
+1 Man :
+2 and :
+3 dog :
+4 standing :
+5 on :
+6 rocks :
+7 next :
+8 to :
+9 water :
+</translation>
+<alignment>
+1 2 3 4 <==> 1 2 3 // EQUI // 5 // 
+5 6 7 8 <==> 5 6 7 8 9 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="267" status="">
+// Four hooded children huddle under a blanket outdoors .
+// Four children keeping warm under a blanket .
+<source>
+1 Four :
+2 hooded :
+3 children :
+4 huddle :
+5 under :
+6 a :
+7 blanket :
+8 outdoors :
+9 . :
+</source>
+<translation>
+1 Four :
+2 children :
+3 keeping :
+4 warm :
+5 under :
+6 a :
+7 blanket :
+8 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 // EQUI // 5 // 
+5 6 7 <==> 5 6 7 // EQUI // 5 // 
+9 <==> 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="268" status="">
+// A young laughing girl and a boy are playing on a big drum .
+// A baby girl and little boy are standing next to a guitar and a drum .
+<source>
+1 A :
+2 young :
+3 laughing :
+4 girl :
+5 and :
+6 a :
+7 boy :
+8 are :
+9 playing :
+10 on :
+11 a :
+12 big :
+13 drum :
+14 . :
+</source>
+<translation>
+1 A :
+2 baby :
+3 girl :
+4 and :
+5 little :
+6 boy :
+7 are :
+8 standing :
+9 next :
+10 to :
+11 a :
+12 guitar :
+13 and :
+14 a :
+15 drum :
+16 . :
+</translation>
+<alignment>
+1 2 3 4 5 6 7 <==> 1 2 3 4 5 6 // EQUI // 5 // 
+11 12 13 <==> 9 10 11 12 13 14 15 // EQUI // 5 // 
+14 <==> 16 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="269" status="">
+// A little girl takes a picture while mom watches in boredom .
+// A little girl in pajamas takes a picture with a camera
+<source>
+1 A :
+2 little :
+3 girl :
+4 takes :
+5 a :
+6 picture :
+7 while :
+8 mom :
+9 watches :
+10 in :
+11 boredom :
+12 . :
+</source>
+<translation>
+1 A :
+2 little :
+3 girl :
+4 in :
+5 pajamas :
+6 takes :
+7 a :
+8 picture :
+9 with :
+10 a :
+11 camera :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+4 5 6 <==> 6 7 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="270" status="">
+// A dog leaps over a barrier .
+// A dog leaps over a fence .
+<source>
+1 A :
+2 dog :
+3 leaps :
+4 over :
+5 a :
+6 barrier :
+7 . :
+</source>
+<translation>
+1 A :
+2 dog :
+3 leaps :
+4 over :
+5 a :
+6 fence :
+7 . :
+</translation>
+<alignment>
+1 2 <==> 3 // EQUI // 5 // 
+3 <==> 1 2 // EQUI // 5 // 
+3 <==> 3 // EQUI // 5 // 
+7 <==> 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="271" status="">
+// A boy plays baseball .
+// A man is playing baseball .
+<source>
+1 A :
+2 boy :
+3 plays :
+4 baseball :
+5 . :
+</source>
+<translation>
+1 A :
+2 man :
+3 is :
+4 playing :
+5 baseball :
+6 . :
+</translation>
+<alignment>
+4 <==> 3 4 // EQUI // 5 // 
+4 <==> 5 // EQUI // 5 // 
+5 <==> 6 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="272" status="">
+// People sitting on a couch laugh .
+// Four happy people sitting on a red couch
+<source>
+1 People :
+2 sitting :
+3 on :
+4 a :
+5 couch :
+6 laugh :
+7 . :
+</source>
+<translation>
+1 Four :
+2 happy :
+3 people :
+4 sitting :
+5 on :
+6 a :
+7 red :
+8 couch :
+</translation>
+<alignment>
+1 <==> 1 2 3 // EQUI // 5 // 
+2 <==> 4 // EQUI // 5 // 
+3 4 5 <==> 5 6 7 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="273" status="">
+// A young boy jumping into a pool that says "no diving" .
+// A boy jumps into a not-so-crowded public pool .
+<source>
+1 A :
+2 young :
+3 boy :
+4 jumping :
+5 into :
+6 a :
+7 pool :
+8 that :
+9 says :
+10 "no :
+11 diving" :
+12 . :
+</source>
+<translation>
+1 A :
+2 boy :
+3 jumps :
+4 into :
+5 a :
+6 not-so-crowded :
+7 public :
+8 pool :
+9 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 // EQUI // 5 // 
+4 <==> 3 // EQUI // 5 // 
+5 6 7 <==> 4 5 6 7 8 // EQUI // 5 // 
+12 <==> 9 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="274" status="">
+// A young boy leaps from one couch to another .
+// A young boy is leaping from one chair to another .
+<source>
+1 A :
+2 young :
+3 boy :
+4 leaps :
+5 from :
+6 one :
+7 couch :
+8 to :
+9 another :
+10 . :
+</source>
+<translation>
+1 A :
+2 young :
+3 boy :
+4 is :
+5 leaping :
+6 from :
+7 one :
+8 chair :
+9 to :
+10 another :
+11 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+4 <==> 4 5 // EQUI // 5 // 
+8 9 <==> 9 10 // EQUI // 5 // 
+10 <==> 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="275" status="">
+// A young boy wearing a red winter coat is eating and holding up a candy bar .
+// A young boy wearing a red coat eats a chocolate bar .
+<source>
+1 A :
+2 young :
+3 boy :
+4 wearing :
+5 a :
+6 red :
+7 winter :
+8 coat :
+9 is :
+10 eating :
+11 and :
+12 holding :
+13 up :
+14 a :
+15 candy :
+16 bar :
+17 . :
+</source>
+<translation>
+1 A :
+2 young :
+3 boy :
+4 wearing :
+5 a :
+6 red :
+7 coat :
+8 eats :
+9 a :
+10 chocolate :
+11 bar :
+12 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+4 <==> 4 // EQUI // 5 // 
+5 6 7 8 <==> 5 6 7 // EQUI // 5 // 
+9 10 <==> 8 // EQUI // 5 // 
+14 15 16 <==> 9 10 11 // EQUI // 5 // 
+17 <==> 12 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="276" status="">
+// Two dogs running on grass .
+// Two black , wet dogs running on grass .
+<source>
+1 Two :
+2 dogs :
+3 running :
+4 on :
+5 grass :
+6 . :
+</source>
+<translation>
+1 Two :
+2 black :
+3 , :
+4 wet :
+5 dogs :
+6 running :
+7 on :
+8 grass :
+9 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 3 4 5 // EQUI // 5 // 
+3 <==> 6 // EQUI // 5 // 
+4 5 <==> 7 8 // EQUI // 5 // 
+6 <==> 9 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="277" status="">
+// Two boys playing a game of flag football .
+// Two boys are playing flag football .
+<source>
+1 Two :
+2 boys :
+3 playing :
+4 a :
+5 game :
+6 of :
+7 flag :
+8 football :
+9 . :
+</source>
+<translation>
+1 Two :
+2 boys :
+3 are :
+4 playing :
+5 flag :
+6 football :
+7 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+4 5 <==> 3 4 // EQUI // 5 // 
+6 7 8 <==> 5 6 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="278" status="">
+// A golden retriever is jumping off a wooden porch
+// A gold dog jumping off a wooden porch .
+<source>
+1 A :
+2 golden :
+3 retriever :
+4 is :
+5 jumping :
+6 off :
+7 a :
+8 wooden :
+9 porch :
+</source>
+<translation>
+1 A :
+2 gold :
+3 dog :
+4 jumping :
+5 off :
+6 a :
+7 wooden :
+8 porch :
+9 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+4 5 6 <==> 4 5 // EQUI // 5 // 
+7 8 9 <==> 6 7 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="279" status="">
+// A young child is holding onto the back of a wicker chair .
+// A young child holds a spoon to it's mouth while sitting in a chair .
+<source>
+1 A :
+2 young :
+3 child :
+4 is :
+5 holding :
+6 onto :
+7 the :
+8 back :
+9 of :
+10 a :
+11 wicker :
+12 chair :
+13 . :
+</source>
+<translation>
+1 A :
+2 young :
+3 child :
+4 holds :
+5 a :
+6 spoon :
+7 to :
+8 it's :
+9 mouth :
+10 while :
+11 sitting :
+12 in :
+13 a :
+14 chair :
+15 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+9 10 11 12 <==> 12 13 14 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="280" status="">
+// Two dogs are running on the grass .
+// Two birds interacting in the grass
+<source>
+1 Two :
+2 dogs :
+3 are :
+4 running :
+5 on :
+6 the :
+7 grass :
+8 . :
+</source>
+<translation>
+1 Two :
+2 birds :
+3 interacting :
+4 in :
+5 the :
+6 grass :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+5 6 7 <==> 4 5 6 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="281" status="">
+// Two surfers on riding a small wave .
+// Two surfers perform tricks in the waves .
+<source>
+1 Two :
+2 surfers :
+3 on :
+4 riding :
+5 a :
+6 small :
+7 wave :
+8 . :
+</source>
+<translation>
+1 Two :
+2 surfers :
+3 perform :
+4 tricks :
+5 in :
+6 the :
+7 waves :
+8 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+8 <==> 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="282" status="">
+// A brown furry animal stands behind some plants .
+// A dog pants while standing in the woods .
+<source>
+1 A :
+2 brown :
+3 furry :
+4 animal :
+5 stands :
+6 behind :
+7 some :
+8 plants :
+9 . :
+</source>
+<translation>
+1 A :
+2 dog :
+3 pants :
+4 while :
+5 standing :
+6 in :
+7 the :
+8 woods :
+9 . :
+</translation>
+<alignment>
+1 2 3 4 <==> 1 2 // EQUI // 5 // 
+5 <==> 4 5 // EQUI // 5 // 
+9 <==> 9 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="283" status="">
+// A dog jumps high in the snow .
+// A dog runs in the snow .
+<source>
+1 A :
+2 dog :
+3 jumps :
+4 high :
+5 in :
+6 the :
+7 snow :
+8 . :
+</source>
+<translation>
+1 A :
+2 dog :
+3 runs :
+4 in :
+5 the :
+6 snow :
+7 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+5 6 7 <==> 4 5 6 // EQUI // 5 // 
+8 <==> 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="284" status="">
+// A dog in the snow .
+// Two dogs in snow .
+<source>
+1 A :
+2 dog :
+3 in :
+4 the :
+5 snow :
+6 . :
+</source>
+<translation>
+1 Two :
+2 dogs :
+3 in :
+4 snow :
+5 . :
+</translation>
+<alignment>
+3 4 5 <==> 3 4 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="285" status="">
+// A dog running through snow .
+// A collie running through the snow .
+<source>
+1 A :
+2 dog :
+3 running :
+4 through :
+5 snow :
+6 . :
+</source>
+<translation>
+1 A :
+2 collie :
+3 running :
+4 through :
+5 the :
+6 snow :
+7 . :
+</translation>
+<alignment>
+1 2 <==> 7 // EQUI // 5 // 
+3 <==> 3 // EQUI // 5 // 
+4 5 <==> 4 5 6 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="286" status="">
+// Two dogs are fighting on brick pavement .
+// Two brownish dogs are fighting .
+<source>
+1 Two :
+2 dogs :
+3 are :
+4 fighting :
+5 on :
+6 brick :
+7 pavement :
+8 . :
+</source>
+<translation>
+1 Two :
+2 brownish :
+3 dogs :
+4 are :
+5 fighting :
+6 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 3 // EQUI // 5 // 
+3 4 <==> 4 5 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="287" status="">
+// The black dog is running on the grass .
+// The German shepherd dog is running through the snow .
+<source>
+1 The :
+2 black :
+3 dog :
+4 is :
+5 running :
+6 on :
+7 the :
+8 grass :
+9 . :
+</source>
+<translation>
+1 The :
+2 German :
+3 shepherd :
+4 dog :
+5 is :
+6 running :
+7 through :
+8 the :
+9 snow :
+10 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 4 // EQUI // 5 // 
+4 5 <==> 5 6 // EQUI // 5 // 
+9 <==> 10 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="288" status="">
+// A dog catching a ball .
+// A dog catching a Frisbee .
+<source>
+1 A :
+2 dog :
+3 catching :
+4 a :
+5 ball :
+6 . :
+</source>
+<translation>
+1 A :
+2 dog :
+3 catching :
+4 a :
+5 Frisbee :
+6 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 <==> 3 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="289" status="">
+// Two black dogs playing in the snow .
+// Two dogs play in the snow
+<source>
+1 Two :
+2 black :
+3 dogs :
+4 playing :
+5 in :
+6 the :
+7 snow :
+8 . :
+</source>
+<translation>
+1 Two :
+2 dogs :
+3 play :
+4 in :
+5 the :
+6 snow :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 // EQUI // 5 // 
+4 <==> 3 // EQUI // 5 // 
+5 6 7 <==> 4 5 6 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="290" status="">
+// A girl with a purple and white helmet is riding on a scooter .
+// A girl wearing a helmet rides a scooter .
+<source>
+1 A :
+2 girl :
+3 with :
+4 a :
+5 purple :
+6 and :
+7 white :
+8 helmet :
+9 is :
+10 riding :
+11 on :
+12 a :
+13 scooter :
+14 . :
+</source>
+<translation>
+1 A :
+2 girl :
+3 wearing :
+4 a :
+5 helmet :
+6 rides :
+7 a :
+8 scooter :
+9 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 4 5 6 7 8 <==> 3 4 5 // EQUI // 5 // 
+9 10 <==> 6 // EQUI // 5 // 
+11 12 13 <==> 7 8 // EQUI // 5 // 
+14 <==> 9 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="291" status="">
+// a skateboard performs a trick off a quarter pipe .
+// A skateboarder attempts to do a trick over a homemade ramp .
+<source>
+1 a :
+2 skateboard :
+3 performs :
+4 a :
+5 trick :
+6 off :
+7 a :
+8 quarter :
+9 pipe :
+10 . :
+</source>
+<translation>
+1 A :
+2 skateboarder :
+3 attempts :
+4 to :
+5 do :
+6 a :
+7 trick :
+8 over :
+9 a :
+10 homemade :
+11 ramp :
+12 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+4 5 <==> 6 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="292" status="">
+// A group of people are standing by a window watching something .
+// A group of people stand and wait to see something .
+<source>
+1 A :
+2 group :
+3 of :
+4 people :
+5 are :
+6 standing :
+7 by :
+8 a :
+9 window :
+10 watching :
+11 something :
+12 . :
+</source>
+<translation>
+1 A :
+2 group :
+3 of :
+4 people :
+5 stand :
+6 and :
+7 wait :
+8 to :
+9 see :
+10 something :
+11 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 4 <==> 3 4 // EQUI // 5 // 
+5 6 <==> 5 // EQUI // 5 // 
+10 <==> 10 // EQUI // 5 // 
+11 <==> 10 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="293" status="">
+// A softball player swinging at a pitch .
+// A baseball player hitting the ball
+<source>
+1 A :
+2 softball :
+3 player :
+4 swinging :
+5 at :
+6 a :
+7 pitch :
+8 . :
+</source>
+<translation>
+1 A :
+2 baseball :
+3 player :
+4 hitting :
+5 the :
+6 ball :
+</translation>
+<alignment>
+8 <==> 1 2 3 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="294" status="">
+// Three sheep graze on the grassy field with a dog walking behind them .
+// a small group of goats in the grass with a black and white dog in the backgroud .
+<source>
+1 Three :
+2 sheep :
+3 graze :
+4 on :
+5 the :
+6 grassy :
+7 field :
+8 with :
+9 a :
+10 dog :
+11 walking :
+12 behind :
+13 them :
+14 . :
+</source>
+<translation>
+1 a :
+2 small :
+3 group :
+4 of :
+5 goats :
+6 in :
+7 the :
+8 grass :
+9 with :
+10 a :
+11 black :
+12 and :
+13 white :
+14 dog :
+15 in :
+16 the :
+17 backgroud :
+18 . :
+</translation>
+<alignment>
+4 5 6 7 <==> 6 7 8 // EQUI // 5 // 
+8 9 10 <==> 9 10 11 12 13 14 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="295" status="">
+// Three dogs playing in the snow while one dog wears a jacket .
+// Three dogs playing in the snow , with a city in the background .
+<source>
+1 Three :
+2 dogs :
+3 playing :
+4 in :
+5 the :
+6 snow :
+7 while :
+8 one :
+9 dog :
+10 wears :
+11 a :
+12 jacket :
+13 . :
+</source>
+<translation>
+1 Three :
+2 dogs :
+3 playing :
+4 in :
+5 the :
+6 snow :
+7 , :
+8 with :
+9 a :
+10 city :
+11 in :
+12 the :
+13 background :
+14 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 <==> 3 // EQUI // 5 // 
+4 5 6 <==> 4 5 6 // EQUI // 5 // 
+7 8 9 <==> 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="296" status="">
+// a black , brown and white dog running along with a white Frisbee in his mouth .
+// A black and white dog carries a white Frisbee over the grass .
+<source>
+1 a :
+2 black :
+3 , :
+4 brown :
+5 and :
+6 white :
+7 dog :
+8 running :
+9 along :
+10 with :
+11 a :
+12 white :
+13 Frisbee :
+14 in :
+15 his :
+16 mouth :
+17 . :
+</source>
+<translation>
+1 A :
+2 black :
+3 and :
+4 white :
+5 dog :
+6 carries :
+7 a :
+8 white :
+9 Frisbee :
+10 over :
+11 the :
+12 grass :
+13 . :
+</translation>
+<alignment>
+1 2 3 4 5 6 7 <==> 1 2 3 4 5 // EQUI // 5 // 
+10 11 12 13 <==> 7 8 9 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="297" status="">
+// A dog runs with a yellow toy in its mouth .
+// A dog swimming with a stick in it's mouth .
+<source>
+1 A :
+2 dog :
+3 runs :
+4 with :
+5 a :
+6 yellow :
+7 toy :
+8 in :
+9 its :
+10 mouth :
+11 . :
+</source>
+<translation>
+1 A :
+2 dog :
+3 swimming :
+4 with :
+5 a :
+6 stick :
+7 in :
+8 it's :
+9 mouth :
+10 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+8 9 10 <==> 7 8 9 // EQUI // 5 // 
+11 <==> 10 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="298" status="">
+// The dog is playing in the water .
+// A dog is wading in the water .
+<source>
+1 The :
+2 dog :
+3 is :
+4 playing :
+5 in :
+6 the :
+7 water :
+8 . :
+</source>
+<translation>
+1 A :
+2 dog :
+3 is :
+4 wading :
+5 in :
+6 the :
+7 water :
+8 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+5 6 7 <==> 5 6 7 // EQUI // 5 // 
+8 <==> 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="299" status="">
+// A young boy is riding a bike .
+// A young girl laying on a blue inflatable toy
+<source>
+1 A :
+2 young :
+3 boy :
+4 is :
+5 riding :
+6 a :
+7 bike :
+8 . :
+</source>
+<translation>
+1 A :
+2 young :
+3 girl :
+4 laying :
+5 on :
+6 a :
+7 blue :
+8 inflatable :
+9 toy :
+</translation>
+<alignment>
+4 5 <==> 4 // EQUI // 5 // 
+8 <==> 1 2 3 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="300" status="">
+// The white and brown dog is running quickly through the grass .
+// The big white dog is running in the grass .
+<source>
+1 The :
+2 white :
+3 and :
+4 brown :
+5 dog :
+6 is :
+7 running :
+8 quickly :
+9 through :
+10 the :
+11 grass :
+12 . :
+</source>
+<translation>
+1 The :
+2 big :
+3 white :
+4 dog :
+5 is :
+6 running :
+7 in :
+8 the :
+9 grass :
+10 . :
+</translation>
+<alignment>
+9 10 11 <==> 7 8 9 // EQUI // 5 // 
+12 <==> 10 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="301" status="">
+// A black and white dog running through an obstacle course
+// A black and white dog runs through pole obstacles .
+<source>
+1 A :
+2 black :
+3 and :
+4 white :
+5 dog :
+6 running :
+7 through :
+8 an :
+9 obstacle :
+10 course :
+</source>
+<translation>
+1 A :
+2 black :
+3 and :
+4 white :
+5 dog :
+6 runs :
+7 through :
+8 pole :
+9 obstacles :
+10 . :
+</translation>
+<alignment>
+1 2 3 4 5 <==> 6 // EQUI // 5 // 
+6 <==> 6 // EQUI // 5 // 
+7 8 9 10 <==> 10 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="302" status="">
+// The child in the red coat laid in the red mat .
+// The toddler is ready to climb the red piece of equipment .
+<source>
+1 The :
+2 child :
+3 in :
+4 the :
+5 red :
+6 coat :
+7 laid :
+8 in :
+9 the :
+10 red :
+11 mat :
+12 . :
+</source>
+<translation>
+1 The :
+2 toddler :
+3 is :
+4 ready :
+5 to :
+6 climb :
+7 the :
+8 red :
+9 piece :
+10 of :
+11 equipment :
+12 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 4 5 6 <==> 7 8 9 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="303" status="">
+// A golden dog is running through the snow .
+// A pack of sled dogs pulling a sled through a town .
+<source>
+1 A :
+2 golden :
+3 dog :
+4 is :
+5 running :
+6 through :
+7 the :
+8 snow :
+9 . :
+</source>
+<translation>
+1 A :
+2 pack :
+3 of :
+4 sled :
+5 dogs :
+6 pulling :
+7 a :
+8 sled :
+9 through :
+10 a :
+11 town :
+12 . :
+</translation>
+<alignment>
+6 7 8 <==> 7 8 // EQUI // 5 // 
+9 <==> 3 4 5 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="304" status="">
+// Three children and playing and laughing on the floor .
+// Three children playing on the floor .
+<source>
+1 Three :
+2 children :
+3 and :
+4 playing :
+5 and :
+6 laughing :
+7 on :
+8 the :
+9 floor :
+10 . :
+</source>
+<translation>
+1 Three :
+2 children :
+3 playing :
+4 on :
+5 the :
+6 floor :
+7 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+7 8 9 <==> 4 5 6 // EQUI // 5 // 
+10 <==> 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="305" status="">
+// a black dog swimming through a river .
+// a black dog digging through the snow .
+<source>
+1 a :
+2 black :
+3 dog :
+4 swimming :
+5 through :
+6 a :
+7 river :
+8 . :
+</source>
+<translation>
+1 a :
+2 black :
+3 dog :
+4 digging :
+5 through :
+6 the :
+7 snow :
+8 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="306" status="">
+// A bulldog is running through a grassy park while people stand in the background .
+// A dog is running in a large body of water causing it to splash .
+<source>
+1 A :
+2 bulldog :
+3 is :
+4 running :
+5 through :
+6 a :
+7 grassy :
+8 park :
+9 while :
+10 people :
+11 stand :
+12 in :
+13 the :
+14 background :
+15 . :
+</source>
+<translation>
+1 A :
+2 dog :
+3 is :
+4 running :
+5 in :
+6 a :
+7 large :
+8 body :
+9 of :
+10 water :
+11 causing :
+12 it :
+13 to :
+14 splash :
+15 . :
+</translation>
+<alignment>
+3 4 <==> 3 4 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="307" status="">
+// brown and white dog with a baseball in its mouth .
+// Black and white dog holding a baseball in mouth .
+<source>
+1 brown :
+2 and :
+3 white :
+4 dog :
+5 with :
+6 a :
+7 baseball :
+8 in :
+9 its :
+10 mouth :
+11 . :
+</source>
+<translation>
+1 Black :
+2 and :
+3 white :
+4 dog :
+5 holding :
+6 a :
+7 baseball :
+8 in :
+9 mouth :
+10 . :
+</translation>
+<alignment>
+1 2 3 4 <==> 1 2 3 4 // EQUI // 5 // 
+5 6 7 <==> 5 6 7 // EQUI // 5 // 
+8 9 10 <==> 8 9 // EQUI // 5 // 
+11 <==> 10 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="308" status="">
+// A golden dog is running through the snow .
+// A black dog is running through the snow .
+<source>
+1 A :
+2 golden :
+3 dog :
+4 is :
+5 running :
+6 through :
+7 the :
+8 snow :
+9 . :
+</source>
+<translation>
+1 A :
+2 black :
+3 dog :
+4 is :
+5 running :
+6 through :
+7 the :
+8 snow :
+9 . :
+</translation>
+<alignment>
+4 5 <==> 4 5 // EQUI // 5 // 
+6 7 8 <==> 6 7 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="309" status="">
+// Girls dressed in red and black costumes hold a wrestling pose .
+// Two girls dressed like waitresses dance along with a man dressed as a chef .
+<source>
+1 Girls :
+2 dressed :
+3 in :
+4 red :
+5 and :
+6 black :
+7 costumes :
+8 hold :
+9 a :
+10 wrestling :
+11 pose :
+12 . :
+</source>
+<translation>
+1 Two :
+2 girls :
+3 dressed :
+4 like :
+5 waitresses :
+6 dance :
+7 along :
+8 with :
+9 a :
+10 man :
+11 dressed :
+12 as :
+13 a :
+14 chef :
+15 . :
+</translation>
+<alignment>
+1 <==> 1 2 // EQUI // 5 // 
+2 <==> 3 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="310" status="">
+// Baby with blonde pigtails in yellow room attempting to climb out of green playpen .
+// A female toddler in pigtails is trying to climb out of a green and white playpen .
+<source>
+1 Baby :
+2 with :
+3 blonde :
+4 pigtails :
+5 in :
+6 yellow :
+7 room :
+8 attempting :
+9 to :
+10 climb :
+11 out :
+12 of :
+13 green :
+14 playpen :
+15 . :
+</source>
+<translation>
+1 A :
+2 female :
+3 toddler :
+4 in :
+5 pigtails :
+6 is :
+7 trying :
+8 to :
+9 climb :
+10 out :
+11 of :
+12 a :
+13 green :
+14 and :
+15 white :
+16 playpen :
+17 . :
+</translation>
+<alignment>
+1 <==> 1 2 3 // EQUI // 5 // 
+2 3 4 <==> 4 5 // EQUI // 5 // 
+8 <==> 6 7 // EQUI // 5 // 
+9 10 11 12 <==> 8 9 10 11 // EQUI // 5 // 
+13 14 <==> 12 13 14 15 16 // EQUI // 5 // 
+15 <==> 17 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="311" status="">
+// The two dogs are playing fetch in the snow .
+// Two dogs are playing together in the grass .
+<source>
+1 The :
+2 two :
+3 dogs :
+4 are :
+5 playing :
+6 fetch :
+7 in :
+8 the :
+9 snow :
+10 . :
+</source>
+<translation>
+1 Two :
+2 dogs :
+3 are :
+4 playing :
+5 together :
+6 in :
+7 the :
+8 grass :
+9 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 // EQUI // 5 // 
+4 5 6 <==> 3 4 // EQUI // 5 // 
+10 <==> 9 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="312" status="">
+// A man eating an apple , sitting in public .
+// A man sits in a public place eating an apple .
+<source>
+1 A :
+2 man :
+3 eating :
+4 an :
+5 apple :
+6 , :
+7 sitting :
+8 in :
+9 public :
+10 . :
+</source>
+<translation>
+1 A :
+2 man :
+3 sits :
+4 in :
+5 a :
+6 public :
+7 place :
+8 eating :
+9 an :
+10 apple :
+11 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 <==> 8 // EQUI // 5 // 
+4 5 <==> 9 10 // EQUI // 5 // 
+7 <==> 3 // EQUI // 5 // 
+8 9 <==> 4 5 6 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="313" status="">
+// A man wearing a red bicycle helmet talking on a cell phone with other people in the background .
+// A man in a bicycle helmet is talking on a cell phone with other people behind him .
+<source>
+1 A :
+2 man :
+3 wearing :
+4 a :
+5 red :
+6 bicycle :
+7 helmet :
+8 talking :
+9 on :
+10 a :
+11 cell :
+12 phone :
+13 with :
+14 other :
+15 people :
+16 in :
+17 the :
+18 background :
+19 . :
+</source>
+<translation>
+1 A :
+2 man :
+3 in :
+4 a :
+5 bicycle :
+6 helmet :
+7 is :
+8 talking :
+9 on :
+10 a :
+11 cell :
+12 phone :
+13 with :
+14 other :
+15 people :
+16 behind :
+17 him :
+18 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 4 5 6 7 <==> 3 4 5 6 // EQUI // 5 // 
+8 <==> 7 8 // EQUI // 5 // 
+9 10 11 12 <==> 9 10 11 12 // EQUI // 5 // 
+13 14 15 <==> 13 14 15 // EQUI // 5 // 
+19 <==> 18 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="314" status="">
+// A young boy is punching a yellow ball .
+// A small dog jumps over a yellow beam .
+<source>
+1 A :
+2 young :
+3 boy :
+4 is :
+5 punching :
+6 a :
+7 yellow :
+8 ball :
+9 . :
+</source>
+<translation>
+1 A :
+2 small :
+3 dog :
+4 jumps :
+5 over :
+6 a :
+7 yellow :
+8 beam :
+9 . :
+</translation>
+<alignment>
+6 7 8 <==> 6 7 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="315" status="">
+// A woman wearing a pink Tinker Bell jacket leans against a railing .
+// A woman wearing a pink Tinkerbell sweatshirt leans on a railing overlooking water .
+<source>
+1 A :
+2 woman :
+3 wearing :
+4 a :
+5 pink :
+6 Tinker :
+7 Bell :
+8 jacket :
+9 leans :
+10 against :
+11 a :
+12 railing :
+13 . :
+</source>
+<translation>
+1 A :
+2 woman :
+3 wearing :
+4 a :
+5 pink :
+6 Tinkerbell :
+7 sweatshirt :
+8 leans :
+9 on :
+10 a :
+11 railing :
+12 overlooking :
+13 water :
+14 . :
+</translation>
+<alignment>
+3 <==> 3 // EQUI // 5 // 
+9 <==> 8 // EQUI // 5 // 
+10 11 12 <==> 9 10 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="316" status="">
+// A man walks toward a policeman standing in a crosswalk on a city street .
+// A policeman stands in a crosswalk in a city .
+<source>
+1 A :
+2 man :
+3 walks :
+4 toward :
+5 a :
+6 policeman :
+7 standing :
+8 in :
+9 a :
+10 crosswalk :
+11 on :
+12 a :
+13 city :
+14 street :
+15 . :
+</source>
+<translation>
+1 A :
+2 policeman :
+3 stands :
+4 in :
+5 a :
+6 crosswalk :
+7 in :
+8 a :
+9 city :
+10 . :
+</translation>
+<alignment>
+4 5 6 <==> 1 2 // EQUI // 5 // 
+8 9 10 <==> 4 5 6 // EQUI // 5 // 
+11 12 13 14 <==> 7 8 9 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="317" status="">
+// A young boy plays in a red ball pit .
+// A laughing boy lies on a pit of blue balls .
+<source>
+1 A :
+2 young :
+3 boy :
+4 plays :
+5 in :
+6 a :
+7 red :
+8 ball :
+9 pit :
+10 . :
+</source>
+<translation>
+1 A :
+2 laughing :
+3 boy :
+4 lies :
+5 on :
+6 a :
+7 pit :
+8 of :
+9 blue :
+10 balls :
+11 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+4 <==> 11 // EQUI // 5 // 
+5 6 7 8 9 <==> 5 6 7 8 9 10 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="318" status="">
+// A white dog with red ears is running in the snow .
+// a wet black dog with a red collar is in the river
+<source>
+1 A :
+2 white :
+3 dog :
+4 with :
+5 red :
+6 ears :
+7 is :
+8 running :
+9 in :
+10 the :
+11 snow :
+12 . :
+</source>
+<translation>
+1 a :
+2 wet :
+3 black :
+4 dog :
+5 with :
+6 a :
+7 red :
+8 collar :
+9 is :
+10 in :
+11 the :
+12 river :
+</translation>
+<alignment>
+4 5 6 <==> 5 6 7 8 // EQUI // 5 // 
+12 <==> 9 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="319" status="">
+// A little boy clowns with a colander on his head .
+// A boy with a metal colander on his head .
+<source>
+1 A :
+2 little :
+3 boy :
+4 clowns :
+5 with :
+6 a :
+7 colander :
+8 on :
+9 his :
+10 head :
+11 . :
+</source>
+<translation>
+1 A :
+2 boy :
+3 with :
+4 a :
+5 metal :
+6 colander :
+7 on :
+8 his :
+9 head :
+10 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 // EQUI // 5 // 
+5 6 7 <==> 3 4 5 6 // EQUI // 5 // 
+8 9 10 <==> 7 8 9 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="320" status="">
+// A dog racing on a track .
+// A dog chases another by a tree .
+<source>
+1 A :
+2 dog :
+3 racing :
+4 on :
+5 a :
+6 track :
+7 . :
+</source>
+<translation>
+1 A :
+2 dog :
+3 chases :
+4 another :
+5 by :
+6 a :
+7 tree :
+8 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 <==> 3 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="321" status="">
+// A man in a black leather jacket is sleeping in a subway car .
+// A man in a black leather jacket falls asleep on public transportation .
+<source>
+1 A :
+2 man :
+3 in :
+4 a :
+5 black :
+6 leather :
+7 jacket :
+8 is :
+9 sleeping :
+10 in :
+11 a :
+12 subway :
+13 car :
+14 . :
+</source>
+<translation>
+1 A :
+2 man :
+3 in :
+4 a :
+5 black :
+6 leather :
+7 jacket :
+8 falls :
+9 asleep :
+10 on :
+11 public :
+12 transportation :
+13 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 4 5 6 7 <==> 3 4 5 6 7 // EQUI // 5 // 
+8 9 <==> 8 9 // EQUI // 5 // 
+10 11 12 13 <==> 10 11 12 // EQUI // 5 // 
+14 <==> 13 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="322" status="">
+// A dog jumps on a lawn .
+// A dog jumps of a surfboard
+<source>
+1 A :
+2 dog :
+3 jumps :
+4 on :
+5 a :
+6 lawn :
+7 . :
+</source>
+<translation>
+1 A :
+2 dog :
+3 jumps :
+4 of :
+5 a :
+6 surfboard :
+</translation>
+<alignment>
+1 2 <==> 3 // EQUI // 5 // 
+3 <==> 1 2 // EQUI // 5 // 
+3 <==> 3 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="323" status="">
+// Two dogs run towards shore through shallow water .
+// Two grey dogs running through the shallow water of a lake .
+<source>
+1 Two :
+2 dogs :
+3 run :
+4 towards :
+5 shore :
+6 through :
+7 shallow :
+8 water :
+9 . :
+</source>
+<translation>
+1 Two :
+2 grey :
+3 dogs :
+4 running :
+5 through :
+6 the :
+7 shallow :
+8 water :
+9 of :
+10 a :
+11 lake :
+12 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 3 // EQUI // 5 // 
+3 <==> 4 // EQUI // 5 // 
+9 <==> 5 6 7 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="324" status="">
+// A bird with it's wings spread
+// A bird flying in the air
+<source>
+1 A :
+2 bird :
+3 with :
+4 it's :
+5 wings :
+6 spread :
+</source>
+<translation>
+1 A :
+2 bird :
+3 flying :
+4 in :
+5 the :
+6 air :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="325" status="">
+// a boy in a red shirt , in front of a long blue wall , raises his eyebrow at the camera
+// The boy in the red shirt is next to a blue wall .
+<source>
+1 a :
+2 boy :
+3 in :
+4 a :
+5 red :
+6 shirt :
+7 , :
+8 in :
+9 front :
+10 of :
+11 a :
+12 long :
+13 blue :
+14 wall :
+15 , :
+16 raises :
+17 his :
+18 eyebrow :
+19 at :
+20 the :
+21 camera :
+</source>
+<translation>
+1 The :
+2 boy :
+3 in :
+4 the :
+5 red :
+6 shirt :
+7 is :
+8 next :
+9 to :
+10 a :
+11 blue :
+12 wall :
+13 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 4 5 6 <==> 3 4 5 6 // EQUI // 5 // 
+8 9 10 11 12 13 14 <==> 8 9 10 11 12 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="326" status="">
+// A woman jogs beside a tall concrete wall .
+// A woman runs beside a concrete wall .
+<source>
+1 A :
+2 woman :
+3 jogs :
+4 beside :
+5 a :
+6 tall :
+7 concrete :
+8 wall :
+9 . :
+</source>
+<translation>
+1 A :
+2 woman :
+3 runs :
+4 beside :
+5 a :
+6 concrete :
+7 wall :
+8 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+4 5 6 7 8 <==> 4 5 6 7 // EQUI // 5 // 
+9 <==> 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="327" status="">
+// A brown dog digging a hole in front of a plant
+// A group of people walking on the side of a railroad track .
+<source>
+1 A :
+2 brown :
+3 dog :
+4 digging :
+5 a :
+6 hole :
+7 in :
+8 front :
+9 of :
+10 a :
+11 plant :
+</source>
+<translation>
+1 A :
+2 group :
+3 of :
+4 people :
+5 walking :
+6 on :
+7 the :
+8 side :
+9 of :
+10 a :
+11 railroad :
+12 track :
+13 . :
+</translation>
+<alignment>
+7 8 9 10 11 <==> 6 7 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="328" status="">
+// A man in a red coat and hat talks to another man in red .
+// A man wearing a red coat with glass looks at another man .
+<source>
+1 A :
+2 man :
+3 in :
+4 a :
+5 red :
+6 coat :
+7 and :
+8 hat :
+9 talks :
+10 to :
+11 another :
+12 man :
+13 in :
+14 red :
+15 . :
+</source>
+<translation>
+1 A :
+2 man :
+3 wearing :
+4 a :
+5 red :
+6 coat :
+7 with :
+8 glass :
+9 looks :
+10 at :
+11 another :
+12 man :
+13 . :
+</translation>
+<alignment>
+3 4 5 6 7 8 <==> 3 4 5 6 // EQUI // 5 // 
+10 11 12 <==> 10 11 12 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="329" status="">
+// Two dogs play in the grass .
+// Two tan dogs play in the snow .
+<source>
+1 Two :
+2 dogs :
+3 play :
+4 in :
+5 the :
+6 grass :
+7 . :
+</source>
+<translation>
+1 Two :
+2 tan :
+3 dogs :
+4 play :
+5 in :
+6 the :
+7 snow :
+8 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 3 // EQUI // 5 // 
+3 <==> 4 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="330" status="">
+// A boy doing a back flip into a swimming pool .
+// A boy wearing red and blue swim trunks jumping head first into a swimming pool .
+<source>
+1 A :
+2 boy :
+3 doing :
+4 a :
+5 back :
+6 flip :
+7 into :
+8 a :
+9 swimming :
+10 pool :
+11 . :
+</source>
+<translation>
+1 A :
+2 boy :
+3 wearing :
+4 red :
+5 and :
+6 blue :
+7 swim :
+8 trunks :
+9 jumping :
+10 head :
+11 first :
+12 into :
+13 a :
+14 swimming :
+15 pool :
+16 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+7 8 9 10 <==> 12 13 14 15 // EQUI // 5 // 
+11 <==> 16 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="331" status="">
+// A black and white dog is jumping over a hurdle .
+// A white dog running over a bridge .
+<source>
+1 A :
+2 black :
+3 and :
+4 white :
+5 dog :
+6 is :
+7 jumping :
+8 over :
+9 a :
+10 hurdle :
+11 . :
+</source>
+<translation>
+1 A :
+2 white :
+3 dog :
+4 running :
+5 over :
+6 a :
+7 bridge :
+8 . :
+</translation>
+<alignment>
+1 2 3 4 5 <==> 8 // EQUI // 5 // 
+8 9 10 <==> 4 // EQUI // 5 // 
+8 9 10 <==> 5 6 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="332" status="">
+// A girl bounces upside down on her head on a trampoline .
+// A girl is bouncing on her head on a trampoline .
+<source>
+1 A :
+2 girl :
+3 bounces :
+4 upside :
+5 down :
+6 on :
+7 her :
+8 head :
+9 on :
+10 a :
+11 trampoline :
+12 . :
+</source>
+<translation>
+1 A :
+2 girl :
+3 is :
+4 bouncing :
+5 on :
+6 her :
+7 head :
+8 on :
+9 a :
+10 trampoline :
+11 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 <==> 3 4 // EQUI // 5 // 
+6 7 8 <==> 5 6 7 // EQUI // 5 // 
+9 10 11 <==> 8 9 10 // EQUI // 5 // 
+12 <==> 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="333" status="">
+// Children jumping on a trampoline .
+// A man is sledding on an orange slide .
+<source>
+1 Children :
+2 jumping :
+3 on :
+4 a :
+5 trampoline :
+6 . :
+</source>
+<translation>
+1 A :
+2 man :
+3 is :
+4 sledding :
+5 on :
+6 an :
+7 orange :
+8 slide :
+9 . :
+</translation>
+<alignment>
+2 <==> 5 6 7 8 // EQUI // 5 // 
+6 <==> 9 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="334" status="">
+// A person snowboarding and jumping over a construction sign .
+// a long snowboarder jumping over a barricade outside in the snow .
+<source>
+1 A :
+2 person :
+3 snowboarding :
+4 and :
+5 jumping :
+6 over :
+7 a :
+8 construction :
+9 sign :
+10 . :
+</source>
+<translation>
+1 a :
+2 long :
+3 snowboarder :
+4 jumping :
+5 over :
+6 a :
+7 barricade :
+8 outside :
+9 in :
+10 the :
+11 snow :
+12 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 3 // EQUI // 5 // 
+3 4 5 <==> 4 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="335" status="">
+// The skateboarder gets to the top of the ramp .
+// The skateboarder rides the pipe wall at a skater park .
+<source>
+1 The :
+2 skateboarder :
+3 gets :
+4 to :
+5 the :
+6 top :
+7 of :
+8 the :
+9 ramp :
+10 . :
+</source>
+<translation>
+1 The :
+2 skateboarder :
+3 rides :
+4 the :
+5 pipe :
+6 wall :
+7 at :
+8 a :
+9 skater :
+10 park :
+11 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="336" status="">
+// Two boys in a field kicking a soccer ball .
+// Two football players bang into each other during a football game .
+<source>
+1 Two :
+2 boys :
+3 in :
+4 a :
+5 field :
+6 kicking :
+7 a :
+8 soccer :
+9 ball :
+10 . :
+</source>
+<translation>
+1 Two :
+2 football :
+3 players :
+4 bang :
+5 into :
+6 each :
+7 other :
+8 during :
+9 a :
+10 football :
+11 game :
+12 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 3 // EQUI // 5 // 
+3 4 5 <==> 8 9 10 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="337" status="">
+// A crowd of people stand on a rural road , a field behind them , a forest in front .
+// A bunch of people standing next to a car with it's trunk open .
+<source>
+1 A :
+2 crowd :
+3 of :
+4 people :
+5 stand :
+6 on :
+7 a :
+8 rural :
+9 road :
+10 , :
+11 a :
+12 field :
+13 behind :
+14 them :
+15 , :
+16 a :
+17 forest :
+18 in :
+19 front :
+20 . :
+</source>
+<translation>
+1 A :
+2 bunch :
+3 of :
+4 people :
+5 standing :
+6 next :
+7 to :
+8 a :
+9 car :
+10 with :
+11 it's :
+12 trunk :
+13 open :
+14 . :
+</translation>
+<alignment>
+5 <==> 5 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="338" status="">
+// A dog runs through the deep snow .
+// A white dog is running through the snow .
+<source>
+1 A :
+2 dog :
+3 runs :
+4 through :
+5 the :
+6 deep :
+7 snow :
+8 . :
+</source>
+<translation>
+1 A :
+2 white :
+3 dog :
+4 is :
+5 running :
+6 through :
+7 the :
+8 snow :
+9 . :
+</translation>
+<alignment>
+3 <==> 4 5 // EQUI // 5 // 
+4 5 6 7 <==> 6 7 8 // EQUI // 5 // 
+8 <==> 9 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="339" status="">
+// A boy riding on a swing .
+// A young boy riding in a swing .
+<source>
+1 A :
+2 boy :
+3 riding :
+4 on :
+5 a :
+6 swing :
+7 . :
+</source>
+<translation>
+1 A :
+2 young :
+3 boy :
+4 riding :
+5 in :
+6 a :
+7 swing :
+8 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 3 // EQUI // 5 // 
+3 <==> 4 // EQUI // 5 // 
+4 5 6 <==> 8 // EQUI // 5 // 
+7 <==> 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="340" status="">
+// A woman pointing at a geyser .
+// Women pointing at a geyser .
+<source>
+1 A :
+2 woman :
+3 pointing :
+4 at :
+5 a :
+6 geyser :
+7 . :
+</source>
+<translation>
+1 Women :
+2 pointing :
+3 at :
+4 a :
+5 geyser :
+6 . :
+</translation>
+<alignment>
+3 4 <==> 2 3 // EQUI // 5 // 
+5 6 <==> 4 5 // EQUI // 5 // 
+7 <==> 6 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="341" status="">
+// Three dogs are playing in the white snow .
+// Two dogs are playing in the grass .
+<source>
+1 Three :
+2 dogs :
+3 are :
+4 playing :
+5 in :
+6 the :
+7 white :
+8 snow :
+9 . :
+</source>
+<translation>
+1 Two :
+2 dogs :
+3 are :
+4 playing :
+5 in :
+6 the :
+7 grass :
+8 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 4 <==> 3 4 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="342" status="">
+// An elderly woman rides a bicycle along a city street .
+// An elderly woman walking uphill crossing the street .
+<source>
+1 An :
+2 elderly :
+3 woman :
+4 rides :
+5 a :
+6 bicycle :
+7 along :
+8 a :
+9 city :
+10 street :
+11 . :
+</source>
+<translation>
+1 An :
+2 elderly :
+3 woman :
+4 walking :
+5 uphill :
+6 crossing :
+7 the :
+8 street :
+9 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+7 8 9 10 <==> 6 7 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="343" status="">
+// Two girls next to a mossy tree .
+// Two girls lean around a tree , laughing .
+<source>
+1 Two :
+2 girls :
+3 next :
+4 to :
+5 a :
+6 mossy :
+7 tree :
+8 . :
+</source>
+<translation>
+1 Two :
+2 girls :
+3 lean :
+4 around :
+5 a :
+6 tree :
+7 , :
+8 laughing :
+9 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 4 5 6 7 <==> 4 5 6 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="344" status="">
+// A small boy is building with some wooden blocks .
+// A small boy wearing a blue shirt stacks wooden blocks .
+<source>
+1 A :
+2 small :
+3 boy :
+4 is :
+5 building :
+6 with :
+7 some :
+8 wooden :
+9 blocks :
+10 . :
+</source>
+<translation>
+1 A :
+2 small :
+3 boy :
+4 wearing :
+5 a :
+6 blue :
+7 shirt :
+8 stacks :
+9 wooden :
+10 blocks :
+11 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+6 7 8 9 <==> 9 10 // EQUI // 5 // 
+10 <==> 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="345" status="">
+// a brown dog standing in the middle of ahuge field .
+// A brown dog in a field .
+<source>
+1 a :
+2 brown :
+3 dog :
+4 standing :
+5 in :
+6 the :
+7 middle :
+8 of :
+9 ahuge :
+10 field :
+11 . :
+</source>
+<translation>
+1 A :
+2 brown :
+3 dog :
+4 in :
+5 a :
+6 field :
+7 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+8 9 10 <==> 4 5 6 // EQUI // 5 // 
+11 <==> 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="346" status="">
+// The brown dog runs on the snow with a white ball in his mouth .
+// Four dogs play in the snow with the city skyline behind them .
+<source>
+1 The :
+2 brown :
+3 dog :
+4 runs :
+5 on :
+6 the :
+7 snow :
+8 with :
+9 a :
+10 white :
+11 ball :
+12 in :
+13 his :
+14 mouth :
+15 . :
+</source>
+<translation>
+1 Four :
+2 dogs :
+3 play :
+4 in :
+5 the :
+6 snow :
+7 with :
+8 the :
+9 city :
+10 skyline :
+11 behind :
+12 them :
+13 . :
+</translation>
+<alignment>
+5 6 7 <==> 4 5 6 // EQUI // 5 // 
+15 <==> 3 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="347" status="">
+// a brown and white dog is running on the grass .
+// a brown and white dog running crazily through the grass .
+<source>
+1 a :
+2 brown :
+3 and :
+4 white :
+5 dog :
+6 is :
+7 running :
+8 on :
+9 the :
+10 grass :
+11 . :
+</source>
+<translation>
+1 a :
+2 brown :
+3 and :
+4 white :
+5 dog :
+6 running :
+7 crazily :
+8 through :
+9 the :
+10 grass :
+11 . :
+</translation>
+<alignment>
+1 2 3 4 5 <==> 1 2 3 4 5 // EQUI // 5 // 
+8 9 10 <==> 8 9 10 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="348" status="">
+// A brown dog about to catch a green Frisbee .
+// A brown dog waits for the Frisbee to come down before catching it .
+<source>
+1 A :
+2 brown :
+3 dog :
+4 about :
+5 to :
+6 catch :
+7 a :
+8 green :
+9 Frisbee :
+10 . :
+</source>
+<translation>
+1 A :
+2 brown :
+3 dog :
+4 waits :
+5 for :
+6 the :
+7 Frisbee :
+8 to :
+9 come :
+10 down :
+11 before :
+12 catching :
+13 it :
+14 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+4 5 6 <==> 13 // EQUI // 5 // 
+7 8 9 <==> 6 7 // EQUI // 5 // 
+10 <==> 14 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="349" status="">
+// A young girl with a pink hat on with a yellow building in the background .
+// A young girl in a pink dress with something in her hand .
+<source>
+1 A :
+2 young :
+3 girl :
+4 with :
+5 a :
+6 pink :
+7 hat :
+8 on :
+9 with :
+10 a :
+11 yellow :
+12 building :
+13 in :
+14 the :
+15 background :
+16 . :
+</source>
+<translation>
+1 A :
+2 young :
+3 girl :
+4 in :
+5 a :
+6 pink :
+7 dress :
+8 with :
+9 something :
+10 in :
+11 her :
+12 hand :
+13 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+4 5 6 7 8 <==> 4 5 6 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="350" status="">
+// A man is standing on top of a rock or mountain watching the sun set .
+// A man standing in the mountains watching a sunset .
+<source>
+1 A :
+2 man :
+3 is :
+4 standing :
+5 on :
+6 top :
+7 of :
+8 a :
+9 rock :
+10 or :
+11 mountain :
+12 watching :
+13 the :
+14 sun :
+15 set :
+16 . :
+</source>
+<translation>
+1 A :
+2 man :
+3 standing :
+4 in :
+5 the :
+6 mountains :
+7 watching :
+8 a :
+9 sunset :
+10 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 4 <==> 3 // EQUI // 5 // 
+7 8 9 10 11 <==> 4 5 6 // EQUI // 5 // 
+12 <==> 7 // EQUI // 5 // 
+13 14 15 <==> 8 9 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="351" status="">
+// The couple is sitting near the water in lawn chairs .
+// The boy hops from one picnic table to the other in the park .
+<source>
+1 The :
+2 couple :
+3 is :
+4 sitting :
+5 near :
+6 the :
+7 water :
+8 in :
+9 lawn :
+10 chairs :
+11 . :
+</source>
+<translation>
+1 The :
+2 boy :
+3 hops :
+4 from :
+5 one :
+6 picnic :
+7 table :
+8 to :
+9 the :
+10 other :
+11 in :
+12 the :
+13 park :
+14 . :
+</translation>
+<alignment>
+3 4 <==> 11 12 13 // EQUI // 5 // 
+5 6 7 <==> 11 12 13 // EQUI // 5 // 
+11 <==> 4 5 6 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="352" status="">
+// A man is swinging on a rope above the water .
+// A man in warm clothes swinging on monkey bars at night .
+<source>
+1 A :
+2 man :
+3 is :
+4 swinging :
+5 on :
+6 a :
+7 rope :
+8 above :
+9 the :
+10 water :
+11 . :
+</source>
+<translation>
+1 A :
+2 man :
+3 in :
+4 warm :
+5 clothes :
+6 swinging :
+7 on :
+8 monkey :
+9 bars :
+10 at :
+11 night :
+12 . :
+</translation>
+<alignment>
+3 4 <==> 6 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="353" status="">
+// A dog running through deep snow pack .
+// A dog runs through the deep snow .
+<source>
+1 A :
+2 dog :
+3 running :
+4 through :
+5 deep :
+6 snow :
+7 pack :
+8 . :
+</source>
+<translation>
+1 A :
+2 dog :
+3 runs :
+4 through :
+5 the :
+6 deep :
+7 snow :
+8 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 <==> 3 // EQUI // 5 // 
+4 5 6 7 <==> 4 5 6 7 // EQUI // 5 // 
+8 <==> 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="354" status="">
+// The dog is running in the grass .
+// a dog pounces on the grass .
+<source>
+1 The :
+2 dog :
+3 is :
+4 running :
+5 in :
+6 the :
+7 grass :
+8 . :
+</source>
+<translation>
+1 a :
+2 dog :
+3 pounces :
+4 on :
+5 the :
+6 grass :
+7 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+5 6 7 <==> 4 5 6 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="355" status="">
+// A Golden Retriever jumping off a wood porch .
+// A golden retriever is jumping off a wooden porch
+<source>
+1 A :
+2 Golden :
+3 Retriever :
+4 jumping :
+5 off :
+6 a :
+7 wood :
+8 porch :
+9 . :
+</source>
+<translation>
+1 A :
+2 golden :
+3 retriever :
+4 is :
+5 jumping :
+6 off :
+7 a :
+8 wooden :
+9 porch :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+4 <==> 4 5 // EQUI // 5 // 
+5 6 7 8 <==> 6 7 8 9 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="356" status="">
+// The dog is running with food in his mouth .
+// The dog is running with a yellow ball in his mouth .
+<source>
+1 The :
+2 dog :
+3 is :
+4 running :
+5 with :
+6 food :
+7 in :
+8 his :
+9 mouth :
+10 . :
+</source>
+<translation>
+1 The :
+2 dog :
+3 is :
+4 running :
+5 with :
+6 a :
+7 yellow :
+8 ball :
+9 in :
+10 his :
+11 mouth :
+12 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 4 <==> 3 4 // EQUI // 5 // 
+7 8 9 <==> 9 10 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="357" status="">
+// A reddish brown dog runs across the snow with a snowball in its mouth .
+// The beautiful reddish dog lopes around the flat snowy street with a snowball in its mouth .
+<source>
+1 A :
+2 reddish :
+3 brown :
+4 dog :
+5 runs :
+6 across :
+7 the :
+8 snow :
+9 with :
+10 a :
+11 snowball :
+12 in :
+13 its :
+14 mouth :
+15 . :
+</source>
+<translation>
+1 The :
+2 beautiful :
+3 reddish :
+4 dog :
+5 lopes :
+6 around :
+7 the :
+8 flat :
+9 snowy :
+10 street :
+11 with :
+12 a :
+13 snowball :
+14 in :
+15 its :
+16 mouth :
+17 . :
+</translation>
+<alignment>
+1 2 3 4 <==> 1 2 3 4 // EQUI // 5 // 
+6 7 8 <==> 6 7 8 9 10 // EQUI // 5 // 
+9 10 11 <==> 11 12 13 // EQUI // 5 // 
+12 13 14 <==> 14 15 16 // EQUI // 5 // 
+15 <==> 17 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="358" status="">
+// A white dog with brown spots is running in a yard , chasing a ball .
+// A white dog with brown markings chases an orange ball in a grassy field .
+<source>
+1 A :
+2 white :
+3 dog :
+4 with :
+5 brown :
+6 spots :
+7 is :
+8 running :
+9 in :
+10 a :
+11 yard :
+12 , :
+13 chasing :
+14 a :
+15 ball :
+16 . :
+</source>
+<translation>
+1 A :
+2 white :
+3 dog :
+4 with :
+5 brown :
+6 markings :
+7 chases :
+8 an :
+9 orange :
+10 ball :
+11 in :
+12 a :
+13 grassy :
+14 field :
+15 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+4 5 6 <==> 4 5 6 // EQUI // 5 // 
+9 10 11 <==> 11 12 13 14 // EQUI // 5 // 
+13 <==> 7 // EQUI // 5 // 
+14 15 <==> 8 9 10 // EQUI // 5 // 
+16 <==> 15 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="359" status="">
+// A little girl and a little boy hold hands on a shiny slide .
+// A little girl in a paisley dress runs across a sandy playground .
+<source>
+1 A :
+2 little :
+3 girl :
+4 and :
+5 a :
+6 little :
+7 boy :
+8 hold :
+9 hands :
+10 on :
+11 a :
+12 shiny :
+13 slide :
+14 . :
+</source>
+<translation>
+1 A :
+2 little :
+3 girl :
+4 in :
+5 a :
+6 paisley :
+7 dress :
+8 runs :
+9 across :
+10 a :
+11 sandy :
+12 playground :
+13 . :
+</translation>
+<alignment>
+1 2 3 4 5 6 7 <==> 1 2 3 // EQUI // 5 // 
+14 <==> 9 10 11 12 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="360" status="">
+// Three little boys take a bath in a rubber bin on the grass .
+// Three well-dressed children are sitting on a bench and smiling .
+<source>
+1 Three :
+2 little :
+3 boys :
+4 take :
+5 a :
+6 bath :
+7 in :
+8 a :
+9 rubber :
+10 bin :
+11 on :
+12 the :
+13 grass :
+14 . :
+</source>
+<translation>
+1 Three :
+2 well-dressed :
+3 children :
+4 are :
+5 sitting :
+6 on :
+7 a :
+8 bench :
+9 and :
+10 smiling :
+11 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+11 12 13 <==> 6 7 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="361" status="">
+// a dog sniffing the brushes while a bull looks on
+// A brown dog sniffing at the fence of a brown bull .
+<source>
+1 a :
+2 dog :
+3 sniffing :
+4 the :
+5 brushes :
+6 while :
+7 a :
+8 bull :
+9 looks :
+10 on :
+</source>
+<translation>
+1 A :
+2 brown :
+3 dog :
+4 sniffing :
+5 at :
+6 the :
+7 fence :
+8 of :
+9 a :
+10 brown :
+11 bull :
+12 . :
+</translation>
+<alignment>
+3 <==> 4 // EQUI // 5 // 
+6 7 8 <==> 12 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="362" status="">
+// A black dog bounds through a path in the snow .
+// Two kids and a dog play in the snow .
+<source>
+1 A :
+2 black :
+3 dog :
+4 bounds :
+5 through :
+6 a :
+7 path :
+8 in :
+9 the :
+10 snow :
+11 . :
+</source>
+<translation>
+1 Two :
+2 kids :
+3 and :
+4 a :
+5 dog :
+6 play :
+7 in :
+8 the :
+9 snow :
+10 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 4 5 // EQUI // 5 // 
+8 9 10 <==> 7 8 9 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="363" status="">
+// A boy in a red jacket and balck hat sliding on his knees down a snowy hill
+// A boy is riding a red sledge down a snowy hill .
+<source>
+1 A :
+2 boy :
+3 in :
+4 a :
+5 red :
+6 jacket :
+7 and :
+8 balck :
+9 hat :
+10 sliding :
+11 on :
+12 his :
+13 knees :
+14 down :
+15 a :
+16 snowy :
+17 hill :
+</source>
+<translation>
+1 A :
+2 boy :
+3 is :
+4 riding :
+5 a :
+6 red :
+7 sledge :
+8 down :
+9 a :
+10 snowy :
+11 hill :
+12 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+14 15 16 17 <==> 8 9 10 11 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="364" status="">
+// Three dogs running in a field of grass .
+// Two dogs run in a field of tall grass .
+<source>
+1 Three :
+2 dogs :
+3 running :
+4 in :
+5 a :
+6 field :
+7 of :
+8 grass :
+9 . :
+</source>
+<translation>
+1 Two :
+2 dogs :
+3 run :
+4 in :
+5 a :
+6 field :
+7 of :
+8 tall :
+9 grass :
+10 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 <==> 3 // EQUI // 5 // 
+4 5 6 <==> 4 5 6 // EQUI // 5 // 
+7 8 <==> 7 8 9 // EQUI // 5 // 
+9 <==> 10 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="365" status="">
+// A group of men playing brass instruments .
+// A group of guys play instruments outside .
+<source>
+1 A :
+2 group :
+3 of :
+4 men :
+5 playing :
+6 brass :
+7 instruments :
+8 . :
+</source>
+<translation>
+1 A :
+2 group :
+3 of :
+4 guys :
+5 play :
+6 instruments :
+7 outside :
+8 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+5 <==> 5 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="366" status="">
+// A black and tan dog standing in a field near trees
+// A white dog is standing by a river shaking himself dry .
+<source>
+1 A :
+2 black :
+3 and :
+4 tan :
+5 dog :
+6 standing :
+7 in :
+8 a :
+9 field :
+10 near :
+11 trees :
+</source>
+<translation>
+1 A :
+2 white :
+3 dog :
+4 is :
+5 standing :
+6 by :
+7 a :
+8 river :
+9 shaking :
+10 himself :
+11 dry :
+12 . :
+</translation>
+<alignment>
+6 <==> 4 5 // EQUI // 5 // 
+7 8 9 <==> 6 7 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="367" status="">
+// Three people sit at a picnic table outside of a building painted like a union jack .
+// Three people sit at an outdoor table in front of a building painted like the Union Jack .
+<source>
+1 Three :
+2 people :
+3 sit :
+4 at :
+5 a :
+6 picnic :
+7 table :
+8 outside :
+9 of :
+10 a :
+11 building :
+12 painted :
+13 like :
+14 a :
+15 union :
+16 jack :
+17 . :
+</source>
+<translation>
+1 Three :
+2 people :
+3 sit :
+4 at :
+5 an :
+6 outdoor :
+7 table :
+8 in :
+9 front :
+10 of :
+11 a :
+12 building :
+13 painted :
+14 like :
+15 the :
+16 Union :
+17 Jack :
+18 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 <==> 3 // EQUI // 5 // 
+4 5 6 7 <==> 4 5 6 7 // EQUI // 5 // 
+8 9 10 11 <==> 8 9 10 11 12 // EQUI // 5 // 
+12 <==> 13 // EQUI // 5 // 
+13 14 15 16 <==> 14 15 16 17 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="368" status="">
+// A small dog runs through an obstacle course .
+// A small dog jumping over an obstacle .
+<source>
+1 A :
+2 small :
+3 dog :
+4 runs :
+5 through :
+6 an :
+7 obstacle :
+8 course :
+9 . :
+</source>
+<translation>
+1 A :
+2 small :
+3 dog :
+4 jumping :
+5 over :
+6 an :
+7 obstacle :
+8 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+5 6 7 8 <==> 5 6 7 // EQUI // 5 // 
+9 <==> 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="369" status="">
+// A tent and a campsite in a sunlit forest .
+// A white dog on a beach is carrying a stick in its mouth .
+<source>
+1 A :
+2 tent :
+3 and :
+4 a :
+5 campsite :
+6 in :
+7 a :
+8 sunlit :
+9 forest :
+10 . :
+</source>
+<translation>
+1 A :
+2 white :
+3 dog :
+4 on :
+5 a :
+6 beach :
+7 is :
+8 carrying :
+9 a :
+10 stick :
+11 in :
+12 its :
+13 mouth :
+14 . :
+</translation>
+<alignment>
+10 <==> 1 2 3 // EQUI // 5 // 
+10 <==> 4 5 6 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="370" status="">
+// A black dog is chasing two birds on the shore of the ocean .
+// A dog is running along the beach beside the ocean .
+<source>
+1 A :
+2 black :
+3 dog :
+4 is :
+5 chasing :
+6 two :
+7 birds :
+8 on :
+9 the :
+10 shore :
+11 of :
+12 the :
+13 ocean :
+14 . :
+</source>
+<translation>
+1 A :
+2 dog :
+3 is :
+4 running :
+5 along :
+6 the :
+7 beach :
+8 beside :
+9 the :
+10 ocean :
+11 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 // EQUI // 5 // 
+11 12 13 <==> 8 9 10 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="371" status="">
+// A man and woman with their hands on their chins are standing next to a Christmas tree .
+// The man with a white beard and blue cap is standing in the doorway of a workshop .
+<source>
+1 A :
+2 man :
+3 and :
+4 woman :
+5 with :
+6 their :
+7 hands :
+8 on :
+9 their :
+10 chins :
+11 are :
+12 standing :
+13 next :
+14 to :
+15 a :
+16 Christmas :
+17 tree :
+18 . :
+</source>
+<translation>
+1 The :
+2 man :
+3 with :
+4 a :
+5 white :
+6 beard :
+7 and :
+8 blue :
+9 cap :
+10 is :
+11 standing :
+12 in :
+13 the :
+14 doorway :
+15 of :
+16 a :
+17 workshop :
+18 . :
+</translation>
+<alignment>
+5 6 7 <==> 3 4 5 6 7 8 9 // EQUI // 5 // 
+11 12 <==> 10 11 // EQUI // 5 // 
+13 14 15 16 17 <==> 15 16 17 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="372" status="">
+// Two dogs are running through the grass near a house and trees .
+// Two dogs are running through a green yard
+<source>
+1 Two :
+2 dogs :
+3 are :
+4 running :
+5 through :
+6 the :
+7 grass :
+8 near :
+9 a :
+10 house :
+11 and :
+12 trees :
+13 . :
+</source>
+<translation>
+1 Two :
+2 dogs :
+3 are :
+4 running :
+5 through :
+6 a :
+7 green :
+8 yard :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 4 <==> 3 4 // EQUI // 5 // 
+5 6 7 <==> 5 6 7 8 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="373" status="">
+// Two different breeds of brown and white dogs play on the beach .
+// Two dogs playing in the sand at the beach .
+<source>
+1 Two :
+2 different :
+3 breeds :
+4 of :
+5 brown :
+6 and :
+7 white :
+8 dogs :
+9 play :
+10 on :
+11 the :
+12 beach :
+13 . :
+</source>
+<translation>
+1 Two :
+2 dogs :
+3 playing :
+4 in :
+5 the :
+6 sand :
+7 at :
+8 the :
+9 beach :
+10 . :
+</translation>
+<alignment>
+4 5 6 7 8 <==> 1 2 // EQUI // 5 // 
+9 <==> 3 // EQUI // 5 // 
+10 11 12 <==> 7 8 9 // EQUI // 5 // 
+13 <==> 10 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="374" status="">
+// A white dog is running through the water onto the shore .
+// The white dog runs through the ocean .
+<source>
+1 A :
+2 white :
+3 dog :
+4 is :
+5 running :
+6 through :
+7 the :
+8 water :
+9 onto :
+10 the :
+11 shore :
+12 . :
+</source>
+<translation>
+1 The :
+2 white :
+3 dog :
+4 runs :
+5 through :
+6 the :
+7 ocean :
+8 . :
+</translation>
+<alignment>
+1 2 3 <==> 1 2 3 // EQUI // 5 // 
+4 5 <==> 4 // EQUI // 5 // 
+6 7 8 <==> 5 6 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+
+<sentence id="375" status="">
+// A dog leaping over a hurdle .
+// A dog leaps over the hurdle .
+<source>
+1 A :
+2 dog :
+3 leaping :
+4 over :
+5 a :
+6 hurdle :
+7 . :
+</source>
+<translation>
+1 A :
+2 dog :
+3 leaps :
+4 over :
+5 the :
+6 hurdle :
+7 . :
+</translation>
+<alignment>
+1 2 <==> 1 2 // EQUI // 5 // 
+3 <==> 3 // EQUI // 5 // 
+4 5 6 <==> 4 5 6 // EQUI // 5 // 
+7 <==> 7 // EQUI // 5 // 
+</alignment>
+</sentence>
+
+

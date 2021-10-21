@@ -8,7 +8,7 @@ for learning_rate in ${learning_rate_list[@]}; do
 for layer_idx in ${layer_idx_list[@]}; do
   CUDA_VISIBLE_DEVICES=0 PYTHONPATH=src python \
     src/scripts/run_train.py \
-    --model_name_or_path bert-base-uncased \
+    --model_name_or_path roberta-base \
     --train_file /nas/home/sh0416/data/nli_for_simcse.csv \
     --eval_file /nas/home/sh0416/data \
 	  --method simcse-sup \
@@ -24,7 +24,7 @@ for layer_idx in ${layer_idx_list[@]}; do
     --num_train_epochs 3 \
     --save_total_limit 1 \
     --pooler_type cls \
-    --per_device_train_batch_size 80 \
+    --per_device_train_batch_size 128 \
     --per_device_eval_batch_size 128 \
     --gradient_accumulation_steps 1 \
     --learning_rate ${learning_rate} \

@@ -183,16 +183,16 @@ def inference(
             heatmap_token = model.compute_heatmap(
                 prep_instance["inputs1"], prep_instance["inputs2"]
             )[0, 1:-1, 1:-1].numpy()
-        align_sent1_token2chunk, _ = get_alignments(
+        align_sent1_token2chunk = get_alignments(
             prep_instance["sent1_token"], prep_instance["instance"]["sent1_chunk"]
         )
-        align_sent2_token2chunk, _ = get_alignments(
+        align_sent2_token2chunk = get_alignments(
             prep_instance["sent2_token"], prep_instance["instance"]["sent2_chunk"]
         )
         logger.debug(f"{align_sent1_token2chunk}")
         logger.debug(f"{align_sent2_token2chunk}")
         heatmap_chunk = pool_heatmap(
-            heatmap_token, (align_sent1_token2chunk, align_sent2_token2chunk)
+            heatmap_token, align_sent1_token2chunk, align_sent2_token2chunk
         )
         mask1 = heatmap_chunk == np.max(heatmap_chunk, axis=0, keepdims=True)
         mask2 = heatmap_chunk == np.max(heatmap_chunk, axis=1, keepdims=True)
@@ -253,20 +253,24 @@ Alignment = List[TokensPair]
 
 
 def pool_heatmap(
-    heatmap: np.ndarray, align_pair: Tuple[List[List[int]], List[List[int]]]
+    heatmap: np.ndarray,
+    align_sent1: Tuple[List[List[int]], List[List[int]]],
+    align_sent2: Tuple[List[List[int]], List[List[int]]],
 ) -> np.ndarray:
-    sent1_max = max(max(x) for x in align_pair[0])
-    sent2_max = max(max(x) for x in align_pair[1])
-    heatmap_new = np.zeros((sent1_max + 1, sent2_max + 1))
-    count = np.zeros((sent1_max + 1, sent2_max + 1))
-    for i in range(heatmap.shape[0]):
-        for j in range(heatmap.shape[1]):
-            for k in align_pair[0][i]:
-                for l in align_pair[1][j]:
-                    heatmap_new[k, l] = max(heatmap_new[k, l], heatmap[i, j])
-                    count[k, l] += 1
-    # heatmap_new /= count
-    return heatmap_new
+    sent1_chunk_len, sent2_chunk_len = len(align_sent1[1]), len(align_sent2[1])
+    # Split heatmap blockwise
+
+    heatmap_splitted = [
+        [heatmap[np.ix_(x, y)] for y in align_sent2[1]] for x in align_sent1[1]
+    ]
+    heatmap_pooled1 = np.zeros((sent1_chunk_len, sent2_chunk_len))
+    heatmap_pooled2 = np.zeros((sent1_chunk_len, sent2_chunk_len))
+    for i, x in enumerate(heatmap_splitted):
+        for j, y in enumerate(x):
+            heatmap_pooled1[i, j] = np.mean(np.max(y, axis=1))
+            heatmap_pooled2[i, j] = np.mean(np.max(y, axis=0))
+    heatmap_pooled = np.maximum(heatmap_pooled1, heatmap_pooled2)
+    return heatmap_pooled
 
 
 def extract_alignment_from_heatmap(heatmap: np.ndarray) -> Alignment:
