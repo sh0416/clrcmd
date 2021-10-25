@@ -6,11 +6,12 @@ import torch
 import torch.distributed as dist
 import torch.nn as nn
 import torch.nn.functional as F
-from simcse.config import ModelArguments
-from simcse.utils import masked_mean
 from torch import Tensor
 from transformers import AutoConfig, AutoModel
 from transformers.utils.dummy_pt_objects import PreTrainedModel
+
+from sentsim.config import ModelArguments
+from sentsim.utils import masked_mean
 
 logger = logging.getLogger(__name__)
 
@@ -57,22 +58,45 @@ class LastHiddenSentenceRepresentationModel(nn.Module):
     def __init__(self, model: PreTrainedModel, hidden_size: int):
         super().__init__()
         self.model = model
-        self.head = nn.Sequential(nn.Linear(hidden_size, hidden_size), nn.Tanh())
 
     def forward(self, inputs: ModelInput) -> Tuple[Tensor, Tensor]:
         # Return representation with mask
         mask = inputs["attention_mask"].bool()
-        return self.head(self.model(**inputs).last_hidden_state), mask
+        return self.model(**inputs).last_hidden_state, mask
 
 
-class CLSSentenceRepresentationModel(nn.Module):
-    def __init__(self, model: PreTrainedModel, hidden_size: int):
+class CLSPoolingSentenceRepresentationModel(nn.Module):
+    def __init__(self, model: PreTrainedModel):
         super().__init__()
         self.model = model
-        self.head = nn.Sequential(nn.Linear(hidden_size, hidden_size), nn.Tanh())
 
     def forward(self, inputs: ModelInput) -> Tensor:
-        return self.head(self.model(**inputs).last_hidden_state[:, 0])
+        return self.model(**inputs).last_hidden_state[:, 0]
+
+
+class AveragePoolingSentenceRepresentationModel(nn.Module):
+    def __init__(self, model: PreTrainedModel):
+        super().__init__()
+        self.model = model
+
+    def forward(self, inputs: ModelInput) -> Tensor:
+        mask = inputs["attention_mask"]
+        return masked_mean(self.model(**inputs).last_hidden_state, mask, dim=1)
+
+
+class SentenceBertLearningModule(nn.Module):
+    def __init__(self, model: nn.Module, hidden_size: int):
+        super().__init__()
+        self.model = model
+        self.head = nn.Linear(hidden_size, 3, bias=False)  # 3-way classification
+        self.criterion = nn.CrossEntropyLoss()
+
+    def forward(
+        self, inputs1: ModelInput, inputs2: ModelInput, labels: Tensor
+    ) -> Tensor:
+        x1, x2 = self.representation_model(inputs1), self.representation_model(inputs2)
+        pred = self.head(torch.cat((x1, x2, torch.abs(x1 - x2)), dim=2))
+        return self.criterion(pred, labels)
 
 
 class SentenceSimilarityModel(nn.Module):
@@ -233,8 +257,6 @@ class InBatchContrastiveLearningModule(nn.Module):
         inputs1: ModelInput,
         inputs2: ModelInput,
         inputs_neg: Optional[ModelInput] = None,
-        inputs_mlm: Optional[ModelInput] = None,
-        labels_mlm: Optional[Tensor] = None,
     ) -> Tuple[Tensor]:
         if inputs_neg is not None:
             inputs = {
@@ -284,16 +306,30 @@ def create_contrastive_learning(
     pretrained_model = AutoModel.from_pretrained(
         model_args.model_name_or_path, config=config
     )
+    if model_args.loss_type == "sbert-cls":
+        model = CLSPoolingSentenceRepresentationModel(pretrained_model)
+        model = SentenceBertLearningModule(model, config.hidden_size)
+    elif model_args.loss_type == "sbert-avg":
+        model = AveragePoolingSentenceRepresentationModel(pretrained_model)
+        model = SentenceBertLearningModule(model, config.hidden_size)
+    elif model_args.loss_type == "simcse-cls":
+        model = CLSPoolingSentenceRepresentationModel(pretrained_model)
+        model = SimcseLearningModule(model)
+    elif model_args.loss_type == "simcse-avg":
+        model = AveragePoolingSentenceRepresentationModel(pretrained_model)
+        model = SimcseLearningModule(model)
+    elif model_args.loss_type == "rwmdcse":
+        model = LastHiddenSentenceRepresentationModel(pretrained_model)
+        model = RwmdcseLearningModule(model)
+    else:
+        raise AttributeError()
+    return model
     if model_args.loss_rwmd:
-        representation_model = LastHiddenSentenceRepresentationModel(
-            pretrained_model, config.hidden_size
-        )
+        representation_model = LastHiddenSentenceRepresentationModel(pretrained_model)
         similarity = RelaxedWordMoverSimilarity()
         pairwise_similarity = PairwiseRelaxedWordMoverSimilarity()
     else:
-        representation_model = CLSSentenceRepresentationModel(
-            pretrained_model, config.hidden_size
-        )
+        representation_model = CLSPoolingSentenceRepresentationModel(pretrained_model)
         similarity = nn.CosineSimilarity(dim=-1)
         pairwise_similarity = PairwiseCosineSimilarity()
     model = SentenceSimilarityModel(representation_model, similarity)

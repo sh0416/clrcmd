@@ -6,7 +6,7 @@ import typing
 from functools import partial
 from typing import Dict, List, Optional, Tuple
 
-from simcse.data.eda import eda
+from sentsim.data.eda import eda
 from torch import Tensor
 from torch.utils.data import Dataset
 from transformers import RobertaTokenizer

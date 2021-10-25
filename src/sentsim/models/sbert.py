@@ -2,9 +2,9 @@
 from typing import List, Tuple
 
 import numpy as np
-
 import torch
-from transformers import AutoTokenizer, AutoModel
+from transformers import AutoModel, AutoTokenizer
+
 from sentsim.models.base import SemanticTextualSimilarityModel
 from sentsim.utils import cos, masked_mean
 

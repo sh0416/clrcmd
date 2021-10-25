@@ -1,6 +1,6 @@
 from typing import Dict
 
-from sentence_benchmark.data import (
+from sentsim.data.sts import (
     load_sickr_test,
     load_sts12,
     load_sts13,
@@ -10,8 +10,6 @@ from sentence_benchmark.data import (
     load_stsb_dev,
     load_stsb_test,
 )
-from sentence_benchmark.evaluate import evaluate_sts
-from sentence_benchmark.models.rwmdcse import batcher, prepare
 from transformers import Trainer
 from transformers.utils import logging
 

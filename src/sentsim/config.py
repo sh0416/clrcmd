@@ -12,18 +12,25 @@ class ModelArguments:
         default="roberta-base",
         metadata={"help": "The model checkpoint for weights initialization."},
     )
-    # SimCSE's arguments
-    temp: float = field(default=0.05, metadata={"help": "Temperature for softmax."})
-    pooler_type: str = field(
-        default="cls",
+    # Loss
+    loss_type: str = field(
+        default="sbert-cls",
         metadata={
-            "help": (
-                "What kind of pooler to use (cls, cls_before_pooler, avg, "
-                "avg_top2, avg_first_last)."
-            )
+            "help": "Loss type for training",
+            "choices": [
+                "sbert-cls",
+                "sbert-avg",
+                "simcse-cls",
+                "simcse-avg",
+                "rwmdcse",
+            ],
         },
     )
+    # Temperature softmax
+    temp: float = field(default=0.05, metadata={"help": "Temperature for softmax."})
+    # Dropout
     hidden_dropout_prob: float = field(default=0.1, metadata={"help": "Dropout prob"})
+    # Miscalleneous
     mlp_only_train: bool = field(
         default=False, metadata={"help": "Use MLP only during training"}
     )
@@ -48,6 +55,9 @@ class DataTrainingArguments:
     Arguments pertaining to what data we are going to input our model for training and eval.
     """
 
+    data_type: str = field(
+        default="snli_mnli", metadata={"choices": ["snli_mnli", "wiki"]}
+    )
     train_file: str = field(
         default=None,
         metadata={"help": "The training data file (.txt or .csv)."},
@@ -61,7 +71,6 @@ class DataTrainingArguments:
             )
         },
     )
-    method: str = field(default="simcse-unsup", metadata={"help": "Training method"})
     add_typo_corpus: bool = field(
         default=False, metadata={"help": "Add github typo corpus"}
     )

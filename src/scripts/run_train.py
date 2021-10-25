@@ -5,8 +5,11 @@ from dataclasses import asdict
 from functools import partial
 
 import torch
-from simcse.config import DataTrainingArguments, ModelArguments, OurTrainingArguments
-from simcse.data.dataset import (
+from torch.utils.data import ConcatDataset
+from transformers import AutoTokenizer, HfArgumentParser, set_seed
+
+from sentsim.config import DataTrainingArguments, ModelArguments, OurTrainingArguments
+from sentsim.data.dataset import (
     NLIDataset,
     PairedContrastiveLearningDataset,
     WikiEDADataset,
@@ -14,10 +17,8 @@ from simcse.data.dataset import (
     WikiRepetitionDataset,
     collate_fn,
 )
-from simcse.models import create_contrastive_learning
-from simcse.trainers import CLTrainer
-from torch.utils.data import ConcatDataset
-from transformers import AutoTokenizer, HfArgumentParser, set_seed
+from sentsim.models.models import create_contrastive_learning
+from sentsim.trainer import CLTrainer
 
 logger = logging.getLogger(__name__)
 
@@ -63,24 +64,15 @@ def train(args):
     else:
         raise NotImplementedError()
 
-    if data_args.method == "simcse-unsup":
+    if data_args.data_type == "snli_mnli":
+        train_dataset = SNLIMNLIDataset(data_args.train_file, tokenizer)
+    elif data_args.data_type == "wiki":
         train_dataset = WikiIdentityDataset(data_args.train_file, tokenizer)
     elif data_args.method == "simcse-sup":
         train_dataset = NLIDataset(data_args.train_file, tokenizer)
-    elif data_args.method == "esimcse":
-        train_dataset = WikiRepetitionDataset(
-            data_args.train_file, tokenizer, dup_rate=data_args.dup_rate
-        )
-    elif data_args.method == "edasimcse":
-        train_dataset = WikiEDADataset(data_args.train_file, tokenizer)
     else:
         raise ValueError
 
-    if data_args.add_typo_corpus:
-        typo_dataset = PairedContrastiveLearningDataset(
-            data_args.typo_corpus_filepath, tokenizer
-        )
-        train_dataset = ConcatDataset((train_dataset, typo_dataset))
     trainer = CLTrainer(
         model=model,
         data_collator=partial(collate_fn, tokenizer=tokenizer),
