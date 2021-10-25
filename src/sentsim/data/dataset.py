@@ -6,12 +6,11 @@ import typing
 from functools import partial
 from typing import Dict, List, Optional, Tuple
 
+from simcse.data.eda import eda
 from torch import Tensor
 from torch.utils.data import Dataset
 from transformers import RobertaTokenizer
 from transformers.tokenization_utils_base import PreTrainedTokenizerBase
-
-from simcse.data.eda import eda
 
 logger = logging.getLogger(__name__)
 

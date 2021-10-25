@@ -5,9 +5,6 @@ from dataclasses import asdict
 from functools import partial
 
 import torch
-from torch.utils.data import ConcatDataset
-from transformers import AutoTokenizer, HfArgumentParser, set_seed
-
 from simcse.config import DataTrainingArguments, ModelArguments, OurTrainingArguments
 from simcse.data.dataset import (
     NLIDataset,
@@ -19,6 +16,8 @@ from simcse.data.dataset import (
 )
 from simcse.models import create_contrastive_learning
 from simcse.trainers import CLTrainer
+from torch.utils.data import ConcatDataset
+from transformers import AutoTokenizer, HfArgumentParser, set_seed
 
 logger = logging.getLogger(__name__)
 

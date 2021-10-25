@@ -2,10 +2,9 @@ from typing import Dict, List
 
 import numpy as np
 import torch
-from transformers import RobertaTokenizer
-
 from sentence_benchmark.data import Input
 from simcse.models import create_contrastive_learning
+from transformers import RobertaTokenizer
 
 
 def prepare(inputs: List[Input], param: Dict) -> Dict:

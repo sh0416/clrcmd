@@ -1,8 +1,34 @@
+import itertools
+from typing import Iterable, List
+
+import numpy as np
 import torch
 from torch import Tensor
 
 
+def cos(u: np.ndarray, v: np.ndarray) -> np.ndarray:
+    u, v = np.nan_to_num(u), np.nan_to_num(v)
+    x = np.dot(u, v) / (np.linalg.norm(u) * np.linalg.norm(v))
+    return np.nan_to_num(x)
+
+
+def masked_sum(x: Tensor, mask: Tensor, dim: int) -> Tensor:
+    """Sum (masked version)
+
+    :param x: Input
+    :param mask: Mask Could be broadcastable
+    :param dim:
+    :return: Result of sum
+    """
+    return torch.sum(x * mask.float(), dim=dim)
+
+
 def masked_mean(x: Tensor, mask: Tensor, dim: int) -> Tensor:
-    assert mask.dtype == torch.bool
-    x = torch.where(mask, x, torch.zeros_like(x))
-    return torch.sum(x, dim=dim) / torch.count_nonzero(mask, dim=dim)
+    """Mean (masked version)
+
+    :param x: Input
+    :param mask: Mask Could be broadcastable
+    :param dim:
+    :return: Result of mean
+    """
+    return masked_sum(x, mask, dim) / torch.sum(mask.float(), dim)

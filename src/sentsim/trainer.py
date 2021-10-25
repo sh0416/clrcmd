@@ -1,8 +1,4 @@
-from random import Random
-from typing import Dict, List
-
-from transformers import Trainer
-from transformers.utils import logging
+from typing import Dict
 
 from sentence_benchmark.data import (
     load_sickr_test,
@@ -16,6 +12,8 @@ from sentence_benchmark.data import (
 )
 from sentence_benchmark.evaluate import evaluate_sts
 from sentence_benchmark.models.rwmdcse import batcher, prepare
+from transformers import Trainer
+from transformers.utils import logging
 
 logger = logging.get_logger(__name__)
 

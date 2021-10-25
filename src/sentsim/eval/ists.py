@@ -5,9 +5,8 @@ from typing import List, Optional, Tuple, TypedDict
 
 import numpy as np
 import torch
-from tokenizations import get_alignments
-
 from simcse.models import ModelInput, SentenceSimilarityModel
+from tokenizations import get_alignments
 
 logger = logging.getLogger(__name__)
 

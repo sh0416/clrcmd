@@ -1,75 +1,58 @@
+"""Loading logic for semantic textual similarity data"""
 import csv
 import os
-from typing import Dict, List, NamedTuple, Tuple
+from typing import Dict, List, Tuple
 
-Input = Tuple[str, str]
-
-
-class Example(NamedTuple):
-    input: Input
-    score: float
+SemanticTextualSimilarityDataset = Dict[str, List[Tuple[Tuple[str, str], float]]]
 
 
-def _check_dataset(dataset: List[Example]):
-    for idx, example in enumerate(dataset, start=1):
-        assert len(example.input[0]) > 0, f"{idx = }: {example = }"
-        assert len(example.input[1]) > 0, f"{idx = }: {example = }"
-        assert type(example.score) == float, f"{idx = }: {example = }"
+def _check_dataset(dataset: List[Tuple[Tuple[str, str], float]]):
+    for idx, ((sent0, sent1), score) in enumerate(dataset, start=1):
+        assert len(sent0) > 0, f"{idx = }: {sent0 = }"
+        assert len(sent1) > 0, f"{idx = }: {sent1 = }"
+        assert type(score) == float, f"{idx = }: {score = }"
 
 
-def load_data_sickr(filepath: str) -> List[Example]:
+def load_data_sickr(filepath: str) -> List[Tuple[Tuple[str, str], float]]:
     """Load file which follows SICKR format
 
     :param filepath: Filepath where the data is stored
     :return: List of Examples
     """
-
-    def _create(row: Tuple[str, ...]) -> Example:
-        return Example(input=(row[1], row[2]), score=float(row[3]))
-
     with open(filepath) as f:
         reader = csv.reader(f, delimiter="\t", quoting=csv.QUOTE_NONE)
         # Skip first line
         _ = next(reader)
-        dataset = list(map(_create, reader))
+        dataset = [((row[1], row[2]), float(row[3])) for row in reader]
     _check_dataset(dataset)
     return dataset
 
 
-def load_data_stsb(filepath: str) -> List[Example]:
+def load_data_stsb(filepath: str) -> List[Tuple[Tuple[str, str], float]]:
     """Load file which follows STSB format
 
     :param filepath: Filepath where the data is stored
     :return: List of Examples
     """
-
-    def _create(row: Tuple[str, ...]) -> Example:
-        return Example(input=(row[5], row[6]), score=float(row[4]))
-
     with open(filepath) as f:
         reader = csv.reader(f, delimiter="\t", quoting=csv.QUOTE_NONE)
-        dataset = list(map(_create, reader))
+        dataset = [((row[5], row[6]), float(row[4])) for row in reader]
     _check_dataset(dataset)
     return dataset
 
 
-def load_data_sts(filepaths: Tuple[str, str]) -> List[Example]:
+def load_data_sts(filepaths: Tuple[str, str]) -> List[Tuple[Tuple[str, str], float]]:
     """Load file which follows STS format
 
     :param filepaths: Filepaths corresponding to input and label
     :return: List of Examples
     """
-
-    def _create(row: Tuple[Tuple[str, ...], Tuple[str, ...]]) -> Example:
-        row_input, row_label = row
-        return Example(input=row_input, score=float(row_label[0]))
-
     filepath_input, filepath_label = filepaths
     with open(filepath_input) as f_input, open(filepath_label) as f_label:
         reader_input = csv.reader(f_input, delimiter="\t", quoting=csv.QUOTE_NONE)
         reader_label = csv.reader(f_label, delimiter="\t", quoting=csv.QUOTE_NONE)
         reader = filter(lambda x: len(x[1]) > 0, zip(reader_input, reader_label))
-        dataset = list(map(_create, reader))
+        dataset = [(row_input, float(row_label[0])) for row_input, row_label in reader]
     _check_dataset(dataset)
     return dataset
 
@@ -88,7 +71,9 @@ def create_filepaths_sts(dirpath: str, sources: List[str]) -> List[Tuple[str, st
     return list(zip(filepaths_input, filepaths_label))
 
 
-def load_sources_sts(dirpath: str, sources: List[str]) -> Dict[str, List[Example]]:
+def load_sources_sts(
+    dirpath: str, sources: List[str]
+) -> SemanticTextualSimilarityDataset:
     """Give sources, load dataset. Assume that the files follow STS format
 
     :param dirpath: Directory where the whole files located
@@ -99,7 +84,7 @@ def load_sources_sts(dirpath: str, sources: List[str]) -> Dict[str, List[Example
     return {k: v for k, v in zip(sources, datasets)}
 
 
-def save_dataset(dirpath: str, dataset: Dict[str, List[Example]]) -> None:
+def save_dataset(dirpath: str, dataset: SemanticTextualSimilarityDataset):
     """Given dataset, save the dataset in dirpath
 
     :param dirpath: Directory where the dataset will be saved
@@ -125,7 +110,7 @@ def save_dataset(dirpath: str, dataset: Dict[str, List[Example]]) -> None:
             writer.writerows((example.score,) for example in _dataset)
 
 
-def load_sts12(dirpath: str) -> Dict[str, List[Example]]:
+def load_sts12(dirpath: str) -> SemanticTextualSimilarityDataset:
     sources = [
         "MSRpar",
         "MSRvid",
@@ -142,7 +127,7 @@ def load_sts12(dirpath: str) -> Dict[str, List[Example]]:
     return dataset
 
 
-def load_sts13(dirpath: str) -> Dict[str, List[Example]]:
+def load_sts13(dirpath: str) -> SemanticTextualSimilarityDataset:
     sources = ["FNWN", "headlines", "OnWN"]
     dataset = load_sources_sts(dirpath, sources)
     assert len(dataset["FNWN"]) == 189
@@ -151,7 +136,7 @@ def load_sts13(dirpath: str) -> Dict[str, List[Example]]:
     return dataset
 
 
-def load_sts14(dirpath: str) -> Dict[str, List[Example]]:
+def load_sts14(dirpath: str) -> SemanticTextualSimilarityDataset:
     sources = [
         "deft-forum",
         "deft-news",
@@ -170,7 +155,7 @@ def load_sts14(dirpath: str) -> Dict[str, List[Example]]:
     return dataset
 
 
-def load_sts15(dirpath: str) -> Dict[str, List[Example]]:
+def load_sts15(dirpath: str) -> SemanticTextualSimilarityDataset:
     sources = [
         "answers-forums",
         "answers-students",
@@ -187,7 +172,7 @@ def load_sts15(dirpath: str) -> Dict[str, List[Example]]:
     return dataset
 
 
-def load_sts16(dirpath: str) -> Dict[str, List[Example]]:
+def load_sts16(dirpath: str) -> SemanticTextualSimilarityDataset:
     sources = [
         "answer-answer",
         "headlines",
@@ -204,26 +189,26 @@ def load_sts16(dirpath: str) -> Dict[str, List[Example]]:
     return dataset
 
 
-def load_stsb_train(dirpath: str) -> Dict[str, List[Example]]:
+def load_stsb_train(dirpath: str) -> SemanticTextualSimilarityDataset:
     return {"train": load_data_stsb(os.path.join(dirpath, "sts-train.csv"))}
 
 
-def load_stsb_dev(dirpath: str) -> Dict[str, List[Example]]:
+def load_stsb_dev(dirpath: str) -> SemanticTextualSimilarityDataset:
     return {"dev": load_data_stsb(os.path.join(dirpath, "sts-dev.csv"))}
 
 
-def load_stsb_test(dirpath: str) -> Dict[str, List[Example]]:
+def load_stsb_test(dirpath: str) -> SemanticTextualSimilarityDataset:
     return {"test": load_data_stsb(os.path.join(dirpath, "sts-test.csv"))}
 
 
-def load_sickr_train(dirpath: str) -> Dict[str, List[Example]]:
+def load_sickr_train(dirpath: str) -> SemanticTextualSimilarityDataset:
     return {"train": load_data_sickr(os.path.join(dirpath, "SICK_train.txt"))}
 
 
-def load_sickr_dev(dirpath: str) -> Dict[str, List[Example]]:
+def load_sickr_dev(dirpath: str) -> SemanticTextualSimilarityDataset:
     return {"dev": load_data_sickr(os.path.join(dirpath, "SICK_trial.txt"))}
 
 
-def load_sickr_test(dirpath: str) -> Dict[str, List[Example]]:
+def load_sickr_test(dirpath: str) -> SemanticTextualSimilarityDataset:
     filepath = os.path.join(dirpath, "SICK_test_annotated.txt")
     return {"test": load_data_sickr(filepath)}

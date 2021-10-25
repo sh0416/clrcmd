@@ -4,9 +4,8 @@ import random
 
 import numpy as np
 from datasets import load_dataset
-from transformers import RobertaTokenizerFast
-
 from sentence_benchmark.tokenizer import RobertaTokenizerDropout
+from transformers import RobertaTokenizerFast
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument(

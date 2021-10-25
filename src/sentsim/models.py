@@ -6,12 +6,11 @@ import torch
 import torch.distributed as dist
 import torch.nn as nn
 import torch.nn.functional as F
+from simcse.config import ModelArguments
+from simcse.utils import masked_mean
 from torch import Tensor
 from transformers import AutoConfig, AutoModel
 from transformers.utils.dummy_pt_objects import PreTrainedModel
-
-from simcse.config import ModelArguments
-from simcse.utils import masked_mean
 
 logger = logging.getLogger(__name__)
 

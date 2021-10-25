@@ -1,7 +1,7 @@
 import argparse
 import logging
 
-from sentence_benchmark.data import (
+from sentsim.data.sts import (
     load_sickr_dev,
     load_sickr_test,
     load_sickr_train,
@@ -15,7 +15,10 @@ from sentence_benchmark.data import (
     load_stsb_test,
     load_stsb_train,
 )
-from sentence_benchmark.evaluate import evaluate_sts
+from sentsim.evaluator import SemanticTextualSimilarityEvaluator
+from sentsim.models.bow import BagOfWord
+from sentsim.models.random import RandomSimilarityModel
+from sentsim.models.sbert import SentenceBert
 
 logger = logging.getLogger(__name__)
 
@@ -29,11 +32,18 @@ parser.add_argument(
     help="method",
 )
 parser.add_argument(
+    "--word2vec-path",
+    type=str,
+    default="/nas/home/sh0416/data/fasttext/crawl-300d-2M.vec",
+    help="Filepath for pre-trained word vector",
+)
+parser.add_argument(
     "--pooler_type", type=str, choices=["cls", "avg"], default="cls", help="pooler type"
 )
 parser.add_argument(
-    "--checkpoint",
+    "--model-name-or-path",
     type=str,
+    default="sentence-transformers/nli-roberta-base-v2",
     help="checkpoint",
 )
 parser.add_argument(
@@ -107,11 +117,14 @@ if __name__ == "__main__":
 
     # Load method
     if args.method == "random":
-        from sentence_benchmark.models.random import batcher, prepare
+        model = RandomSimilarityModel()
     elif args.method == "bow":
-        from sentence_benchmark.models.bow import batcher, prepare
+        corpus = [
+            s for examples in dataset.values() for s_pair, _ in examples for s in s_pair
+        ]
+        model = BagOfWord(args.word2vec_path, corpus)
     elif args.method == "sbert":
-        from sentence_benchmark.models.sbert import batcher, prepare
+        model = SentenceBert(args.model_name_or_path, args.pooler_type)
     elif args.method == "simcse":
         from sentence_benchmark.models.simcse import batcher, prepare
     elif args.method == "rwmdcse" or args.method == "simcse-ours":
@@ -120,18 +133,8 @@ if __name__ == "__main__":
         raise AttributeError()
 
     # Evaluate
-    result = evaluate_sts(dataset, vars(args), prepare, batcher)
+    evaluator = SemanticTextualSimilarityEvaluator(args.batch_size)
+    result = evaluator.evaluate(model, dataset)
     logger.info("** Result **")
-    for source, source_result in result.items():
-        if source == "all":
-            continue
-        logger.info(f"  source: {source}")
-        logger.info(f"    pearson: {source_result['pearson'][0]:.4f}")
-        logger.info(f"    spearman: {source_result['spearman'][0]:.4f}")
-    logger.info("  all")
-    logger.info(f"    pearson  (all): {result['all']['pearson']['all']:.4f}")
-    logger.info(f"    spearman (all): {result['all']['spearman']['all']:.4f}")
-    logger.info(f"    pearson  (average): {result['all']['pearson']['mean']:.4f}")
-    logger.info(f"    spearman (average): {result['all']['spearman']['mean']:.4f}")
-    logger.info(f"    pearson  (waverage): {result['all']['pearson']['wmean']:.4f}")
-    logger.info(f"    spearman (waverage): {result['all']['spearman']['wmean']:.4f}")
+    for metric_name, metric_value in result.items():
+        logger.info(f"{metric_name = }, {metric_value = }")

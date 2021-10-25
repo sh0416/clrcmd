@@ -2,7 +2,6 @@ import os
 
 import pytest
 import torch
-
 from simcse.eval.ists import (
     convert_alignment_granularity,
     extract_alignment_from_heatmap,
