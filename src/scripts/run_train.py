@@ -68,7 +68,7 @@ def train(args):
         train_dataset = SNLIMNLIDataset(data_args.train_file, tokenizer)
     elif data_args.data_type == "wiki":
         train_dataset = WikiIdentityDataset(data_args.train_file, tokenizer)
-    elif data_args.method == "simcse-sup":
+    elif data_args.data_type == "simcse-nli":
         train_dataset = NLIDataset(data_args.train_file, tokenizer)
     else:
         raise ValueError

@@ -55,33 +55,54 @@ ModelInput = Dict[str, Tensor]
 
 
 class LastHiddenSentenceRepresentationModel(nn.Module):
-    def __init__(self, model: PreTrainedModel, hidden_size: int):
+    def __init__(self, model: PreTrainedModel, head: bool = False):
         super().__init__()
         self.model = model
+        self.head = head
+        if head:
+            hidden_size = self.model.config.hidden_size
+            self.linear = nn.Linear(hidden_size, hidden_size)
 
     def forward(self, inputs: ModelInput) -> Tuple[Tensor, Tensor]:
         # Return representation with mask
         mask = inputs["attention_mask"].bool()
-        return self.model(**inputs).last_hidden_state, mask
+        outputs = self.model(**inputs).last_hidden_state
+        if self.head:
+            outputs = self.linear(outputs)
+        return outputs, mask
 
 
 class CLSPoolingSentenceRepresentationModel(nn.Module):
-    def __init__(self, model: PreTrainedModel):
+    def __init__(self, model: PreTrainedModel, head: bool = False):
         super().__init__()
         self.model = model
+        self.head = head
+        if head:
+            hidden_size = self.model.config.hidden_size
+            self.linear = nn.Linear(hidden_size, hidden_size)
 
     def forward(self, inputs: ModelInput) -> Tensor:
-        return self.model(**inputs).last_hidden_state[:, 0]
+        outputs = self.model(**inputs).last_hidden_state[:, 0]
+        if self.head:
+            outputs = self.linear(outputs)
+        return outputs
 
 
 class AveragePoolingSentenceRepresentationModel(nn.Module):
-    def __init__(self, model: PreTrainedModel):
+    def __init__(self, model: PreTrainedModel, head: bool = False):
         super().__init__()
         self.model = model
+        self.head = head
+        if head:
+            hidden_size = self.model.config.hidden_size
+            self.linear = nn.Linear(hidden_size, hidden_size)
 
     def forward(self, inputs: ModelInput) -> Tensor:
-        mask = inputs["attention_mask"]
-        return masked_mean(self.model(**inputs).last_hidden_state, mask, dim=1)
+        mask = inputs["attention_mask"].unsqueeze(2)
+        outputs = masked_mean(self.model(**inputs).last_hidden_state, mask, dim=1)
+        if self.head:
+            outputs = self.linear(outputs)
+        return outputs
 
 
 class SentenceBertLearningModule(nn.Module):
@@ -93,10 +114,10 @@ class SentenceBertLearningModule(nn.Module):
 
     def forward(
         self, inputs1: ModelInput, inputs2: ModelInput, labels: Tensor
-    ) -> Tensor:
+    ) -> Tuple[Tensor]:
         x1, x2 = self.representation_model(inputs1), self.representation_model(inputs2)
         pred = self.head(torch.cat((x1, x2, torch.abs(x1 - x2)), dim=2))
-        return self.criterion(pred, labels)
+        return (self.criterion(pred, labels),)
 
 
 class SentenceSimilarityModel(nn.Module):
@@ -118,6 +139,62 @@ class SentenceSimilarityModel(nn.Module):
     def compute_heatmap(self, inputs1: ModelInput, inputs2: ModelInput) -> Tensor:
         x1, x2 = self.representation_model(inputs1), self.representation_model(inputs2)
         return self.similarity.compute_heatmap(x1, x2)
+
+
+class SimcseLearningModule(nn.Module):
+    def __init__(self, model: nn.Module, pairwise_similarity: nn.Module, temp: float):
+        super().__init__()
+        self.model = model
+        self.pairwise_similarity = pairwise_similarity
+        self.temp = temp
+        self.criterion = nn.CrossEntropyLoss()
+
+    def forward(
+        self,
+        inputs1: ModelInput,
+        inputs2: ModelInput,
+        inputs_neg: Optional[ModelInput] = None,
+    ) -> Tuple[Tensor]:
+        if inputs_neg is not None:
+            inputs = {
+                k: torch.cat((inputs1[k], inputs2[k], inputs_neg[k]), dim=0)
+                for k in inputs1.keys()
+            }
+        else:
+            inputs = {
+                k: torch.cat((inputs1[k], inputs2[k]), dim=0) for k in inputs1.keys()
+            }
+        x = self.model.representation_model(inputs)
+        if inputs_neg is not None:
+            sections = (
+                inputs1["input_ids"].shape[0],
+                inputs2["input_ids"].shape[0],
+                inputs_neg["input_ids"].shape[0],
+            )
+            # NOTE: Really bad.. how to fix it?
+            if type(x) == Tensor:
+                x1, x2, x_neg = torch.split(x, sections)
+            else:
+                x1, x2, x_neg = list(
+                    zip(torch.split(x[0], sections), torch.split(x[1], sections))
+                )
+        else:
+            sections = inputs1["input_ids"].shape[0], inputs2["input_ids"].shape[0]
+            # NOTE: Really bad.. how to fix it?
+            if type(x) == Tensor:
+                x1, x2 = torch.split(x, sections)
+            else:
+                x1, x2 = list(
+                    zip(torch.split(x[0], sections), torch.split(x[1], sections))
+                )
+        sim = self.pairwise_similarity(x1, x2)
+        if inputs_neg is not None:
+            sim_neg = self.model.similarity(x1, x_neg)
+            sim = torch.cat((sim, sim_neg.unsqueeze(1)), dim=1)
+        sim = sim / self.temp
+        # (batch_size, batch_size)
+        labels = torch.arange(sim.shape[0], dtype=torch.long, device=sim.device)
+        return (self.criterion(sim, labels),)
 
 
 def compute_heatmap(x1: Tensor, x2: Tensor) -> Tensor:
@@ -240,66 +317,7 @@ class PairwiseCosineSimilarity(nn.Module):
         return F.cosine_similarity(x1.unsqueeze(1), x2.unsqueeze(0), dim=-1)
 
 
-class InBatchContrastiveLearningModule(nn.Module):
-    def __init__(
-        self,
-        model: SentenceSimilarityModel,
-        pairwise_similarity: nn.Module,
-        temp: float,
-    ):
-        super().__init__()
-        self.model = model
-        self.pairwise_similarity = pairwise_similarity
-        self.temp = temp
-
-    def forward(
-        self,
-        inputs1: ModelInput,
-        inputs2: ModelInput,
-        inputs_neg: Optional[ModelInput] = None,
-    ) -> Tuple[Tensor]:
-        if inputs_neg is not None:
-            inputs = {
-                k: torch.cat((inputs1[k], inputs2[k], inputs_neg[k]), dim=0)
-                for k in inputs1.keys()
-            }
-        else:
-            inputs = {
-                k: torch.cat((inputs1[k], inputs2[k]), dim=0) for k in inputs1.keys()
-            }
-        x = self.model.representation_model(inputs)
-        if inputs_neg is not None:
-            sections = (
-                inputs1["input_ids"].shape[0],
-                inputs2["input_ids"].shape[0],
-                inputs_neg["input_ids"].shape[0],
-            )
-            x1, x2, x_neg = list(
-                zip(torch.split(x[0], sections), torch.split(x[1], sections))
-            )
-        else:
-            sections = inputs1["input_ids"].shape[0], inputs2["input_ids"].shape[0]
-            x1, x2 = list(zip(torch.split(x[0], sections), torch.split(x[1], sections)))
-        # DDP: Gather all embeddings if using distributed training
-        if dist.is_initialized() and self.training:
-            x1 = dist_all_gather(x1[0]), dist_all_gather(x1[1])
-            x2 = dist_all_gather(x2[0]), dist_all_gather(x2[1])
-            if x_neg is not None:
-                x_neg = dist_all_gather(x_neg[0]), dist_all_gather(x_neg[1])
-        sim = self.pairwise_similarity(x1, x2)
-        if inputs_neg is not None:
-            sim_neg = self.model.similarity(x1, x_neg)
-            sim = torch.cat((sim, sim_neg.unsqueeze(1)), dim=1)
-        sim = sim / self.temp
-        # (batch_size, batch_size)
-        labels = torch.arange(sim.shape[0], dtype=torch.long, device=sim.device)
-        loss = F.cross_entropy(sim, labels)
-        return (loss,)
-
-
-def create_contrastive_learning(
-    model_args: ModelArguments,
-) -> InBatchContrastiveLearningModule:
+def create_contrastive_learning(model_args: ModelArguments) -> nn.Module:
     config = AutoConfig.from_pretrained(
         model_args.model_name_or_path, output_hidden_states=True, **asdict(model_args)
     )
@@ -313,24 +331,19 @@ def create_contrastive_learning(
         model = AveragePoolingSentenceRepresentationModel(pretrained_model)
         model = SentenceBertLearningModule(model, config.hidden_size)
     elif model_args.loss_type == "simcse-cls":
-        model = CLSPoolingSentenceRepresentationModel(pretrained_model)
-        model = SimcseLearningModule(model)
+        model = CLSPoolingSentenceRepresentationModel(pretrained_model, head=True)
+        model = SentenceSimilarityModel(model, nn.CosineSimilarity(dim=-1))
+        model = SimcseLearningModule(model, PairwiseCosineSimilarity(), model_args.temp)
     elif model_args.loss_type == "simcse-avg":
-        model = AveragePoolingSentenceRepresentationModel(pretrained_model)
-        model = SimcseLearningModule(model)
+        model = AveragePoolingSentenceRepresentationModel(pretrained_model, head=True)
+        model = SentenceSimilarityModel(model, nn.CosineSimilarity(dim=-1))
+        model = SimcseLearningModule(model, PairwiseCosineSimilarity(), model_args.temp)
     elif model_args.loss_type == "rwmdcse":
-        model = LastHiddenSentenceRepresentationModel(pretrained_model)
-        model = RwmdcseLearningModule(model)
+        model = LastHiddenSentenceRepresentationModel(pretrained_model, head=True)
+        model = SentenceSimilarityModel(model, RelaxedWordMoverSimilarity())
+        model = SimcseLearningModule(
+            model, PairwiseRelaxedWordMoverSimilarity(), model_args.temp
+        )
     else:
         raise AttributeError()
     return model
-    if model_args.loss_rwmd:
-        representation_model = LastHiddenSentenceRepresentationModel(pretrained_model)
-        similarity = RelaxedWordMoverSimilarity()
-        pairwise_similarity = PairwiseRelaxedWordMoverSimilarity()
-    else:
-        representation_model = CLSPoolingSentenceRepresentationModel(pretrained_model)
-        similarity = nn.CosineSimilarity(dim=-1)
-        pairwise_similarity = PairwiseCosineSimilarity()
-    model = SentenceSimilarityModel(representation_model, similarity)
-    return InBatchContrastiveLearningModule(model, pairwise_similarity, model_args.temp)
