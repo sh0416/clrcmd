@@ -5,7 +5,7 @@ from typing import List, Optional, Tuple, TypedDict
 
 import numpy as np
 import torch
-from simcse.models import ModelInput, SentenceSimilarityModel
+from sentsim.models.models import ModelInput, SentenceSimilarityModel
 from tokenizations import get_alignments
 
 logger = logging.getLogger(__name__)
@@ -110,10 +110,10 @@ def load_instances(
     sent1_chunk = [pattern.findall(x) for x in sent1_chunk]
     sent2_chunk = [pattern.findall(x) for x in sent2_chunk]
     assert len(sent1) == len(sent2) == len(sent1_chunk) == len(sent2_chunk)
-    for idx, (s1, s1_chunk) in enumerate(zip(sent1, sent1_chunk)):
-        assert s1 == " ".join(s1_chunk), idx
-    for idx, (s2, s2_chunk) in enumerate(zip(sent2, sent2_chunk)):
-        assert s2 == " ".join(s2_chunk), idx
+    for idx, (s1, s1_chunk) in enumerate(zip(sent1, sent1_chunk), start=1):
+        assert s1 == " ".join(s1_chunk), f"{idx = } {s1 = } {s1_chunk = }"
+    for idx, (s2, s2_chunk) in enumerate(zip(sent2, sent2_chunk), start=1):
+        assert s2 == " ".join(s2_chunk), f"{idx = } {s2 = } {s2_chunk = }"
     return [
         {
             "id": idx,

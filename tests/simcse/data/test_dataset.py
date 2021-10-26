@@ -2,7 +2,7 @@ import random
 from functools import partial
 
 import pytest
-from simcse.data.dataset import NLIDataset, WikiIdentityDataset, WikiRepetitionDataset
+from sentsim.data.dataset import NLIDataset, WikiIdentityDataset, WikiRepetitionDataset
 from transformers import AutoTokenizer
 
 

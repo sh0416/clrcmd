@@ -30,7 +30,7 @@ class CLTrainer(Trainer):
         if all:
             metrics = {}
             # STS12
-            dataset = load_sts12(f"{self.args.eval_file}/STS12-en-test")
+            dataset = load_sts12(f"{self.args.eval_file}/STS/STS12-en-test")
             metrics["STS12"] = evaluator.evaluate(model, dataset)
             # STS13
             dataset = load_sts13(f"{self.args.eval_file}/STS/STS13-en-test")

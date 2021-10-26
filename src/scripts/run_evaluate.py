@@ -1,5 +1,10 @@
 import argparse
 import logging
+import json
+from transformers.models.auto.tokenization_auto import AutoTokenizer
+
+import torch
+from transformers.utils.dummy_pt_objects import AutoModel
 
 from sentsim.data.sts import (
     load_sickr_dev,
@@ -18,7 +23,9 @@ from sentsim.data.sts import (
 from sentsim.evaluator import SemanticTextualSimilarityEvaluator
 from sentsim.models.bow import BagOfWord
 from sentsim.models.random import RandomSimilarityModel
-from sentsim.models.sbert import SentenceBert
+from sentsim.models.sbert import PytorchSemanticTextualSimilarityModel
+from sentsim.models.models import create_contrastive_learning
+from sentsim.config import ModelArguments
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +35,7 @@ parser.add_argument(
     "--method",
     type=str,
     default="random",
-    choices=["random", "bow", "sbert", "simcse", "rwmdcse", "simcse-ours"],
+    choices=["random", "bow", "sbert"],
     help="method",
 )
 parser.add_argument(
@@ -37,15 +44,14 @@ parser.add_argument(
     default="/nas/home/sh0416/data/fasttext/crawl-300d-2M.vec",
     help="Filepath for pre-trained word vector",
 )
-parser.add_argument(
-    "--pooler_type", type=str, choices=["cls", "avg"], default="cls", help="pooler type"
-)
+parser.add_argument("--model-args-path", type=str)
 parser.add_argument(
     "--model-name-or-path",
     type=str,
     default="sentence-transformers/nli-roberta-base-v2",
     help="checkpoint",
 )
+parser.add_argument("--checkpoint", type=str)
 parser.add_argument(
     "--dataset",
     type=str,
@@ -124,13 +130,14 @@ if __name__ == "__main__":
         ]
         model = BagOfWord(args.word2vec_path, corpus)
     elif args.method == "sbert":
-        model = SentenceBert(args.model_name_or_path, args.pooler_type)
-    elif args.method == "simcse":
-        from sentence_benchmark.models.simcse import batcher, prepare
-    elif args.method == "rwmdcse" or args.method == "simcse-ours":
-        from sentence_benchmark.models.rwmdcse import batcher, prepare
+        tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path)
+        with open(args.model_args_path) as f:
+            model_args = ModelArguments(**json.load(f))
+        model = create_contrastive_learning(model_args)
+        model.load_state_dict(torch.load(args.checkpoint))
+        model = PytorchSemanticTextualSimilarityModel(model.model, tokenizer)
     else:
-        raise AttributeError()
+        raise ValueError
 
     # Evaluate
     evaluator = SemanticTextualSimilarityEvaluator(args.batch_size)
