@@ -65,11 +65,10 @@ class LastHiddenSentenceRepresentationModel(nn.Module):
 
     def forward(self, inputs: ModelInput) -> Tuple[Tensor, Tensor]:
         # Return representation with mask
-        mask = inputs["attention_mask"].bool()
         outputs = self.model(**inputs).last_hidden_state
         if self.head:
             outputs = self.linear(outputs)
-        return outputs, mask
+        return outputs, inputs["attention_mask"]
 
 
 class CLSPoolingSentenceRepresentationModel(nn.Module):
@@ -228,19 +227,11 @@ class RelaxedWordMoverSimilarity(nn.Module):
         :return: (batch)
         """
         (x1, mask1), (x2, mask2) = x1, x2
-        with torch.no_grad():
-            indice1, indice2 = compute_alignment(x1, x2, mask1, mask2)
-        # Construct computational graph
-        sim1 = self.cos(
-            x1, torch.gather(x2, dim=1, index=indice1.unsqueeze(-1).expand_as(x1))
-        )
-        # (batch, seq_len1)
-        sim2 = self.cos(
-            torch.gather(x1, dim=1, index=indice2.unsqueeze(-1).expand_as(x2)), x2
-        )
-        # (batch, seq_len2)
-        sim1 = masked_mean(sim1, mask1.bool(), dim=-1)
-        sim2 = masked_mean(sim2, mask2.bool(), dim=-1)
+        sim = self.cos(x1.unsqueeze(-2), x2.unsqueeze(-3))
+        # (batch, seq_len1, seq_len2)
+        sim1, sim2 = torch.max(sim, dim=-1)[0], torch.max(sim, dim=-2)[0]
+        sim1 = masked_mean(sim1, mask1, dim=-1)
+        sim2 = masked_mean(sim2, mask2, dim=-1)
         sim = (sim1 + sim2) / 2
         return sim
 
@@ -304,10 +295,10 @@ class PairwiseRelaxedWordMoverSimilarity(nn.Module):
             x2,  # (1, batch2, seq_len2, hidden_dim)
         )
         # (batch1, batch2, seq_len2)
-        batchwise_mask1 = mask1[:, None, :].expand_as(sim1)
-        batchwise_mask2 = mask2[None, :, :].expand_as(sim2)
-        sim1 = masked_mean(sim1, batchwise_mask1.bool(), dim=-1)
-        sim2 = masked_mean(sim2, batchwise_mask2.bool(), dim=-1)
+        batchwise_mask1 = mask1.unsqueeze(1).expand_as(sim1)
+        batchwise_mask2 = mask2.unsqueeze(0).expand_as(sim2)
+        sim1 = masked_mean(sim1, batchwise_mask1, dim=-1)
+        sim2 = masked_mean(sim2, batchwise_mask2, dim=-1)
         sim = (sim1 + sim2) / 2
         return sim
 
@@ -315,6 +306,33 @@ class PairwiseRelaxedWordMoverSimilarity(nn.Module):
 class PairwiseCosineSimilarity(nn.Module):
     def forward(self, x1: Tensor, x2: Tensor) -> Tensor:
         return F.cosine_similarity(x1.unsqueeze(1), x2.unsqueeze(0), dim=-1)
+
+
+def create_similarity_model(model_args: ModelArguments) -> nn.Module:
+    config = AutoConfig.from_pretrained(
+        model_args.model_name_or_path, output_hidden_states=True, **asdict(model_args)
+    )
+    pretrained_model = AutoModel.from_pretrained(
+        model_args.model_name_or_path, config=config
+    )
+    if model_args.loss_type == "sbert-cls":
+        model = CLSPoolingSentenceRepresentationModel(pretrained_model)
+        model = SentenceSimilarityModel(model, nn.CosineSimilarity(dim=-1))
+    elif model_args.loss_type == "sbert-avg":
+        model = AveragePoolingSentenceRepresentationModel(pretrained_model)
+        model = SentenceSimilarityModel(model, nn.CosineSimilarity(dim=-1))
+    elif model_args.loss_type == "simcse-cls":
+        model = CLSPoolingSentenceRepresentationModel(pretrained_model, head=True)
+        model = SentenceSimilarityModel(model, nn.CosineSimilarity(dim=-1))
+    elif model_args.loss_type == "simcse-avg":
+        model = AveragePoolingSentenceRepresentationModel(pretrained_model, head=True)
+        model = SentenceSimilarityModel(model, nn.CosineSimilarity(dim=-1))
+    elif model_args.loss_type == "rwmdcse":
+        model = LastHiddenSentenceRepresentationModel(pretrained_model, head=True)
+        model = SentenceSimilarityModel(model, RelaxedWordMoverSimilarity())
+    else:
+        raise AttributeError()
+    return model
 
 
 def create_contrastive_learning(model_args: ModelArguments) -> nn.Module:

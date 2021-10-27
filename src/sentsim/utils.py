@@ -31,4 +31,4 @@ def masked_mean(x: Tensor, mask: Tensor, dim: int) -> Tensor:
     :param dim:
     :return: Result of mean
     """
-    return masked_sum(x, mask, dim) / torch.sum(mask.float(), dim)
+    return masked_sum(x, mask, dim) / torch.count_nonzero(mask, dim=dim)

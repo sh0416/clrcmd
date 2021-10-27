@@ -102,14 +102,14 @@ def train(args):
         with open(output_eval_file, "w") as f:
             logger.info("***** Eval results *****")
             f.write(
-                f"{results['STS12']['all']['spearman']['all']:.4f},"
-                f"{results['STS13']['all']['spearman']['all']:.4f},"
-                f"{results['STS14']['all']['spearman']['all']:.4f},"
-                f"{results['STS15']['all']['spearman']['all']:.4f},"
-                f"{results['STS16']['all']['spearman']['all']:.4f},"
-                f"{results['STSB-test']['all']['spearman']['all']:.4f},"
-                f"{results['SICKR-test']['all']['spearman']['all']:.4f},"
-                f"{results['STSB-dev']['all']['spearman']['all']:.4f}"
+                f"{results['STS12']['all_spearman_all']:.4f},"
+                f"{results['STS13']['all_spearman_all']:.4f},"
+                f"{results['STS14']['all_spearman_all']:.4f},"
+                f"{results['STS15']['all_spearman_all']:.4f},"
+                f"{results['STS16']['all_spearman_all']:.4f},"
+                f"{results['STSB-test']['all_spearman_all']:.4f},"
+                f"{results['SICKR-test']['all_spearman_all']:.4f},"
+                f"{results['STSB-dev']['all_spearman_all']:.4f}"
             )
     else:
         results = None
