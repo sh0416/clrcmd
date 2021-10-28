@@ -20,7 +20,7 @@ def masked_sum(x: Tensor, mask: Tensor, dim: int) -> Tensor:
     :param dim:
     :return: Result of sum
     """
-    return torch.sum(x * mask.float(), dim=dim)
+    return torch.sum(torch.where(mask, x, torch.zeros_like(x)), dim=dim)
 
 
 def masked_mean(x: Tensor, mask: Tensor, dim: int) -> Tensor:

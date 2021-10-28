@@ -68,7 +68,7 @@ class LastHiddenSentenceRepresentationModel(nn.Module):
         outputs = self.model(**inputs).last_hidden_state
         if self.head:
             outputs = self.linear(outputs)
-        return outputs, inputs["attention_mask"]
+        return outputs, inputs["attention_mask"].bool()
 
 
 class CLSPoolingSentenceRepresentationModel(nn.Module):
@@ -207,8 +207,8 @@ def compute_alignment(
     sim = compute_heatmap(x1, x2)
     # Set similarity of invalid position to negative inf
     inf = torch.tensor(float("-inf"), device=sim.device)
-    sim = torch.where(mask1.unsqueeze(-1).bool(), sim, inf)
-    sim = torch.where(mask2.unsqueeze(-2).bool(), sim, inf)
+    sim = torch.where(mask1.unsqueeze(-1), sim, inf)
+    sim = torch.where(mask2.unsqueeze(-2), sim, inf)
     indice1 = torch.max(sim, dim=-1)[1]
     indice2 = torch.max(sim, dim=-2)[1]
     return indice1, indice2
@@ -227,11 +227,14 @@ class RelaxedWordMoverSimilarity(nn.Module):
         :return: (batch)
         """
         (x1, mask1), (x2, mask2) = x1, x2
-        sim = self.cos(x1.unsqueeze(-2), x2.unsqueeze(-3))
+        sim = self.cos(x1[:, :, None, :], x2[:, None, :, :])
+        inf = torch.tensor(float("-inf"), device=sim.device)
+        sim = torch.where(mask1.unsqueeze(-1), sim, inf)
+        sim = torch.where(mask2.unsqueeze(-2), sim, inf)
         # (batch, seq_len1, seq_len2)
-        sim1, sim2 = torch.max(sim, dim=-1)[0], torch.max(sim, dim=-2)[0]
-        sim1 = masked_mean(sim1, mask1, dim=-1)
-        sim2 = masked_mean(sim2, mask2, dim=-1)
+        sim1, sim2 = torch.max(sim, dim=2)[0], torch.max(sim, dim=1)[0]
+        sim1 = masked_mean(sim1, mask1, dim=1)
+        sim2 = masked_mean(sim2, mask2, dim=1)
         sim = (sim1 + sim2) / 2
         return sim
 
@@ -277,6 +280,7 @@ class PairwiseRelaxedWordMoverSimilarity(nn.Module):
                     indice2[i : i + 8, j : j + 8, :] = _indice2
         # Construct computational graph for RWMD
         x1, x2 = x1.unsqueeze(1), x2.unsqueeze(0)
+        # sim = self.cos(x1[:, None, :, None], x2[None, :, None, :])
         sim1 = self.cos(
             x1,  # (batch1, 1, seq_len1, hidden_dim)
             torch.gather(
@@ -294,6 +298,7 @@ class PairwiseRelaxedWordMoverSimilarity(nn.Module):
             ),  # (batch1, batch2, seq_len2, hidden_dim)
             x2,  # (1, batch2, seq_len2, hidden_dim)
         )
+        # sim1, sim2 = torch.max(sim, dim=2)[0], torch.max(sim, dim=3)[0]
         # (batch1, batch2, seq_len2)
         batchwise_mask1 = mask1.unsqueeze(1).expand_as(sim1)
         batchwise_mask2 = mask2.unsqueeze(0).expand_as(sim2)
