@@ -70,6 +70,9 @@ class LastHiddenSentenceRepresentationModel(nn.Module):
             outputs = self.linear(outputs)
         return outputs, inputs["attention_mask"].bool()
 
+    def compute_last_hidden(self, inputs: ModelInput) -> Tuple[Tensor, Tensor]:
+        return self.forward(inputs)
+
 
 class CLSPoolingSentenceRepresentationModel(nn.Module):
     def __init__(self, model: PreTrainedModel, head: bool = False):
@@ -86,6 +89,9 @@ class CLSPoolingSentenceRepresentationModel(nn.Module):
             outputs = self.linear(outputs)
         return outputs
 
+    def compute_last_hidden(self, inputs: ModelInput) -> Tuple[Tensor, Tensor]:
+        raise ValueError("No interpretable resource for cls pooling")
+
 
 class AveragePoolingSentenceRepresentationModel(nn.Module):
     def __init__(self, model: PreTrainedModel, head: bool = False):
@@ -94,14 +100,20 @@ class AveragePoolingSentenceRepresentationModel(nn.Module):
         self.head = head
         if head:
             hidden_size = self.model.config.hidden_size
-            self.linear = nn.Linear(hidden_size, hidden_size)
+            self.linear = nn.Linear(hidden_size, hidden_size, bias=False)
 
     def forward(self, inputs: ModelInput) -> Tensor:
-        mask = inputs["attention_mask"].unsqueeze(2)
+        mask = inputs["attention_mask"].bool().unsqueeze(2)
         outputs = masked_mean(self.model(**inputs).last_hidden_state, mask, dim=1)
         if self.head:
             outputs = self.linear(outputs)
         return outputs
+
+    def compute_last_hidden(self, inputs: ModelInput) -> Tuple[Tensor, Tensor]:
+        outputs = self.model(**inputs).last_hidden_state
+        if self.head:
+            outputs = self.linear(outputs)
+        return outputs, inputs["attention_mask"].bool()
 
 
 class SentenceBertLearningModule(nn.Module):
@@ -136,7 +148,8 @@ class SentenceSimilarityModel(nn.Module):
         return self.similarity(x1, x2)
 
     def compute_heatmap(self, inputs1: ModelInput, inputs2: ModelInput) -> Tensor:
-        x1, x2 = self.representation_model(inputs1), self.representation_model(inputs2)
+        x1 = self.representation_model.compute_last_hidden(inputs1)
+        x2 = self.representation_model.compute_last_hidden(inputs2)
         return self.similarity.compute_heatmap(x1, x2)
 
 
@@ -167,29 +180,17 @@ class SimcseLearningModule(nn.Module):
         if inputs_neg is not None:
             sections = (
                 inputs1["input_ids"].shape[0],
-                inputs2["input_ids"].shape[0],
-                inputs_neg["input_ids"].shape[0],
+                inputs2["input_ids"].shape[0] + inputs_neg["input_ids"].shape[0],
             )
-            # NOTE: Really bad.. how to fix it?
-            if type(x) == Tensor:
-                x1, x2, x_neg = torch.split(x, sections)
-            else:
-                x1, x2, x_neg = list(
-                    zip(torch.split(x[0], sections), torch.split(x[1], sections))
-                )
         else:
             sections = inputs1["input_ids"].shape[0], inputs2["input_ids"].shape[0]
-            # NOTE: Really bad.. how to fix it?
-            if type(x) == Tensor:
-                x1, x2 = torch.split(x, sections)
-            else:
-                x1, x2 = list(
-                    zip(torch.split(x[0], sections), torch.split(x[1], sections))
-                )
+
+        # NOTE: Really bad.. how to fix it?
+        if type(x) == Tensor:
+            x1, x2 = torch.split(x, sections)
+        else:
+            x1, x2 = list(zip(torch.split(x[0], sections), torch.split(x[1], sections)))
         sim = self.pairwise_similarity(x1, x2)
-        if inputs_neg is not None:
-            sim_neg = self.model.similarity(x1, x_neg)
-            sim = torch.cat((sim, sim_neg.unsqueeze(1)), dim=1)
         sim = sim / self.temp
         # (batch_size, batch_size)
         labels = torch.arange(sim.shape[0], dtype=torch.long, device=sim.device)
@@ -197,7 +198,11 @@ class SimcseLearningModule(nn.Module):
 
 
 def compute_heatmap(x1: Tensor, x2: Tensor) -> Tensor:
-    # Compute indice that produces maximum similarity
+    """
+    :param x1: [..., seq_len1, hidden_dim]
+    :param x2: [..., seq_len2, hidden_dim]
+    :return: pairwise cosine similarity [..., seq_len1, seq_len2]
+    """
     return F.cosine_similarity(x1.unsqueeze(-2), x2.unsqueeze(-3), dim=-1)
 
 
@@ -280,7 +285,6 @@ class PairwiseRelaxedWordMoverSimilarity(nn.Module):
                     indice2[i : i + 8, j : j + 8, :] = _indice2
         # Construct computational graph for RWMD
         x1, x2 = x1.unsqueeze(1), x2.unsqueeze(0)
-        # sim = self.cos(x1[:, None, :, None], x2[None, :, None, :])
         sim1 = self.cos(
             x1,  # (batch1, 1, seq_len1, hidden_dim)
             torch.gather(
@@ -298,14 +302,22 @@ class PairwiseRelaxedWordMoverSimilarity(nn.Module):
             ),  # (batch1, batch2, seq_len2, hidden_dim)
             x2,  # (1, batch2, seq_len2, hidden_dim)
         )
-        # sim1, sim2 = torch.max(sim, dim=2)[0], torch.max(sim, dim=3)[0]
         # (batch1, batch2, seq_len2)
-        batchwise_mask1 = mask1.unsqueeze(1).expand_as(sim1)
-        batchwise_mask2 = mask2.unsqueeze(0).expand_as(sim2)
-        sim1 = masked_mean(sim1, batchwise_mask1, dim=-1)
-        sim2 = masked_mean(sim2, batchwise_mask2, dim=-1)
+        sim1 = masked_mean(sim1, mask1.unsqueeze(1).expand_as(sim1), dim=-1)
+        sim2 = masked_mean(sim2, mask2.unsqueeze(0).expand_as(sim2), dim=-1)
         sim = (sim1 + sim2) / 2
         return sim
+
+
+class CosineSimilarity(nn.Module):
+    def forward(self, x1: Tensor, x2: Tensor) -> Tensor:
+        return F.cosine_similarity(x1, x2, dim=-1)
+
+    def compute_heatmap(
+        self, x1: Tuple[Tensor, Tensor], x2: Tuple[Tensor, Tensor]
+    ) -> Tensor:
+        (x1, _), (x2, _) = x1, x2
+        return compute_heatmap(x1, x2)
 
 
 class PairwiseCosineSimilarity(nn.Module):
@@ -355,11 +367,11 @@ def create_contrastive_learning(model_args: ModelArguments) -> nn.Module:
         model = SentenceBertLearningModule(model, config.hidden_size)
     elif model_args.loss_type == "simcse-cls":
         model = CLSPoolingSentenceRepresentationModel(pretrained_model, head=True)
-        model = SentenceSimilarityModel(model, nn.CosineSimilarity(dim=-1))
+        model = SentenceSimilarityModel(model, CosineSimilarity())
         model = SimcseLearningModule(model, PairwiseCosineSimilarity(), model_args.temp)
     elif model_args.loss_type == "simcse-avg":
         model = AveragePoolingSentenceRepresentationModel(pretrained_model, head=True)
-        model = SentenceSimilarityModel(model, nn.CosineSimilarity(dim=-1))
+        model = SentenceSimilarityModel(model, CosineSimilarity())
         model = SimcseLearningModule(model, PairwiseCosineSimilarity(), model_args.temp)
     elif model_args.loss_type == "rwmdcse":
         model = LastHiddenSentenceRepresentationModel(pretrained_model, head=True)

@@ -2,6 +2,7 @@ import os
 
 import pytest
 import torch
+
 from sentsim.eval.ists import (
     convert_alignment_granularity,
     extract_alignment_from_heatmap,

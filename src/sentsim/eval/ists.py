@@ -5,8 +5,9 @@ from typing import List, Optional, Tuple, TypedDict
 
 import numpy as np
 import torch
-from sentsim.models.models import ModelInput, SentenceSimilarityModel
 from tokenizations import get_alignments
+
+from sentsim.models.models import ModelInput, SentenceSimilarityModel
 
 logger = logging.getLogger(__name__)
 
@@ -266,9 +267,9 @@ def pool_heatmap(
     heatmap_pooled2 = np.zeros((sent1_chunk_len, sent2_chunk_len))
     for i, x in enumerate(heatmap_splitted):
         for j, y in enumerate(x):
-            heatmap_pooled1[i, j] = np.mean(np.max(y, axis=1))
-            heatmap_pooled2[i, j] = np.mean(np.max(y, axis=0))
-    heatmap_pooled = np.maximum(heatmap_pooled1, heatmap_pooled2)
+            heatmap_pooled1[i, j] = np.max(np.max(y, axis=1))
+            heatmap_pooled2[i, j] = np.max(np.max(y, axis=0))
+    heatmap_pooled = (heatmap_pooled1 + heatmap_pooled2) / 2
     return heatmap_pooled
 
 

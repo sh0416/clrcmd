@@ -1,11 +1,12 @@
 import argparse
-import logging
 import json
-from transformers.models.auto.tokenization_auto import AutoTokenizer
+import logging
 
 import torch
+from transformers.models.auto.tokenization_auto import AutoTokenizer
 from transformers.utils.dummy_pt_objects import AutoModel
 
+from sentsim.config import ModelArguments
 from sentsim.data.sts import (
     load_sickr_dev,
     load_sickr_test,
@@ -22,10 +23,9 @@ from sentsim.data.sts import (
 )
 from sentsim.evaluator import SemanticTextualSimilarityEvaluator
 from sentsim.models.bow import BagOfWord
+from sentsim.models.models import create_contrastive_learning
 from sentsim.models.random import RandomSimilarityModel
 from sentsim.models.sbert import PytorchSemanticTextualSimilarityModel
-from sentsim.models.models import create_contrastive_learning
-from sentsim.config import ModelArguments
 
 logger = logging.getLogger(__name__)
 

@@ -2,8 +2,9 @@ import random
 from functools import partial
 
 import pytest
-from sentsim.data.dataset import NLIDataset, WikiIdentityDataset, WikiRepetitionDataset
 from transformers import AutoTokenizer
+
+from sentsim.data.dataset import NLIDataset, WikiIdentityDataset, WikiRepetitionDataset
 
 
 @pytest.fixture

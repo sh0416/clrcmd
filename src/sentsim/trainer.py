@@ -1,5 +1,8 @@
 from typing import Dict
 
+from transformers import Trainer
+from transformers.utils import logging
+
 from sentsim.data.sts import (
     load_sickr_test,
     load_sts12,
@@ -10,9 +13,6 @@ from sentsim.data.sts import (
     load_stsb_dev,
     load_stsb_test,
 )
-from transformers import Trainer
-from transformers.utils import logging
-
 from sentsim.evaluator import SemanticTextualSimilarityEvaluator
 from sentsim.models.sbert import PytorchSemanticTextualSimilarityModel
 
