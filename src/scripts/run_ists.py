@@ -35,7 +35,6 @@ parser.add_argument(
 parser.add_argument(
     "--ckpt-path",
     type=str,
-    required=True,
     help="checkpoint path",
 )
 
@@ -62,7 +61,8 @@ def main():
     prep_instances = preprocess_instances(tokenizer, instances)
 
     module = create_contrastive_learning(model_args)
-    module.load_state_dict(torch.load(args.ckpt_path))
+    if args.ckpt_path is not None:
+        module.load_state_dict(torch.load(args.ckpt_path))
     infered_instances = inference(module.model, prep_instances)
     save_infered_instances(
         infered_instances, os.path.join(args.ckpt_dir, f"{args.source}.wa")

@@ -267,24 +267,7 @@ def pool_heatmap(
     heatmap_pooled2 = np.zeros((sent1_chunk_len, sent2_chunk_len))
     for i, x in enumerate(heatmap_splitted):
         for j, y in enumerate(x):
-            heatmap_pooled1[i, j] = np.max(np.max(y, axis=1))
-            heatmap_pooled2[i, j] = np.max(np.max(y, axis=0))
+            heatmap_pooled1[i, j] = np.mean(np.mean(y, axis=1))
+            heatmap_pooled2[i, j] = np.mean(np.mean(y, axis=0))
     heatmap_pooled = (heatmap_pooled1 + heatmap_pooled2) / 2
     return heatmap_pooled
-
-
-def extract_alignment_from_heatmap(heatmap: np.ndarray) -> Alignment:
-    argmax = np.argmax(heatmap, axis=1).cpu().detach().numpy()
-    alignment = [([i], [x]) for i, x in enumerate(argmax)]
-    return alignment
-
-
-def convert_alignment_granularity(
-    alignment: Alignment, granularity: List[List[str]]
-) -> Alignment:
-    alignment_new = []
-    for tokens1, tokens2 in alignment:
-        tokens1 = list(set(granularity[t] for t in tokens1))
-        tokens2 = list(set(granularity[t] for t in tokens2))
-        alignment_new.append((tokens1, tokens2))
-    return alignment_new

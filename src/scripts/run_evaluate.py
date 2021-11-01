@@ -45,12 +45,6 @@ parser.add_argument(
     help="Filepath for pre-trained word vector",
 )
 parser.add_argument("--model-args-path", type=str)
-parser.add_argument(
-    "--model-name-or-path",
-    type=str,
-    default="sentence-transformers/nli-roberta-base-v2",
-    help="checkpoint",
-)
 parser.add_argument("--checkpoint", type=str)
 parser.add_argument(
     "--dataset",
@@ -130,11 +124,12 @@ if __name__ == "__main__":
         ]
         model = BagOfWord(args.word2vec_path, corpus)
     elif args.method == "sbert":
-        tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path)
         with open(args.model_args_path) as f:
             model_args = ModelArguments(**json.load(f))
+        tokenizer = AutoTokenizer.from_pretrained(model_args.model_name_or_path)
         model = create_contrastive_learning(model_args)
-        model.load_state_dict(torch.load(args.checkpoint))
+        if args.checkpoint is not None:
+            model.load_state_dict(torch.load(args.checkpoint))
         model = PytorchSemanticTextualSimilarityModel(model.model, tokenizer)
     else:
         raise ValueError

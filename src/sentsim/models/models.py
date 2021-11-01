@@ -100,7 +100,7 @@ class AveragePoolingSentenceRepresentationModel(nn.Module):
         self.head = head
         if head:
             hidden_size = self.model.config.hidden_size
-            self.linear = nn.Linear(hidden_size, hidden_size, bias=False)
+            self.linear = nn.Linear(hidden_size, hidden_size)
 
     def forward(self, inputs: ModelInput) -> Tensor:
         mask = inputs["attention_mask"].bool().unsqueeze(2)
@@ -197,19 +197,10 @@ class SimcseLearningModule(nn.Module):
         return (self.criterion(sim, labels),)
 
 
-def compute_heatmap(x1: Tensor, x2: Tensor) -> Tensor:
-    """
-    :param x1: [..., seq_len1, hidden_dim]
-    :param x2: [..., seq_len2, hidden_dim]
-    :return: pairwise cosine similarity [..., seq_len1, seq_len2]
-    """
-    return F.cosine_similarity(x1.unsqueeze(-2), x2.unsqueeze(-3), dim=-1)
-
-
 def compute_alignment(
     x1: Tensor, x2: Tensor, mask1: Tensor, mask2: Tensor
 ) -> Tuple[Tensor, Tensor]:
-    sim = compute_heatmap(x1, x2)
+    sim = F.cosine_similarity(x1.unsqueeze(-2), x2.unsqueeze(-3), dim=-1)
     # Set similarity of invalid position to negative inf
     inf = torch.tensor(float("-inf"), device=sim.device)
     sim = torch.where(mask1.unsqueeze(-1), sim, inf)
@@ -246,8 +237,16 @@ class RelaxedWordMoverSimilarity(nn.Module):
     def compute_heatmap(
         self, x1: Tuple[Tensor, Tensor], x2: Tuple[Tensor, Tensor]
     ) -> Tensor:
-        (x1, _), (x2, _) = x1, x2
-        return compute_heatmap(x1, x2)
+        (x1, mask1), (x2, mask2) = x1, x2
+        sim = self.cos(x1[:, :, None, :], x2[:, None, :, :])
+        inf = torch.tensor(float("-inf"), device=sim.device)
+        sim = torch.where(mask1.unsqueeze(-1), sim, inf)
+        sim = torch.where(mask2.unsqueeze(-2), sim, inf)
+        # (batch, seq_len1, seq_len2)
+        sim1 = torch.mul(sim, (sim == torch.max(sim, dim=2, keepdim=True)[0]).float())
+        sim2 = torch.mul(sim, (sim == torch.max(sim, dim=1, keepdim=True)[0]).float())
+        sim = (sim1 + sim2) / 2
+        return sim
 
 
 class PairwiseRelaxedWordMoverSimilarity(nn.Module):
@@ -310,14 +309,26 @@ class PairwiseRelaxedWordMoverSimilarity(nn.Module):
 
 
 class CosineSimilarity(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.cos = nn.CosineSimilarity(dim=-1)
+
     def forward(self, x1: Tensor, x2: Tensor) -> Tensor:
-        return F.cosine_similarity(x1, x2, dim=-1)
+        return self.cos(x1, x2)
 
     def compute_heatmap(
         self, x1: Tuple[Tensor, Tensor], x2: Tuple[Tensor, Tensor]
     ) -> Tensor:
-        (x1, _), (x2, _) = x1, x2
-        return compute_heatmap(x1, x2)
+        (x1, mask1), (x2, mask2) = x1, x2
+        s1 = masked_mean(x1, mask1.unsqueeze(2), dim=1)  # (batch, hidden)
+        s2 = masked_mean(x2, mask2.unsqueeze(2), dim=1)  # (batch, hidden)
+        sim = torch.einsum("bih,bjh->bij", x1, x2)
+        inf = torch.tensor(float("-inf"), device=sim.device)
+        sim = torch.where(mask1.unsqueeze(-1), sim, inf)
+        sim = torch.where(mask2.unsqueeze(-2), sim, inf)
+        sim = sim / torch.norm(s1, dim=1)[:, None, None]
+        sim = sim / torch.norm(s2, dim=1)[:, None, None]
+        return sim
 
 
 class PairwiseCosineSimilarity(nn.Module):
