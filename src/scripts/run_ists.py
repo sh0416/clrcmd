@@ -23,7 +23,7 @@ parser.add_argument(
     "--source",
     type=str,
     default="images",
-    choices=["images", "headlines"],
+    choices=["images", "headlines", "answers-students"],
     help="data source",
 )
 parser.add_argument(
@@ -64,9 +64,8 @@ def main():
     if args.ckpt_path is not None:
         module.load_state_dict(torch.load(args.ckpt_path))
     infered_instances = inference(module.model, prep_instances)
-    save_infered_instances(
-        infered_instances, os.path.join(args.ckpt_dir, f"{args.source}.wa")
-    )
+    outfile = f"{args.source}.wa" if args.ckpt_path else f"{args.source}.wa.untrained"
+    save_infered_instances(infered_instances, os.path.join(args.ckpt_dir, outfile))
 
 
 if __name__ == "__main__":

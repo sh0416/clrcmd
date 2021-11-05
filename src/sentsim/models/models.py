@@ -245,6 +245,8 @@ class RelaxedWordMoverSimilarity(nn.Module):
         # (batch, seq_len1, seq_len2)
         sim1 = torch.mul(sim, (sim == torch.max(sim, dim=2, keepdim=True)[0]).float())
         sim2 = torch.mul(sim, (sim == torch.max(sim, dim=1, keepdim=True)[0]).float())
+        sim1 = sim1 / torch.count_nonzero(mask1, dim=1)[:, None, None]
+        sim2 = sim2 / torch.count_nonzero(mask2, dim=1)[:, None, None]
         sim = (sim1 + sim2) / 2
         return sim
 
@@ -328,6 +330,8 @@ class CosineSimilarity(nn.Module):
         sim = torch.where(mask2.unsqueeze(-2), sim, inf)
         sim = sim / torch.norm(s1, dim=1)[:, None, None]
         sim = sim / torch.norm(s2, dim=1)[:, None, None]
+        sim = sim / torch.count_nonzero(mask1, dim=1)[:, None, None]
+        sim = sim / torch.count_nonzero(mask2, dim=1)[:, None, None]
         return sim
 
 

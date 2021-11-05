@@ -2,6 +2,7 @@ import logging
 import re
 import xml.etree.ElementTree as ET
 from typing import List, Optional, Tuple, TypedDict
+from bs4 import BeautifulSoup
 
 import numpy as np
 import torch
@@ -30,32 +31,29 @@ class Alignment(TypedDict):
 def load_alignment(filepath: str) -> List[Alignment]:
     data = []
     with open(filepath) as f:
-        s = "<data>" + f.read().replace("<==>", "==") + "</data>"
-        tree = ET.fromstring(s)
-        for sentence in tree:
-            example_id = int(sentence.attrib["id"])
-            sent1, sent2 = sentence.text.strip().splitlines()
-            assert sent1.startswith("// ") and sent2.startswith("// ")
-            sent1, sent2 = sent1[3:], sent2[3:]
-            pairs = []
-            for x in sentence.find("alignment").text.strip().splitlines():
-                pair_ids, type, score, comment = x.split(" // ")
-                sent1_word_ids, sent2_word_ids = pair_ids.split(" == ")
-                sent1_word_ids = [int(x) for x in sent1_word_ids.split()]
-                sent2_word_ids = [int(x) for x in sent2_word_ids.split()]
-                score = None if score == "NIL" else float(score)
-                pairs.append(
-                    {
-                        "sent1_word_ids": sent1_word_ids,
-                        "sent2_word_ids": sent2_word_ids,
-                        "type": type,
-                        "score": score,
-                        "comment": comment,
-                    }
-                )
-            data.append(
-                {"id": example_id, "sent1": sent1, "sent2": sent2, "pairs": pairs}
+        soup = BeautifulSoup(f.read())
+    for sentence in soup.find_all("sentence"):
+        example_id = int(sentence.get("id"))
+        sent1, sent2 = sentence.find(text=True).strip().splitlines()
+        assert sent1.startswith("// ") and sent2.startswith("// ")
+        sent1, sent2 = sent1[3:], sent2[3:]
+        pairs = []
+        for x in sentence.find("alignment").find(text=True).strip().splitlines():
+            pair_ids, type, score, comment = x.split(" // ")
+            sent1_word_ids, sent2_word_ids = pair_ids.split(" <==> ")
+            sent1_word_ids = [int(x) for x in sent1_word_ids.split()]
+            sent2_word_ids = [int(x) for x in sent2_word_ids.split()]
+            score = None if score == "NIL" else float(score)
+            pairs.append(
+                {
+                    "sent1_word_ids": sent1_word_ids,
+                    "sent2_word_ids": sent2_word_ids,
+                    "type": type,
+                    "score": score,
+                    "comment": comment,
+                }
             )
+        data.append({"id": example_id, "sent1": sent1, "sent2": sent2, "pairs": pairs})
     return data
 
 
