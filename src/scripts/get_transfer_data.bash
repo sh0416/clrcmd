@@ -6,7 +6,7 @@
 #
 
 # Download and tokenize data with MOSES tokenizer
-data_path=.data
+data_path=data
 preprocess_exec=./tokenizer.sed
 
 # Get MOSES

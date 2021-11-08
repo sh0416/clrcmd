@@ -1,18 +1,18 @@
 dup_rate_list=("0.08", "0.16" "0.24" "0.32" "0.40")
 seed_list=(3)
-learning_rate_list=("5e-5")
+learning_rate_list=("4e-5")
 layer_idx_list=(12)
 
 for seed in ${seed_list[@]}; do
 for learning_rate in ${learning_rate_list[@]}; do
 for layer_idx in ${layer_idx_list[@]}; do
-  CUDA_VISIBLE_DEVICES=1 PYTHONPATH=src python \
+  CUDA_VISIBLE_DEVICES=3 PYTHONPATH=src python \
     src/scripts/run_train.py \
     --model_name_or_path roberta-base \
-    --loss_type rwmdcse \
+    --loss_type simcse-avg \
 	  --data_type simcse-nli \
     --train_file /nas/home/sh0416/data/simcse/nli_for_simcse.csv \
-    --eval_file /nas/home/sh0416/data \
+    --eval_file /nas/home/sh0416/data/ \
     --dataloader_drop_last \
     --evaluation_strategy steps \
     --eval_steps 250 \
@@ -22,9 +22,10 @@ for layer_idx in ${layer_idx_list[@]}; do
     --temp 0.05 \
     --do_train \
     --do_eval \
+    --fp16 \
     --num_train_epochs 3 \
     --save_total_limit 1 \
-    --per_device_train_batch_size 128 \
+    --per_device_train_batch_size 256 \
     --per_device_eval_batch_size 128 \
     --gradient_accumulation_steps 1 \
     --learning_rate ${learning_rate} \
