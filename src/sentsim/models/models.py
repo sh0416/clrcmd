@@ -310,6 +310,32 @@ class PairwiseRelaxedWordMoverSimilarity(nn.Module):
         return sim
 
 
+class DensePairwiseRelaxedWordMoverSimilarity(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.cos = nn.CosineSimilarity(dim=-1)
+
+    def forward(self, x1: Tuple[Tensor, Tensor], x2: Tuple[Tensor, Tensor]) -> Tensor:
+        """Compute relaxed word mover similarity
+
+        :param x1: ((batch1, seq_len1, hidden_dim), (batch1, seq_len1)), torch.float
+        :param x2: ((batch2, seq_len2, hidden_dim), (batch2, seq_len2)), torch.float
+        :return: (batch1, batch2)
+        """
+        (x1, mask1), (x2, mask2) = x1, x2
+        sim = self.cos(x1[:, None, :, None, :], x2[None, :, None, :, :])
+        # (batch1, batch2, seq_len1, seq_len2)
+        inf = torch.tensor(float("-inf"), device=sim.device)
+        sim = torch.where(mask1[:, None, :, None], sim, inf)
+        sim = torch.where(mask2[None, :, None, :], sim, inf)
+        sim1, sim2 = torch.max(sim, dim=3)[0], torch.max(sim, dim=2)[0]
+        # (batch1, batch2, seq_len1), (batch1, batch2, seq_len2)
+        sim1 = masked_mean(sim1, mask1[:, None, :], dim=-1)
+        sim2 = masked_mean(sim2, mask2[None, :, :], dim=-1)
+        sim = (sim1 + sim2) / 2
+        return sim
+
+
 class CosineSimilarity(nn.Module):
     def __init__(self):
         super().__init__()
@@ -389,11 +415,13 @@ def create_contrastive_learning(model_args: ModelArguments) -> nn.Module:
         model = SentenceSimilarityModel(model, CosineSimilarity())
         model = SimcseLearningModule(model, PairwiseCosineSimilarity(), model_args.temp)
     elif model_args.loss_type == "rwmdcse":
+        if model_args.dense_rwmd:
+            pairwise_similarity = DensePairwiseRelaxedWordMoverSimilarity()
+        else:
+            pairwise_similarity = PairwiseRelaxedWordMoverSimilarity()
         model = LastHiddenSentenceRepresentationModel(pretrained_model, head=True)
         model = SentenceSimilarityModel(model, RelaxedWordMoverSimilarity())
-        model = SimcseLearningModule(
-            model, PairwiseRelaxedWordMoverSimilarity(), model_args.temp
-        )
+        model = SimcseLearningModule(model, pairwise_similarity, model_args.temp)
     else:
         raise AttributeError()
     return model

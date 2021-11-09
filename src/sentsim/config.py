@@ -47,6 +47,9 @@ class ModelArguments:
     layer_idx: Optional[int] = field(
         default=None, metadata={"help": "Index of final layer"}
     )
+    dense_rwmd: bool = field(
+        default=False, metadata={"help": "Whether to use dense rwmd"}
+    )
 
 
 @dataclass
