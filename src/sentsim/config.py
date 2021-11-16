@@ -98,7 +98,7 @@ class DataTrainingArguments:
 class OurTrainingArguments(TrainingArguments):
     eval_file: str = field(default=None, metadata={"help": "rootpath for STS"})
     output_dir: str = field(
-        default=f"/home/sh0416/checkpoints/{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+        default=f"checkpoints/{datetime.now().strftime('%Y%m%d_%H%M%S')}",
         metadata={
             "help": (
                 "The output directory where the model predictions and"
