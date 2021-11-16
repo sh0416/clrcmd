@@ -26,19 +26,6 @@ def plot_heatmap(s1, s2, data, score, fpath):
     ax.set_xticklabels(s2, rotation=90)
     ax.xaxis.set_ticks_position("top")
     im = ax.pcolormesh(data, edgecolors="k", linewidths=1, cmap=plt.get_cmap("Blues"))
-    """
-    inter = np.min(data) + (np.max(data) - np.min(data)) / 2
-    for y in range(data.shape[0]):
-        for x in range(data.shape[1]):
-            plt.text(
-                x + 0.5,
-                y + 0.5,
-                "%.2f" % data[y, x],
-                horizontalalignment="center",
-                verticalalignment="center",
-                c="w" if data[y, x] > inter else "k",
-            )
-    """
 
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("right", size="5%", pad=0.05)

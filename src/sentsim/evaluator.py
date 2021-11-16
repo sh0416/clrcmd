@@ -44,11 +44,3 @@ class SemanticTextualSimilarityEvaluator:
         results[f"all_pearson_mean"] = np.average(pearsons)
         results[f"all_spearman_mean"] = np.average(spearmans)
         return results
-
-
-class InterpretableSemanticTextualSimilarityEvaluator:
-    def __init__(self):
-        pass
-
-    def evaluate(self, model, dataset):
-        pass

@@ -3,16 +3,19 @@ seed_list=(3)
 learning_rate_list=("4e-5")
 layer_idx_list=(12)
 
+train_file="/path/to/nli_for_simcse.csv"
+eval_file="/path/to/eval/directory"
+
 for seed in ${seed_list[@]}; do
 for learning_rate in ${learning_rate_list[@]}; do
 for layer_idx in ${layer_idx_list[@]}; do
-  CUDA_VISIBLE_DEVICES=3 PYTHONPATH=src python \
+  CUDA_VISIBLE_DEVICES=2 PYTHONPATH=src python \
     src/scripts/run_train.py \
     --model_name_or_path roberta-base \
     --loss_type simcse-avg \
 	  --data_type simcse-nli \
-    --train_file /nas/home/sh0416/data/simcse/nli_for_simcse.csv \
-    --eval_file /nas/home/sh0416/data/ \
+    --train_file ${train_file} \
+    --eval_file ${eval_file} \
     --dataloader_drop_last \
     --evaluation_strategy steps \
     --eval_steps 250 \
@@ -31,7 +34,9 @@ for layer_idx in ${layer_idx_list[@]}; do
     --learning_rate ${learning_rate} \
     --hidden_dropout_prob 0.1 \
     --seed ${seed} \
-    --layer_idx ${layer_idx}
+    --layer_idx ${layer_idx} \
+    --dense_rwmd
+
 done
 done
 done

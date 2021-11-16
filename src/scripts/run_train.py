@@ -5,18 +5,10 @@ from dataclasses import asdict
 from functools import partial
 
 import torch
-from torch.utils.data import ConcatDataset
 from transformers import AutoTokenizer, HfArgumentParser, set_seed
 
 from sentsim.config import DataTrainingArguments, ModelArguments, OurTrainingArguments
-from sentsim.data.dataset import (
-    NLIDataset,
-    PairedContrastiveLearningDataset,
-    WikiEDADataset,
-    WikiIdentityDataset,
-    WikiRepetitionDataset,
-    collate_fn,
-)
+from sentsim.data.dataset import NLIDataset, collate_fn
 from sentsim.models.models import create_contrastive_learning
 from sentsim.trainer import CLTrainer
 
@@ -64,14 +56,7 @@ def train(args):
     else:
         raise NotImplementedError()
 
-    if data_args.data_type == "snli_mnli":
-        train_dataset = SNLIMNLIDataset(data_args.train_file, tokenizer)
-    elif data_args.data_type == "wiki":
-        train_dataset = WikiIdentityDataset(data_args.train_file, tokenizer)
-    elif data_args.data_type == "simcse-nli":
-        train_dataset = NLIDataset(data_args.train_file, tokenizer)
-    else:
-        raise ValueError
+    train_dataset = NLIDataset(data_args.train_file, tokenizer)
 
     trainer = CLTrainer(
         model=model,

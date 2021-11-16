@@ -1,7 +1,6 @@
 import abc
 import csv
 import logging
-import random
 import typing
 from functools import partial
 from typing import Dict, List, Optional, Tuple
@@ -11,14 +10,8 @@ from torch.utils.data import Dataset
 from transformers import RobertaTokenizer
 from transformers.tokenization_utils_base import PreTrainedTokenizerBase
 
-from sentsim.data.eda import eda
 
 logger = logging.getLogger(__name__)
-
-
-def _load_txt(filepath: str) -> List[str]:
-    with open(filepath) as f:
-        return [x.strip() for x in f]
 
 
 def _load_csv(filepath: str) -> List[Tuple[str, ...]]:
@@ -62,46 +55,6 @@ class ContrastiveLearningDataset(Dataset):
         pass
 
 
-class WikiDataset(ContrastiveLearningDataset):
-    def _load_data(self, filepath: str) -> List[Row]:
-        return _load_txt(filepath)
-
-
-class WikiIdentityDataset(WikiDataset):
-    def _create_tokenized_pair(self, row: Row) -> TokenizedTriplet:
-        tokens = self.tokenizer.tokenize(row)
-        return tokens, tokens, None
-
-
-class WikiRepetitionDataset(WikiDataset):
-    def __init__(self, filepath: str, tokenizer: RobertaTokenizer, dup_rate: float):
-        super().__init__(filepath=filepath, tokenizer=tokenizer)
-        self.dup_rate = dup_rate
-
-    def _create_tokenized_pair(self, row: Row) -> TokenizedTriplet:
-        tokens = self.tokenizer.tokenize(row)
-        # Compute dup_len
-        dup_len = random.randint(0, max(1, int(self.dup_rate * len(tokens))))
-        # Compute positions
-        dup_set = random.sample(range(len(tokens)), k=dup_len)
-        # Compute repetition tokens
-        tokens_pos = []
-        for pos, token in enumerate(tokens):
-            tokens_pos.append(token)
-            if pos in dup_set:
-                tokens_pos.append(token)
-        return tokens, tokens_pos, None
-
-
-class WikiEDADataset(WikiDataset):
-    def _create_tokenized_pair(self, row: Row) -> TokenizedTriplet:
-        sentence_pos = eda(row, num_aug=1)[0]
-        assert len(sentence_pos) > 0, row
-        tokens = self.tokenizer.tokenize(row)
-        tokens_pos = self.tokenizer.tokenize(sentence_pos)
-        return tokens, tokens_pos, None
-
-
 class NLIDataset(ContrastiveLearningDataset):
     def _load_data(self, filepath: str) -> List[Row]:
         with open(filepath) as f:
@@ -113,22 +66,6 @@ class NLIDataset(ContrastiveLearningDataset):
         tokens_pos = self.tokenizer.tokenize(row[1])
         tokens_neg = self.tokenizer.tokenize(row[2])
         return tokens, tokens_pos, tokens_neg
-
-
-class KorNLIDataset(ContrastiveLearningDataset):
-    def _load_data(self, filepath: str) -> List[Row]:
-        with open(filepath) as f:
-            reader = csv.DictReader(f)
-            return [
-                (row["sentence1"], row["sentence2"])
-                for row in reader
-                if row["gold_label"] == "entailment"
-            ]
-
-    def _create_tokenized_pair(self, row: Row) -> TokenizedTriplet:
-        tokens = self.tokenizer.tokenize(row[0])
-        tokens_pos = self.tokenizer.tokenize(row[1])
-        return tokens, tokens_pos, None
 
 
 class PairedContrastiveLearningDataset(ContrastiveLearningDataset):

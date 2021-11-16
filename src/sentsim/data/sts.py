@@ -3,7 +3,9 @@ import csv
 import os
 from typing import Dict, List, Tuple
 
-SemanticTextualSimilarityDataset = Dict[str, List[Tuple[Tuple[str, str], float]]]
+
+Example = Tuple[Tuple[str, str], float]
+SemanticTextualSimilarityDataset = Dict[str, List[Example]]
 
 
 def _check_dataset(dataset: List[Tuple[Tuple[str, str], float]]):

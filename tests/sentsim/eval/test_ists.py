@@ -3,11 +3,7 @@ import os
 import pytest
 import torch
 
-from sentsim.eval.ists import (
-    convert_alignment_granularity,
-    extract_alignment_from_heatmap,
-    load_instances,
-)
+from sentsim.eval.ists import load_instances
 
 
 @pytest.fixture
@@ -117,7 +113,10 @@ def test_load_instances(
         },
         {
             "id": 5,
-            "sent1": "the switch has to be contained in the same path as the bulb and the battery",
+            "sent1": (
+                "the switch has to be contained in the same path as the bulb and the"
+                " battery"
+            ),
             "sent2": "The switch and the bulb have to be in the same path.",
             "sent1_chunk": [
                 "the switch",
@@ -133,12 +132,4 @@ def test_load_instances(
             ],
         },
     ]
-    assert pred == true
-
-
-def test_extract_alignment_from_heatmap():
-    torch.manual_seed(0)
-    heatmap = torch.rand(4, 6)
-    pred = extract_alignment_from_heatmap(heatmap)
-    true = [([0], [1]), ([1], [1]), ([2], [5]), ([3], [3])]
     assert pred == true

@@ -59,7 +59,7 @@ class DataTrainingArguments:
     """
 
     data_type: str = field(
-        default="snli_mnli", metadata={"choices": ["simcse-nli", "snli_mnli", "wiki"]}
+        default="simcse-nli", metadata={"choices": ["simcse-nli", "wiki"]}
     )
     train_file: str = field(
         default=None,
