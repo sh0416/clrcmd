@@ -1,6 +1,55 @@
-Sentence Benchmark
+Contrastive Learning: Relaxed Contextualized word Mover Distance (CLRCMD)
 ==================
 
+This repository reproduces the experimental result reported in the paper.
+
+## 1. Prepare Environment
+We assume that the user uses anaconda environment.
+```
+conda create -n clrcmd python=3.8
+conda activate clrcmd
+pip install -r requirements.txt
+```
+
+## 2. Prepare dataset
+
+### 2-1. Sentence benchmark dataset (STS12, STS13, STS14, STS15, STS16, STSB, SICKR)
+We download the benchmark dataset using the script provided by SimCSE repository.  
+```
+bash examples/get_transfer_data.bash
+```
+
+### 2-2. Interpretable sentence similarity benchmark dataset (ISTS)
+
+
+### 2-3. NLI dataset tailored for self-supervised learning (SimCSE-NLI)
+We download the training dataset using the script provided by SimCSE repository.
+```
+bash examples/download_nli.bash
+mv nli_for_simcse.csv data
+```
+
+## 3. Evaluate sentence similarity benchmark
+
+### 3-1. Evaluate benchmark performance on pretrained checkpoint
+```
+torchrun examples/run_evaluate.py --data-dir data --dataset sts12 --model bert-cls
+torchrun examples/run_evaluate.py --data-dir data --dataset sts12 --model bert-avg
+torchrun examples/run_evaluate.py --data-dir data --dataset sts12 --model roberta-cls
+torchrun examples/run_evaluate.py --data-dir data --dataset sts12 --model roberta-avg
+```
+
+### 3-2. Evaluate benchmark performance on the trained checkpoint
+```
+torchrun examples/run_evaluate.py --data-dir data --dataset sts12 --model bert-cls --checkpoint ckpt/simcse.pt
+torchrun examples/run_evaluate.py --data-dir data --dataset sts12 --model bert-avg --checkpoint ckpt/simcse.pt
+torchrun examples/run_evaluate.py --data-dir data --dataset sts12 --model bert-rcmd --checkpoint ckpt/clrcmd.pt
+```
+
+### 3-3. Evaluate benchmark performance on the checkpoint trained on CLRCMD
+
+
+# Legacy README
 ```
 CUDA_VISIBLE_DEVICES=0,1,2,3 PYTHONPATH=src python -m torch.distributed.launch --nproc_per_node 4 --master_port 10001 src/scripts/run_train.py --model_name_or_path roberta-base --train_file data/wiki1m_for_simcse.txt_bpedropout_0.0_roberta-base.csv --dataloader_drop_last --evaluation_strategy steps --eval_steps 125 --metric_for_best_model stsb_spearman --load_best_model_at_end --mlp_only_train --temp 0.05 --do_train --do_eval --fp16 --num_train_epochs 1 --save_total_limit 1 --loss_token --coeff_loss_token 1 --per_device_train_batch_size 128 --per_device_eval_batch_size 128 --gradient_accumulation_steps 1 --learning_rate 1e-5 --hidden_dropout_prob 0.1
 ```
