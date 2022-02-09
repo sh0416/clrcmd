@@ -10,7 +10,7 @@ for layer_idx in ${layer_idx_list[@]}; do
     src/scripts/run_train.py \
     --model_name_or_path roberta-base \
     --loss_type simcse-avg \
-	  --data_type simcse-nli \
+    --data_type simcse-nli \
     --train_file /nas/home/sh0416/data/simcse/nli_for_simcse.csv \
     --eval_file /nas/home/sh0416/data/ \
     --dataloader_drop_last \
