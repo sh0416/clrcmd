@@ -36,10 +36,20 @@ bash examples/download_nli.bash
 
 ### 3-1. Evaluate semantic textual similarity benchmark
 ```
-torchrun examples/run_evaluate.py --data-dir data --dataset sts12 --model bert-cls
-torchrun examples/run_evaluate.py --data-dir data --dataset sts12 --model bert-avg
-torchrun examples/run_evaluate.py --data-dir data --dataset sts12 --model roberta-cls
-torchrun examples/run_evaluate.py --data-dir data --dataset sts12 --model roberta-avg
+usage: run_evaluate.py [-h] [--model {bert-cls,bert-avg,roberta-cls,roberta-avg}] [--checkpoint CHECKPOINT] [--data-dir DATA_DIR]
+                       [--dataset {sts12,sts13,sts14,sts15,sts16,stsb,sickr}]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --model {bert-cls,bert-avg,roberta-cls,roberta-avg}
+                        Model (default: bert-cls)
+  --checkpoint CHECKPOINT
+                        Checkpoint path (default: None)
+  --data-dir DATA_DIR   data dir (default: data)
+  --dataset {sts12,sts13,sts14,sts15,sts16,stsb,sickr}
+                        dataset (default: sts12)
+
+python examples/run_evaluate.py --data-dir data --dataset sts12 --model bert-cls
 ```
 
 ### 3-2. Evaluate benchmark performance on the trained checkpoint
