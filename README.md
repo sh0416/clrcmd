@@ -34,22 +34,19 @@ bash examples/download_nli.bash
 
 ## 3. Evaluate benchmark
 
-### 3-1. Evaluate semantic textual similarity benchmark
+### 3-1. Evaluate semantic textual similarity benchmark without any training
 ```
-usage: run_evaluate.py [-h] [--model {bert-cls,bert-avg,roberta-cls,roberta-avg}] [--checkpoint CHECKPOINT] [--data-dir DATA_DIR]
-                       [--dataset {sts12,sts13,sts14,sts15,sts16,stsb,sickr}]
+# Help message
+python examples/run_evaluate.py -h
 
-optional arguments:
-  -h, --help            show this help message and exit
-  --model {bert-cls,bert-avg,roberta-cls,roberta-avg}
-                        Model (default: bert-cls)
-  --checkpoint CHECKPOINT
-                        Checkpoint path (default: None)
-  --data-dir DATA_DIR   data dir (default: data)
-  --dataset {sts12,sts13,sts14,sts15,sts16,stsb,sickr}
-                        dataset (default: sts12)
-
+# One example
 python examples/run_evaluate.py --data-dir data --dataset sts12 --model bert-cls
+```
+
+### 3-2. Train model using self-supervised learning (e.g. SimCSE, CLRCMD)
+We recommend using distributed training.
+```
+python -m torch.distributed.run --nproc_per_node 4 examples/run_train.py --data-dir data --model bert-cls
 ```
 
 ### 3-2. Evaluate benchmark performance on the trained checkpoint

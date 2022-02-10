@@ -1,11 +1,6 @@
-"""Loading logic for semantic textual similarity data"""
 import csv
 import os
 from typing import Dict, List, Tuple
-
-
-Example = Tuple[Tuple[str, str], float]
-SemanticTextualSimilarityDataset = Dict[str, List[Example]]
 
 
 def _check_dataset(dataset: List[Tuple[Tuple[str, str], float]]):
@@ -75,7 +70,7 @@ def create_filepaths_sts(dirpath: str, sources: List[str]) -> List[Tuple[str, st
 
 def load_sources_sts(
     dirpath: str, sources: List[str]
-) -> SemanticTextualSimilarityDataset:
+) -> Dict[str, List[Tuple[Tuple[str, str], float]]]:
     """Give sources, load dataset. Assume that the files follow STS format
 
     :param dirpath: Directory where the whole files located
@@ -86,7 +81,7 @@ def load_sources_sts(
     return {k: v for k, v in zip(sources, datasets)}
 
 
-def save_dataset(dirpath: str, dataset: SemanticTextualSimilarityDataset):
+def save_dataset(dirpath: str, dataset: Dict[str, List[Tuple[Tuple[str, str], float]]]):
     """Given dataset, save the dataset in dirpath
 
     :param dirpath: Directory where the dataset will be saved
@@ -99,20 +94,14 @@ def save_dataset(dirpath: str, dataset: SemanticTextualSimilarityDataset):
     for source, (filepath_input, filepath_label) in zip(sources, filepaths):
         _dataset = dataset[source]
         with open(filepath_input, "w", newline="") as f:
-            writer = csv.writer(
-                f, delimiter="\t", quotechar=None, quoting=csv.QUOTE_NONE
-            )
-            writer.writerows(
-                (example.input[0], example.input[1]) for example in _dataset
-            )
+            writer = csv.writer(f, delimiter="\t", quotechar=None, quoting=csv.QUOTE_NONE)
+            writer.writerows((example.input[0], example.input[1]) for example in _dataset)
         with open(filepath_label, "w", newline="") as f:
-            writer = csv.writer(
-                f, delimiter="\t", quotechar=None, quoting=csv.QUOTE_NONE
-            )
+            writer = csv.writer(f, delimiter="\t", quotechar=None, quoting=csv.QUOTE_NONE)
             writer.writerows((example.score,) for example in _dataset)
 
 
-def load_sts12(dirpath: str) -> SemanticTextualSimilarityDataset:
+def load_sts12(dirpath: str) -> Dict[str, List[Tuple[Tuple[str, str], float]]]:
     sources = [
         "MSRpar",
         "MSRvid",
@@ -129,7 +118,7 @@ def load_sts12(dirpath: str) -> SemanticTextualSimilarityDataset:
     return dataset
 
 
-def load_sts13(dirpath: str) -> SemanticTextualSimilarityDataset:
+def load_sts13(dirpath: str) -> Dict[str, List[Tuple[Tuple[str, str], float]]]:
     sources = ["FNWN", "headlines", "OnWN"]
     dataset = load_sources_sts(dirpath, sources)
     assert len(dataset["FNWN"]) == 189
@@ -138,7 +127,7 @@ def load_sts13(dirpath: str) -> SemanticTextualSimilarityDataset:
     return dataset
 
 
-def load_sts14(dirpath: str) -> SemanticTextualSimilarityDataset:
+def load_sts14(dirpath: str) -> Dict[str, List[Tuple[Tuple[str, str], float]]]:
     sources = [
         "deft-forum",
         "deft-news",
@@ -157,7 +146,7 @@ def load_sts14(dirpath: str) -> SemanticTextualSimilarityDataset:
     return dataset
 
 
-def load_sts15(dirpath: str) -> SemanticTextualSimilarityDataset:
+def load_sts15(dirpath: str) -> Dict[str, List[Tuple[Tuple[str, str], float]]]:
     sources = [
         "answers-forums",
         "answers-students",
@@ -174,7 +163,7 @@ def load_sts15(dirpath: str) -> SemanticTextualSimilarityDataset:
     return dataset
 
 
-def load_sts16(dirpath: str) -> SemanticTextualSimilarityDataset:
+def load_sts16(dirpath: str) -> Dict[str, List[Tuple[Tuple[str, str], float]]]:
     sources = [
         "answer-answer",
         "headlines",
@@ -191,26 +180,47 @@ def load_sts16(dirpath: str) -> SemanticTextualSimilarityDataset:
     return dataset
 
 
-def load_stsb_train(dirpath: str) -> SemanticTextualSimilarityDataset:
+def load_stsb_train(dirpath: str) -> Dict[str, List[Tuple[Tuple[str, str], float]]]:
     return {"train": load_data_stsb(os.path.join(dirpath, "sts-train.csv"))}
 
 
-def load_stsb_dev(dirpath: str) -> SemanticTextualSimilarityDataset:
+def load_stsb_dev(dirpath: str) -> Dict[str, List[Tuple[Tuple[str, str], float]]]:
     return {"dev": load_data_stsb(os.path.join(dirpath, "sts-dev.csv"))}
 
 
-def load_stsb_test(dirpath: str) -> SemanticTextualSimilarityDataset:
+def load_stsb_test(dirpath: str) -> Dict[str, List[Tuple[Tuple[str, str], float]]]:
     return {"test": load_data_stsb(os.path.join(dirpath, "sts-test.csv"))}
 
 
-def load_sickr_train(dirpath: str) -> SemanticTextualSimilarityDataset:
+def load_sickr_train(dirpath: str) -> Dict[str, List[Tuple[Tuple[str, str], float]]]:
     return {"train": load_data_sickr(os.path.join(dirpath, "SICK_train.txt"))}
 
 
-def load_sickr_dev(dirpath: str) -> SemanticTextualSimilarityDataset:
+def load_sickr_dev(dirpath: str) -> Dict[str, List[Tuple[Tuple[str, str], float]]]:
     return {"dev": load_data_sickr(os.path.join(dirpath, "SICK_trial.txt"))}
 
 
-def load_sickr_test(dirpath: str) -> SemanticTextualSimilarityDataset:
+def load_sickr_test(dirpath: str) -> Dict[str, List[Tuple[Tuple[str, str], float]]]:
     filepath = os.path.join(dirpath, "SICK_test_annotated.txt")
     return {"test": load_data_sickr(filepath)}
+
+
+def load_sts_benchmark(
+    data_dir: str, dataset: str
+) -> Dict[str, List[Tuple[Tuple[str, str], float]]]:
+    if dataset == "sts12":
+        return load_sts12(os.path.join(data_dir, "STS", "STS12-en-test"))
+    elif dataset == "sts13":
+        return load_sts13(os.path.join(data_dir, "STS", "STS13-en-test"))
+    elif dataset == "sts14":
+        return load_sts14(os.path.join(data_dir, "STS", "STS14-en-test"))
+    elif dataset == "sts15":
+        return load_sts15(os.path.join(data_dir, "STS", "STS15-en-test"))
+    elif dataset == "sts16":
+        return load_sts16(os.path.join(data_dir, "STS", "STS16-en-test"))
+    elif dataset == "stsb":
+        return load_stsb_test(os.path.join(data_dir, "STS", "STSBenchmark"))
+    elif dataset == "sickr":
+        return load_sickr_test(os.path.join(data_dir, "SICK"))
+    else:
+        raise ValueError(f"Invalid {dataset = }")

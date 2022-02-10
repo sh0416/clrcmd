@@ -7,7 +7,7 @@ import torch.distributed as dist
 import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
-from transformers import AutoConfig, AutoModel
+from transformers import AutoModel, AutoTokenizer, PreTrainedTokenizerBase
 from transformers.utils.dummy_pt_objects import PreTrainedModel
 
 from clrcmd.config import ModelArguments
@@ -354,6 +354,15 @@ class PairwiseCosineSimilarity(nn.Module):
         return F.cosine_similarity(x1.unsqueeze(1), x2.unsqueeze(0), dim=-1)
 
 
+def create_tokenizer(model_name: str) -> PreTrainedTokenizerBase:
+    if model_name.startswith("bert"):
+        return AutoTokenizer.from_pretrained("bert-base-uncased")
+    elif model_name.startswith("roberta"):
+        return AutoTokenizer.from_pretrained("roberta-base")
+    else:
+        raise ValueError(f"Undefined {model_name = }")
+
+
 def create_similarity_model(model_name: str) -> nn.Module:
     if model_name.startswith("bert"):
         model = AutoModel.from_pretrained("bert-base-uncased")
@@ -375,33 +384,19 @@ def create_similarity_model(model_name: str) -> nn.Module:
     return model
 
 
-def create_contrastive_learning(model_args: ModelArguments) -> nn.Module:
-    config = AutoConfig.from_pretrained(
-        model_args.model_name_or_path, output_hidden_states=True, **asdict(model_args)
-    )
-    pretrained_model = AutoModel.from_pretrained(model_args.model_name_or_path, config=config)
-    if model_args.loss_type == "sbert-cls":
-        model = CLSPoolingSentenceRepresentationModel(pretrained_model)
-        model = SentenceBertLearningModule(model, config.hidden_size)
-    elif model_args.loss_type == "sbert-avg":
-        model = AveragePoolingSentenceRepresentationModel(pretrained_model)
-        model = SentenceBertLearningModule(model, config.hidden_size)
-    elif model_args.loss_type == "simcse-cls":
-        model = CLSPoolingSentenceRepresentationModel(pretrained_model, head=True)
-        model = SentenceSimilarityModel(model, CosineSimilarity())
-        model = SimcseLearningModule(model, PairwiseCosineSimilarity(), model_args.temp)
-    elif model_args.loss_type == "simcse-avg":
-        model = AveragePoolingSentenceRepresentationModel(pretrained_model, head=True)
-        model = SentenceSimilarityModel(model, CosineSimilarity())
-        model = SimcseLearningModule(model, PairwiseCosineSimilarity(), model_args.temp)
-    elif model_args.loss_type == "rwmdcse":
-        if model_args.dense_rwmd:
+def create_contrastive_learning(
+    model_name: str, temp: float, dense_rwmd: bool = False
+) -> nn.Module:
+    model = create_similarity_model(model_name)
+    if model_name.endswith("cls"):
+        return SimcseLearningModule(model, PairwiseCosineSimilarity(), temp)
+    elif model_name.endswith("avg"):
+        return SimcseLearningModule(model, PairwiseCosineSimilarity(), temp)
+    elif model_name.endswith("rcmd"):
+        if dense_rwmd:
             pairwise_similarity = DensePairwiseRelaxedWordMoverSimilarity()
         else:
             pairwise_similarity = PairwiseRelaxedWordMoverSimilarity()
-        model = LastHiddenSentenceRepresentationModel(pretrained_model, head=True)
-        model = SentenceSimilarityModel(model, RelaxedWordMoverSimilarity())
-        model = SimcseLearningModule(model, pairwise_similarity, model_args.temp)
+        return SimcseLearningModule(model, pairwise_similarity, temp)
     else:
-        raise AttributeError()
-    return model
+        raise ValueError(f"Undefined {model_name = }")

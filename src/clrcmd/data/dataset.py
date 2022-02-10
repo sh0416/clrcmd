@@ -1,100 +1,70 @@
-import abc
 import csv
 import logging
-import typing
-from functools import partial
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
+import torch
 from torch import Tensor
 from torch.utils.data import Dataset
-from transformers import RobertaTokenizer
-from transformers.tokenization_utils_base import PreTrainedTokenizerBase
-
+from transformers import PreTrainedTokenizerBase, default_data_collator
 
 logger = logging.getLogger(__name__)
 
 
-def _load_csv(filepath: str) -> List[Tuple[str, ...]]:
-    with open(filepath) as f:
-        reader = csv.reader(f)
-        return list(reader)
-
-
-Row = typing.TypeVar("Row", str, Tuple[str, str], Tuple[str, str, str])
-TokenizedTriplet = Tuple[List[str], List[str], Optional[List[str]]]
-Example = Tuple[Dict[str, Tensor], Dict[str, Tensor], Optional[Dict[str, Tensor]]]
-
-
-class ContrastiveLearningDataset(Dataset):
-    def __init__(self, filepath: str, tokenizer: PreTrainedTokenizerBase):
+class STSBenchmarkDataset(Dataset):
+    def __init__(
+        self, examples: List[Tuple[Tuple[str, str], float]], tokenizer: PreTrainedTokenizerBase
+    ):
+        self.examples = examples
         self.tokenizer = tokenizer
-        self.data = self._load_data(filepath)
 
-    def __getitem__(self, index: int) -> Example:
-        x, x_pos, x_neg = self._create_tokenized_pair(self.data[index])
-        f = partial(
-            self.tokenizer.encode_plus,
-            padding="max_length",
-            max_length=32,
-            truncation=True,
+    def __getitem__(self, idx: int) -> Tuple[Dict[str, Tensor], Dict[str, Tensor], Tensor]:
+        (text1, text2), score = self.examples[idx]
+        text1 = self.tokenizer(text1, padding="max_length", max_length=128, return_tensors="pt")
+        text2 = self.tokenizer(text2, padding="max_length", max_length=128, return_tensors="pt")
+        text1 = {k: v[0] for k, v in text1.items()}
+        text2 = {k: v[0] for k, v in text2.items()}
+        return text1, text2, torch.tensor(score)
+
+    def __len__(self):
+        return len(self.examples)
+
+
+class NLIContrastiveLearningDataset(Dataset):
+    def __init__(self, filepath: str, tokenizer: PreTrainedTokenizerBase):
+        with open(filepath) as f:
+            self.examples = [
+                (row["sent0"], row["sent1"], row["hard_neg"]) for row in csv.DictReader(f)
+            ]
+        self.tokenizer = tokenizer
+
+    def __getitem__(
+        self, idx: int
+    ) -> Tuple[Dict[str, Tensor], Dict[str, Tensor], Dict[str, Tensor]]:
+        text1, text2, text_neg = self.examples[idx]
+        text1 = self.tokenizer(
+            text1, truncation=True, padding="max_length", max_length=32, return_tensors="pt"
         )
-        if x_neg is not None:
-            return f(x), f(x_pos), f(x_neg)
-        else:
-            return f(x), f(x_pos), None
+        text2 = self.tokenizer(
+            text2, truncation=True, padding="max_length", max_length=32, return_tensors="pt"
+        )
+        text_neg = self.tokenizer(
+            text_neg, truncation=True, padding="max_length", max_length=32, return_tensors="pt"
+        )
+        text1 = {k: v[0] for k, v in text1.items()}
+        text2 = {k: v[0] for k, v in text2.items()}
+        text_neg = {k: v[0] for k, v in text_neg.items()}
+        return {"inputs1": text1, "inputs2": text2, "inputs_neg": text_neg}
 
     def __len__(self) -> int:
-        return len(self.data)
-
-    @abc.abstractmethod
-    def _load_data(self, filepath: str) -> List[Row]:
-        pass
-
-    @abc.abstractmethod
-    def _create_tokenized_pair(self, row: Row) -> TokenizedTriplet:
-        pass
+        return len(self.examples)
 
 
-class NLIDataset(ContrastiveLearningDataset):
-    def _load_data(self, filepath: str) -> List[Row]:
-        with open(filepath) as f:
-            reader = csv.DictReader(f)
-            return [(row["sent0"], row["sent1"], row["hard_neg"]) for row in reader]
-
-    def _create_tokenized_pair(self, row: Row) -> TokenizedTriplet:
-        tokens = self.tokenizer.tokenize(row[0])
-        tokens_pos = self.tokenizer.tokenize(row[1])
-        tokens_neg = self.tokenizer.tokenize(row[2])
-        return tokens, tokens_pos, tokens_neg
-
-
-class PairedContrastiveLearningDataset(ContrastiveLearningDataset):
-    def _load_data(self, filepath: str) -> List[Row]:
-        return _load_csv(filepath)
-
-    def _create_tokenized_pair(self, row: Row) -> TokenizedTriplet:
-        tokens = self.tokenizer.tokenize(row[0])
-        tokens_pos = self.tokenizer.tokenize(row[1])
-        assert len(tokens) > 0, f"{row = }"
-        assert len(tokens_pos) > 0, f"{row = }"
-        return tokens, tokens_pos, None
-
-
-def collate_fn(
-    batch: List[Example],
-    tokenizer: RobertaTokenizer,
-) -> Dict[str, Tensor]:
-    batch_x, batch_pos, batch_neg = [], [], []
-    for x, x_pos, x_neg in batch:
-        batch_x.append(x)
-        batch_pos.append(x_pos)
-        if x_neg is not None:
-            batch_neg.append(x_neg)
-    assert len(batch_neg) == 0 or len(batch_x) == len(batch_neg)
-    batch_x = tokenizer.pad(batch_x, return_tensors="pt")
-    batch_pos = tokenizer.pad(batch_pos, return_tensors="pt")
-    if len(batch_neg) > 0:
-        batch_neg = tokenizer.pad(batch_neg, return_tensors="pt")
-    else:
-        batch_neg = None
-    return {"inputs1": batch_x, "inputs2": batch_pos, "inputs_neg": batch_neg}
+class ContrastiveLearningCollator:
+    def __call__(
+        self, features: List[Tuple[Dict[str, Tensor], Dict[str, Tensor], Dict[str, Tensor]]]
+    ) -> Tuple[Dict[str, Tensor], Dict[str, Tensor], Dict[str, Tensor]]:
+        return {
+            "inputs1": default_data_collator([x["inputs1"] for x in features]),
+            "inputs2": default_data_collator([x["inputs2"] for x in features]),
+            "inputs_neg": default_data_collator([x["inputs_neg"] for x in features]),
+        }

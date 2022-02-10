@@ -7,11 +7,10 @@ import torch
 from scipy.stats import pearsonr, spearmanr
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from transformers import AutoTokenizer
 
 from clrcmd.data.dataset import STSBenchmarkDataset
 from clrcmd.data.sts import load_sts_benchmark
-from clrcmd.models import create_similarity_model
+from clrcmd.models import create_similarity_model, create_tokenizer
 
 logger = logging.getLogger(__name__)
 
@@ -40,12 +39,7 @@ def main():
         logger.info(f"  {k}: {v}")
 
     # Create tokenizer and model
-    if args.model.startswith("bert"):
-        tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
-    elif args.model.startswith("roberta"):
-        tokenizer = AutoTokenizer.from_pretrained("roberta-base")
-    else:
-        raise ValueError(f"Undefined {args.model = }")
+    tokenizer = create_tokenizer(args.model)
     model = create_similarity_model(args.model).to(device)
 
     # Load dataset

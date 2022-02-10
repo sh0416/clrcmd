@@ -1,35 +1,46 @@
-import json
+import argparse
 import logging
 import os
-from dataclasses import asdict
-from functools import partial
 
 import torch
-from transformers import AutoTokenizer, HfArgumentParser, set_seed
+from transformers import TrainingArguments, set_seed, default_data_collator
 
-from sentsim.config import DataTrainingArguments, ModelArguments, OurTrainingArguments
-from sentsim.data.dataset import NLIDataset, collate_fn
-from sentsim.models.models import create_contrastive_learning
-from sentsim.trainer import CLTrainer
+from clrcmd.data.dataset import ContrastiveLearningCollator, NLIContrastiveLearningDataset
+from clrcmd.models import create_contrastive_learning, create_tokenizer
+from clrcmd.trainer import CLTrainer
 
 logger = logging.getLogger(__name__)
 
+parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+# fmt: off
+parser.add_argument("--data-dir", type=str, help="Data directory", default="data")
+parser.add_argument("--model", type=str, help="Model", choices=["bert-cls", "bert-avg", "bert-rcmd", "roberta-cls", "roberta-avg", "roberta-rcmd"], default="bert-cls")
+parser.add_argument("--output-dir", type=str, help="Output directory", default="ckpt")
+parser.add_argument("--temp", type=float, help="Softmax temperature", default=0.05)
+# fmt: on
 
-def train(args):
-    model_args, data_args, training_args = args
 
-    # Save arguments
-    os.makedirs(training_args.output_dir, exist_ok=True)
-    filepath = os.path.join(training_args.output_dir, "model_args.json")
-    with open(filepath, "w") as f:
-        json.dump(asdict(model_args), f)
-    filepath = os.path.join(training_args.output_dir, "data_args.json")
-    with open(filepath, "w") as f:
-        json.dump(asdict(data_args), f)
-    filepath = os.path.join(training_args.output_dir, "training_args.json")
-    with open(filepath, "w") as f:
-        json.dump(training_args.to_dict(), f)
+def main():
+    logging.basicConfig(
+        level=logging.INFO, format="%(asctime)s - %(message)s", filename="log/train.log"
+    )
+    args = parser.parse_args()
+    logger.info("Hyperparameters")
+    for k, v in vars(args).items():
+        logger.info(f"{k} = {v}")
 
+    training_args = TrainingArguments(
+        args.output_dir,
+        per_device_train_batch_size=128,
+        learning_rate=5e-5,
+        num_train_epochs=3,
+        fp16=True,
+        logging_strategy="steps",
+        logging_steps=20,
+        save_strategy="steps",
+        save_steps=200,
+        save_total_limit=1,
+    )
     # Log on each process the small summary:
     logger.warning(
         f"Process rank: {training_args.local_rank}, "
@@ -43,32 +54,25 @@ def train(args):
     set_seed(training_args.seed)
 
     # Load pretrained model and tokenizer
-    #
-    # Distributed training:
-    # The .from_pretrained methods guarantee that only one local process can
-    # concurrently download model & vocab.
-    if model_args.model_name_or_path:
-        tokenizer = AutoTokenizer.from_pretrained(
-            model_args.model_name_or_path, use_fast=False
-        )
-        model = create_contrastive_learning(model_args)
-        model.train()
-    else:
-        raise NotImplementedError()
+    tokenizer = create_tokenizer(args.model)
+    model = create_contrastive_learning(args.model, args.temp)
+    model.train()
 
-    train_dataset = NLIDataset(data_args.train_file, tokenizer)
+    train_dataset = NLIContrastiveLearningDataset(
+        os.path.join(args.data_dir, "nli_for_simcse.csv"), tokenizer
+    )
 
     trainer = CLTrainer(
         model=model,
-        data_collator=partial(collate_fn, tokenizer=tokenizer),
+        data_collator=ContrastiveLearningCollator(),
         args=training_args,
         train_dataset=train_dataset,
         tokenizer=tokenizer,
     )
-    trainer.model_args = model_args
+    train_result = trainer.train()
+    exit()
 
     # Training
-    train_result = trainer.train()
 
     if trainer.is_world_process_zero():
         output_train_file = os.path.join(training_args.output_dir, "train_results.txt")
@@ -100,15 +104,6 @@ def train(args):
         results = None
 
     return results
-
-
-def main():
-    torch.set_printoptions(precision=2, threshold=1e-7, sci_mode=False)
-    parser = HfArgumentParser(
-        (ModelArguments, DataTrainingArguments, OurTrainingArguments)
-    )
-    args = parser.parse_args_into_dataclasses()
-    train(args)
 
 
 if __name__ == "__main__":
