@@ -1,21 +1,22 @@
 import argparse
+import logging
 
 import torch
 from sentsim.config import ModelArguments
 from sentsim.models.models import create_similarity_model
 
+logger = logging.getLogger(__name__)
+
 parser = argparse.ArgumentParser()
-parser.add_argument("--batch-size", type=int, default=2048)
-parser.add_argument("--seq-len", type=int, default=32)
-parser.add_argument(
-    "--method", type=str, default="rwmdcse", choices=["simcse-avg", "rwmdcse"]
-)
-parser.add_argument("--num-iter", type=int, default=40)
+# fmt: off
+parser.add_argument("--batch-size", type=int, default=512)
+parser.add_argument("--seq-len", type=int, default=8)
+parser.add_argument("--method", type=str, default="rwmdcse", choices=["simcse-cls", "simcse-avg", "rwmdcse"])
+parser.add_argument("--num-iter", type=int, default=10)
+# fmt: on
 
 
-def main():
-    args = parser.parse_args()
-
+def main(args):
     # Create timer
     start = torch.cuda.Event(enable_timing=True)
     end = torch.cuda.Event(enable_timing=True)
@@ -54,4 +55,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    logging.basicConfig(level=logging.INFO)
+    main(parser.parse_args())
