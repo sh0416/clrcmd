@@ -13,20 +13,23 @@ pip install -r requirements.txt
 
 ## 2. Prepare dataset
 
-### 2-1. Sentence benchmark dataset (STS12, STS13, STS14, STS15, STS16, STSB, SICKR)
+### 2-1. Semantic Textual Similarity benchmark (STS12, STS13, STS14, STS15, STS16, STSB, SICKR)
 We download the benchmark dataset using the script provided by SimCSE repository.  
 ```
-bash examples/get_transfer_data.bash
+bash examples/download_sts.sh
 ```
 
-### 2-2. Interpretable sentence similarity benchmark dataset (ISTS)
+### 2-2. Interpretable Semantic Textual Similarity benchmark (iSTS)
+We create a script for downloading iSTS benchmarks.
+```
+bash examples/download_ists.sh
+```
 
 
 ### 2-3. NLI dataset tailored for self-supervised learning (SimCSE-NLI)
 We download the training dataset using the script provided by SimCSE repository.
 ```
 bash examples/download_nli.bash
-mv nli_for_simcse.csv data
 ```
 
 ## 3. Evaluate sentence similarity benchmark
