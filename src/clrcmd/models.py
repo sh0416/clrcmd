@@ -10,8 +10,8 @@ from torch import Tensor
 from transformers import AutoConfig, AutoModel
 from transformers.utils.dummy_pt_objects import PreTrainedModel
 
-from sentsim.config import ModelArguments
-from sentsim.utils import masked_mean
+from clrcmd.config import ModelArguments
+from clrcmd.utils import masked_mean
 
 logger = logging.getLogger(__name__)
 
@@ -123,9 +123,7 @@ class SentenceBertLearningModule(nn.Module):
         self.head = nn.Linear(hidden_size, 3, bias=False)  # 3-way classification
         self.criterion = nn.CrossEntropyLoss()
 
-    def forward(
-        self, inputs1: ModelInput, inputs2: ModelInput, labels: Tensor
-    ) -> Tuple[Tensor]:
+    def forward(self, inputs1: ModelInput, inputs2: ModelInput, labels: Tensor) -> Tuple[Tensor]:
         x1, x2 = self.representation_model(inputs1), self.representation_model(inputs2)
         pred = self.head(torch.cat((x1, x2, torch.abs(x1 - x2)), dim=2))
         return (self.criterion(pred, labels),)
@@ -173,9 +171,7 @@ class SimcseLearningModule(nn.Module):
                 for k in inputs1.keys()
             }
         else:
-            inputs = {
-                k: torch.cat((inputs1[k], inputs2[k]), dim=0) for k in inputs1.keys()
-            }
+            inputs = {k: torch.cat((inputs1[k], inputs2[k]), dim=0) for k in inputs1.keys()}
         x = self.model.representation_model(inputs)
         if inputs_neg is not None:
             sections = (
@@ -234,9 +230,7 @@ class RelaxedWordMoverSimilarity(nn.Module):
         sim = (sim1 + sim2) / 2
         return sim
 
-    def compute_heatmap(
-        self, x1: Tuple[Tensor, Tensor], x2: Tuple[Tensor, Tensor]
-    ) -> Tensor:
+    def compute_heatmap(self, x1: Tuple[Tensor, Tensor], x2: Tuple[Tensor, Tensor]) -> Tensor:
         (x1, mask1), (x2, mask2) = x1, x2
         sim = self.cos(x1[:, :, None, :], x2[:, None, :, :])
         inf = torch.tensor(float("-inf"), device=sim.device)
@@ -268,12 +262,8 @@ class PairwiseRelaxedWordMoverSimilarity(nn.Module):
         batch2, seq_len2, _ = x2.shape
         # Compute max indice batchwise
         with torch.no_grad():
-            indice1 = torch.empty(
-                (batch1, batch2, seq_len1), dtype=torch.long, device=x1.device
-            )
-            indice2 = torch.empty(
-                (batch1, batch2, seq_len2), dtype=torch.long, device=x2.device
-            )
+            indice1 = torch.empty((batch1, batch2, seq_len1), dtype=torch.long, device=x1.device)
+            indice2 = torch.empty((batch1, batch2, seq_len2), dtype=torch.long, device=x2.device)
             for i in range(0, batch1, 8):
                 for j in range(0, batch2, 8):
                     _indice1, _indice2 = compute_alignment(
@@ -344,9 +334,7 @@ class CosineSimilarity(nn.Module):
     def forward(self, x1: Tensor, x2: Tensor) -> Tensor:
         return self.cos(x1, x2)
 
-    def compute_heatmap(
-        self, x1: Tuple[Tensor, Tensor], x2: Tuple[Tensor, Tensor]
-    ) -> Tensor:
+    def compute_heatmap(self, x1: Tuple[Tensor, Tensor], x2: Tuple[Tensor, Tensor]) -> Tensor:
         (x1, mask1), (x2, mask2) = x1, x2
         s1 = masked_mean(x1, mask1.unsqueeze(2), dim=1)  # (batch, hidden)
         s2 = masked_mean(x2, mask2.unsqueeze(2), dim=1)  # (batch, hidden)
@@ -366,30 +354,24 @@ class PairwiseCosineSimilarity(nn.Module):
         return F.cosine_similarity(x1.unsqueeze(1), x2.unsqueeze(0), dim=-1)
 
 
-def create_similarity_model(model_args: ModelArguments) -> nn.Module:
-    config = AutoConfig.from_pretrained(
-        model_args.model_name_or_path, output_hidden_states=True, **asdict(model_args)
-    )
-    pretrained_model = AutoModel.from_pretrained(
-        model_args.model_name_or_path, config=config
-    )
-    if model_args.loss_type == "sbert-cls":
-        model = CLSPoolingSentenceRepresentationModel(pretrained_model)
+def create_similarity_model(model_name: str) -> nn.Module:
+    if model_name.startswith("bert"):
+        model = AutoModel.from_pretrained("bert-base-uncased")
+    elif model_name.startswith("roberta"):
+        model = AutoModel.from_pretrained("roberta-base")
+    else:
+        raise ValueError(f"Undefined {model_name = }")
+    if model_name.endswith("cls"):
+        model = CLSPoolingSentenceRepresentationModel(model)
         model = SentenceSimilarityModel(model, nn.CosineSimilarity(dim=-1))
-    elif model_args.loss_type == "sbert-avg":
-        model = AveragePoolingSentenceRepresentationModel(pretrained_model)
+    elif model_name.endswith("avg"):
+        model = AveragePoolingSentenceRepresentationModel(model)
         model = SentenceSimilarityModel(model, nn.CosineSimilarity(dim=-1))
-    elif model_args.loss_type == "simcse-cls":
-        model = CLSPoolingSentenceRepresentationModel(pretrained_model, head=True)
-        model = SentenceSimilarityModel(model, nn.CosineSimilarity(dim=-1))
-    elif model_args.loss_type == "simcse-avg":
-        model = AveragePoolingSentenceRepresentationModel(pretrained_model, head=True)
-        model = SentenceSimilarityModel(model, nn.CosineSimilarity(dim=-1))
-    elif model_args.loss_type == "rwmdcse":
-        model = LastHiddenSentenceRepresentationModel(pretrained_model, head=True)
+    elif model_name.endswith("rcmd"):
+        model = LastHiddenSentenceRepresentationModel(model, head=True)
         model = SentenceSimilarityModel(model, RelaxedWordMoverSimilarity())
     else:
-        raise AttributeError()
+        raise ValueError(f"Undefined {model_name = }")
     return model
 
 
@@ -397,9 +379,7 @@ def create_contrastive_learning(model_args: ModelArguments) -> nn.Module:
     config = AutoConfig.from_pretrained(
         model_args.model_name_or_path, output_hidden_states=True, **asdict(model_args)
     )
-    pretrained_model = AutoModel.from_pretrained(
-        model_args.model_name_or_path, config=config
-    )
+    pretrained_model = AutoModel.from_pretrained(model_args.model_name_or_path, config=config)
     if model_args.loss_type == "sbert-cls":
         model = CLSPoolingSentenceRepresentationModel(pretrained_model)
         model = SentenceBertLearningModule(model, config.hidden_size)

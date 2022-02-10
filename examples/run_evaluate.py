@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 # fmt: off
-parser.add_argument("--model", type=str, default="bert-cls", choices=["bert-cls", "bert-avg", "roberta-cls", "roberta-avg"], help="Model")
+parser.add_argument("--model", type=str, default="bert-cls", choices=["bert-cls", "bert-avg", "bert-rcmd", "roberta-cls", "roberta-avg", "roberta-rcmd"], help="Model")
 parser.add_argument("--checkpoint", type=str, default=None, help="Checkpoint path")
 parser.add_argument("--data-dir", type=str, default="data", help="data dir")
 parser.add_argument("--dataset", type=str, default="sts12", choices=["sts12", "sts13", "sts14", "sts15", "sts16", "stsb", "sickr"], help="dataset")
