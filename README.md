@@ -9,6 +9,7 @@ We assume that the user uses anaconda environment.
 conda create -n clrcmd python=3.8
 conda activate clrcmd
 pip install -r requirements.txt
+python setup.py develop
 ```
 
 ## 2. Prepare dataset
@@ -25,16 +26,15 @@ We create a script for downloading iSTS benchmarks.
 bash examples/download_ists.sh
 ```
 
-
 ### 2-3. NLI dataset tailored for self-supervised learning (SimCSE-NLI)
 We download the training dataset using the script provided by SimCSE repository.
 ```
 bash examples/download_nli.bash
 ```
 
-## 3. Evaluate sentence similarity benchmark
+## 3. Evaluate benchmark
 
-### 3-1. Evaluate benchmark performance on pretrained checkpoint
+### 3-1. Evaluate semantic textual similarity benchmark
 ```
 torchrun examples/run_evaluate.py --data-dir data --dataset sts12 --model bert-cls
 torchrun examples/run_evaluate.py --data-dir data --dataset sts12 --model bert-avg
