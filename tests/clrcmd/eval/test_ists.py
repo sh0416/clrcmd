@@ -3,7 +3,7 @@ import os
 import pytest
 import torch
 
-from sentsim.eval.ists import load_instances
+from clrcmd.eval.ists import load_instances
 
 
 @pytest.fixture
@@ -114,8 +114,7 @@ def test_load_instances(
         {
             "id": 5,
             "sent1": (
-                "the switch has to be contained in the same path as the bulb and the"
-                " battery"
+                "the switch has to be contained in the same path as the bulb and the" " battery"
             ),
             "sent2": "The switch and the bulb have to be in the same path.",
             "sent1_chunk": [

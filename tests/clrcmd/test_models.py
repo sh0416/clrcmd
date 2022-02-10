@@ -1,10 +1,10 @@
 import torch
 import torch.nn.functional as F
 
-from sentsim.models.models import (
+from clrcmd.models import (
+    DensePairwiseRelaxedWordMoverSimilarity,
     PairwiseRelaxedWordMoverSimilarity,
     RelaxedWordMoverSimilarity,
-    DensePairwiseRelaxedWordMoverSimilarity,
 )
 
 

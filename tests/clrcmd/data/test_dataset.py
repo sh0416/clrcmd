@@ -3,7 +3,7 @@ from functools import partial
 import pytest
 from transformers import AutoTokenizer
 
-from sentsim.data.dataset import NLIDataset
+from clrcmd.data.dataset import NLIContrastiveLearningDataset
 
 
 @pytest.fixture
@@ -29,7 +29,7 @@ def tokenizer():
 
 
 def test_nli_dataset(filepath_nli, tokenizer, corpus_nli):
-    dataset = NLIDataset(filepath_nli, tokenizer)
+    dataset = NLIContrastiveLearningDataset(filepath_nli, tokenizer)
     tokenize_fn = partial(
         tokenizer.__call__,
         padding="max_length",
