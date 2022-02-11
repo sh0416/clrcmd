@@ -218,7 +218,9 @@ def load_sts_benchmark(
         return load_sts15(os.path.join(data_dir, "STS", "STS15-en-test"))
     elif dataset == "sts16":
         return load_sts16(os.path.join(data_dir, "STS", "STS16-en-test"))
-    elif dataset == "stsb":
+    elif dataset == "stsb-dev":
+        return load_stsb_dev(os.path.join(data_dir, "STS", "STSBenchmark"))
+    elif dataset == "stsb-test":
         return load_stsb_test(os.path.join(data_dir, "STS", "STSBenchmark"))
     elif dataset == "sickr":
         return load_sickr_test(os.path.join(data_dir, "SICK"))

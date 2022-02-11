@@ -23,7 +23,7 @@ class STSBenchmarkDataset(Dataset):
         text2 = self.tokenizer(text2, padding="max_length", max_length=128, return_tensors="pt")
         text1 = {k: v[0] for k, v in text1.items()}
         text2 = {k: v[0] for k, v in text2.items()}
-        return text1, text2, torch.tensor(score)
+        return {"inputs1": text1, "inputs2": text2, "label": torch.tensor(score)}
 
     def __len__(self):
         return len(self.examples)
@@ -63,8 +63,14 @@ class ContrastiveLearningCollator:
     def __call__(
         self, features: List[Tuple[Dict[str, Tensor], Dict[str, Tensor], Dict[str, Tensor]]]
     ) -> Tuple[Dict[str, Tensor], Dict[str, Tensor], Dict[str, Tensor]]:
-        return {
-            "inputs1": default_data_collator([x["inputs1"] for x in features]),
-            "inputs2": default_data_collator([x["inputs2"] for x in features]),
-            "inputs_neg": default_data_collator([x["inputs_neg"] for x in features]),
-        }
+        result = {}
+        for k in features[0]:
+            if k == "inputs1":
+                result["inputs1"] = default_data_collator([x["inputs1"] for x in features])
+            elif k == "inputs2":
+                result["inputs2"] = default_data_collator([x["inputs2"] for x in features])
+            elif k == "inputs_neg":
+                result["inputs_neg"] = default_data_collator([x["inputs_neg"] for x in features])
+            elif k == "label":
+                result["label"] = torch.stack([x["label"] for x in features])
+        return result

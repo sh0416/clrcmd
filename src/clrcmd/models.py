@@ -1,16 +1,18 @@
 import logging
-from dataclasses import asdict
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Optional, Tuple
 
 import torch
 import torch.distributed as dist
 import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
-from transformers import AutoModel, AutoTokenizer, PreTrainedTokenizerBase
-from transformers.utils.dummy_pt_objects import PreTrainedModel
+from transformers import (
+    AutoModel,
+    AutoTokenizer,
+    PreTrainedModel,
+    PreTrainedTokenizerBase,
+)
 
-from clrcmd.config import ModelArguments
 from clrcmd.utils import masked_mean
 
 logger = logging.getLogger(__name__)
