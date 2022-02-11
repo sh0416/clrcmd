@@ -2,13 +2,13 @@ import logging
 import re
 import xml.etree.ElementTree as ET
 from typing import List, Optional, Tuple, TypedDict
-from bs4 import BeautifulSoup
 
 import numpy as np
 import torch
+from bs4 import BeautifulSoup
 from tokenizations import get_alignments
 
-from sentsim.models.models import ModelInput, SentenceSimilarityModel
+from clrcmd.models import ModelInput, SentenceSimilarityModel
 
 logger = logging.getLogger(__name__)
 
@@ -135,13 +135,9 @@ class PreprocessedInstance(TypedDict):
     inputs2: ModelInput
 
 
-def preprocess_instances(
-    tokenizer, instances: List[Instance]
-) -> List[PreprocessedInstance]:
+def preprocess_instances(tokenizer, instances: List[Instance]) -> List[PreprocessedInstance]:
     def tokenize(s: str):
-        return tokenizer.convert_ids_to_tokens(
-            tokenizer(s, add_special_tokens=False)["input_ids"]
-        )
+        return tokenizer.convert_ids_to_tokens(tokenizer(s, add_special_tokens=False)["input_ids"])
 
     prep_instances = []
     for instance in instances:
@@ -203,12 +199,8 @@ def inference(
             prep_instance["instance"]["sent2_chunk"],
             prep_instance["instance"]["sent2"].split(),
         )
-        sent1_word_ids = [
-            [y + 1 for y in align_sent1_chunk2word[x]] for x in sent1_chunks
-        ]
-        sent2_word_ids = [
-            [y + 1 for y in align_sent2_chunk2word[x]] for x in sent2_chunks
-        ]
+        sent1_word_ids = [[y + 1 for y in align_sent1_chunk2word[x]] for x in sent1_chunks]
+        sent2_word_ids = [[y + 1 for y in align_sent2_chunk2word[x]] for x in sent2_chunks]
         pairs = [
             {
                 "sent1_word_ids": s1,
@@ -258,9 +250,7 @@ def pool_heatmap(
     sent1_chunk_len, sent2_chunk_len = len(align_sent1[1]), len(align_sent2[1])
     # Split heatmap blockwise
 
-    heatmap_splitted = [
-        [heatmap[np.ix_(x, y)] for y in align_sent2[1]] for x in align_sent1[1]
-    ]
+    heatmap_splitted = [[heatmap[np.ix_(x, y)] for y in align_sent2[1]] for x in align_sent1[1]]
     heatmap_pooled1 = np.zeros((sent1_chunk_len, sent2_chunk_len))
     heatmap_pooled2 = np.zeros((sent1_chunk_len, sent2_chunk_len))
     for i, x in enumerate(heatmap_splitted):

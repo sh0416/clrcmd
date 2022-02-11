@@ -1,4 +1,5 @@
 import argparse
+
 from sentsim.eval.ists import AlignmentPair, load_alignment, save_alignment
 
 parser = argparse.ArgumentParser()
@@ -30,9 +31,7 @@ def main():
     for alignment in gold_alignments:
         removed_type = ["NOALI", "OPPO"] if args.remove_oppo else ["NOALI"]
         alignment["pairs"] = [
-            x
-            for x in alignment["pairs"]
-            if x["type"] not in removed_type and x["score"] >= 3.0
+            x for x in alignment["pairs"] if x["type"] not in removed_type and x["score"] >= 3.0
         ]
 
     outfile = f"{args.alignment_path}.equi"

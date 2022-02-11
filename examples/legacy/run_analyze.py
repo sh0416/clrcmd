@@ -55,25 +55,19 @@ def is_overlap(interval1: Pair, interval2: Pair) -> bool:
     return l == [0, 0, 1, 1]
 
 
-def create_overlap_pair(
-    align1: List[Pair], align2: List[Pair]
-) -> List[Tuple[Pair, Pair]]:
+def create_overlap_pair(align1: List[Pair], align2: List[Pair]) -> List[Tuple[Pair, Pair]]:
     pipeline = itertools.product(align1, align2)
     pipeline = filter(lambda x: is_overlap(x[0], x[1]), pipeline)
     return list(pipeline)
 
 
-def create_perfect_overlap_pair(
-    align1: List[Pair], align2: List[Pair]
-) -> List[Tuple[Pair, Pair]]:
+def create_perfect_overlap_pair(align1: List[Pair], align2: List[Pair]) -> List[Tuple[Pair, Pair]]:
     pipeline = itertools.product(align1, align2)
     pipeline = filter(lambda x: x[0] == x[1], pipeline)
     return list(pipeline)
 
 
-def get_first_diff_position(
-    align1: List[Pair], align2: List[Pair]
-) -> Tuple[Pair, Pair]:
+def get_first_diff_position(align1: List[Pair], align2: List[Pair]) -> Tuple[Pair, Pair]:
     x = zip(align1, align2)
     x = itertools.dropwhile(lambda x: x[0] == x[1], x)
     x = itertools.islice(x, 1)
@@ -134,9 +128,7 @@ def main(args: argparse.Namespace):
     first_diff = list(map(get_first_diff_position, align1, align2))
 
     overlap_idx = list(map(index_pair_list, overlap, interval2idx1, interval2idx2))
-    overlap_perfect_idx = list(
-        map(index_pair_list, overlap_perfect, interval2idx1, interval2idx2)
-    )
+    overlap_perfect_idx = list(map(index_pair_list, overlap_perfect, interval2idx1, interval2idx2))
     first_diff_idx = list(map(index_pair, first_diff, interval2idx1, interval2idx2))
 
     model = RobertaModel.from_pretrained(

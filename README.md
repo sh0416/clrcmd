@@ -32,7 +32,7 @@ We download the training dataset using the script provided by SimCSE repository.
 bash examples/download_nli.bash
 ```
 
-## 3. Evaluate benchmark
+## 3. Conduct experiments
 
 ### 3-1. Evaluate semantic textual similarity benchmark without any training
 ```
@@ -44,9 +44,8 @@ python examples/run_evaluate.py --data-dir data --dataset sts12 --model bert-cls
 ```
 
 ### 3-2. Train model using self-supervised learning (e.g. SimCSE, CLRCMD)
-We recommend using distributed training.
 ```
-python -m torch.distributed.run --nproc_per_node 4 examples/run_train.py --data-dir data --model bert-cls
+python examples/run_train.py --data-dir data --model bert-cls
 ```
 
 ### 3-2. Evaluate benchmark performance on the trained checkpoint
@@ -54,7 +53,9 @@ python -m torch.distributed.run --nproc_per_node 4 examples/run_train.py --data-
 python examples/run_evaluate.py --data-dir data --dataset sts12 --model bert-cls --checkpoint ckpt/bert-cls/checkpoint-best
 ```
 
-### 3-3. Evaluate benchmark performance on the checkpoint trained on CLRCMD
+## 4. Report results
+
+### 4-1. Semantic textual similarity benchmark
 
 
 # Legacy README

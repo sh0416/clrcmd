@@ -1,22 +1,21 @@
-import json
 import argparse
-import torch
+import json
 import random
+
 import matplotlib.pyplot as plt
+import numpy as np
+import torch
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from sentsim.config import ModelArguments
+from sentsim.data.sts import load_sts13
 from sentsim.models.models import create_contrastive_learning
 from transformers import AutoTokenizer
-import numpy as np
-from sentsim.data.sts import load_sts13
 
 
 def plot_heatmap(s1, s2, data, score, fpath):
     l1, l2 = len(s1), len(s2)
 
-    fig, ax = plt.subplots(
-        figsize=(int(0.5 * len(s2)), int(0.4 * len(s1))), facecolor="white"
-    )
+    fig, ax = plt.subplots(figsize=(int(0.5 * len(s2)), int(0.4 * len(s1))), facecolor="white")
 
     plt.gca().invert_yaxis()
     ax.set_title(f"score: {score:.3f}")
@@ -56,9 +55,7 @@ def main():
     with torch.no_grad():
         examples = [x for examples in sts13.values() for x in examples]
         random.seed(0)
-        examples = (
-            random.sample(examples, k=60) + sorted(examples, key=lambda x: x[1])[-30:]
-        )
+        examples = random.sample(examples, k=60) + sorted(examples, key=lambda x: x[1])[-30:]
         examples = sorted(examples, key=lambda x: x[1])
         # examples = examples[:30] + examples[-30:]
         for (s1, s2), score in examples:

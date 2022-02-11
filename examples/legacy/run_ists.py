@@ -4,13 +4,15 @@ import os
 from typing import Tuple
 
 import torch
-from transformers import AutoTokenizer
-
 from sentsim.config import ModelArguments
-from sentsim.eval.ists import load_instances, preprocess_instances, inference
-from sentsim.eval.ists import save_infered_instances
-
+from sentsim.eval.ists import (
+    inference,
+    load_instances,
+    preprocess_instances,
+    save_infered_instances,
+)
 from sentsim.models.models import create_contrastive_learning
+from transformers import AutoTokenizer
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument(
@@ -55,9 +57,7 @@ def main():
 
     with open(os.path.join(args.ckpt_dir, "model_args.json")) as f:
         model_args = ModelArguments(**json.load(f))
-    tokenizer = AutoTokenizer.from_pretrained(
-        model_args.model_name_or_path, use_fast=False
-    )
+    tokenizer = AutoTokenizer.from_pretrained(model_args.model_name_or_path, use_fast=False)
     prep_instances = preprocess_instances(tokenizer, instances)
 
     module = create_contrastive_learning(model_args)

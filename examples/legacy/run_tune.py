@@ -51,9 +51,7 @@ def search_hparams(
 
 
 def main():
-    parser = HfArgumentParser(
-        (ModelArguments, DataTrainingArguments, OurTrainingArguments)
-    )
+    parser = HfArgumentParser((ModelArguments, DataTrainingArguments, OurTrainingArguments))
     # NOTE: Inside `parse_args_into_dataclasses`, call `init_dist_process`
     #       So, we don't have to call it manually
     args: Arguments = parser.parse_args_into_dataclasses()
@@ -63,9 +61,7 @@ def main():
 
         # Fixed hyperparameters
         data_args.max_seq_length = 32
-        training_args.output_dir = os.path.join(
-            "result", datetime.now().strftime("%Y%m%d_%H%M")
-        )
+        training_args.output_dir = os.path.join("result", datetime.now().strftime("%Y%m%d_%H%M"))
         training_args.per_device_train_batch_size = 64
         training_args.per_device_eval_batch_size = 128
         training_args.gradient_accumulation_steps = 2
@@ -99,9 +95,7 @@ def main():
             direction="maximize",
             sampler=optuna.samplers.RandomSampler(0),
         )
-        study.enqueue_trial(
-            {"learning_rate": 1e-5, "hidden_dropout_prob": 0.1, "seed": 0}
-        )
+        study.enqueue_trial({"learning_rate": 1e-5, "hidden_dropout_prob": 0.1, "seed": 0})
         study.optimize(target_fn, n_trials=n_trials)
         df = study.trials_dataframe()
         df.to_csv(f"{study_name}.csv", index=False)
