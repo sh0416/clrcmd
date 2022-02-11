@@ -205,24 +205,13 @@ def load_sickr_test(dirpath: str) -> Dict[str, List[Tuple[Tuple[str, str], float
     return {"test": load_data_sickr(filepath)}
 
 
-def load_sts_benchmark(
-    data_dir: str, dataset: str
-) -> Dict[str, List[Tuple[Tuple[str, str], float]]]:
-    if dataset == "sts12":
-        return load_sts12(os.path.join(data_dir, "STS", "STS12-en-test"))
-    elif dataset == "sts13":
-        return load_sts13(os.path.join(data_dir, "STS", "STS13-en-test"))
-    elif dataset == "sts14":
-        return load_sts14(os.path.join(data_dir, "STS", "STS14-en-test"))
-    elif dataset == "sts15":
-        return load_sts15(os.path.join(data_dir, "STS", "STS15-en-test"))
-    elif dataset == "sts16":
-        return load_sts16(os.path.join(data_dir, "STS", "STS16-en-test"))
-    elif dataset == "stsb-dev":
-        return load_stsb_dev(os.path.join(data_dir, "STS", "STSBenchmark"))
-    elif dataset == "stsb-test":
-        return load_stsb_test(os.path.join(data_dir, "STS", "STSBenchmark"))
-    elif dataset == "sickr":
-        return load_sickr_test(os.path.join(data_dir, "SICK"))
-    else:
-        raise ValueError(f"Invalid {dataset = }")
+def load_sts_benchmark(data_dir: str) -> Dict[str, Dict[str, List[Tuple[Tuple[str, str], float]]]]:
+    return {
+        "sts12": load_sts12(os.path.join(data_dir, "STS", "STS12-en-test")),
+        "sts13": load_sts13(os.path.join(data_dir, "STS", "STS13-en-test")),
+        "sts14": load_sts14(os.path.join(data_dir, "STS", "STS14-en-test")),
+        "sts15": load_sts15(os.path.join(data_dir, "STS", "STS15-en-test")),
+        "sts16": load_sts16(os.path.join(data_dir, "STS", "STS16-en-test")),
+        "stsb": load_stsb_test(os.path.join(data_dir, "STS", "STSBenchmark")),
+        "sickr": load_sickr_test(os.path.join(data_dir, "SICK")),
+    }

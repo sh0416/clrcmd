@@ -9,7 +9,7 @@ from clrcmd.data.dataset import (
     NLIContrastiveLearningDataset,
     STSBenchmarkDataset,
 )
-from clrcmd.data.sts import load_sts_benchmark
+from clrcmd.data.sts import load_stsb_dev
 from clrcmd.models import create_contrastive_learning, create_tokenizer
 from clrcmd.trainer import STSTrainer, compute_metrics
 
@@ -73,7 +73,7 @@ def main():
         os.path.join(args.data_dir, "nli_for_simcse.csv"), tokenizer
     )
     eval_dataset = STSBenchmarkDataset(
-        load_sts_benchmark(args.data_dir, "stsb-dev")["dev"], tokenizer
+        load_stsb_dev(os.path.join(args.data_dir, "STS", "STSBenchmark"))["dev"], tokenizer
     )
 
     trainer = STSTrainer(
