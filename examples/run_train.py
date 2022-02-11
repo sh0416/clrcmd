@@ -88,40 +88,6 @@ def main():
     train_result = trainer.train()
     logger.info(train_result)
     trainer.save_model(os.path.join(training_args.output_dir, "checkpoint-best"))
-    exit()
-
-    # Training
-
-    if trainer.is_world_process_zero():
-        output_train_file = os.path.join(training_args.output_dir, "train_results.txt")
-        with open(output_train_file, "w") as writer:
-            logger.info("***** Train results *****")
-            for key, value in sorted(train_result.metrics.items()):
-                logger.info(f"  {key} = {value}")
-                writer.write(f"{key} = {value}\n")
-
-    # Evaluation
-    if trainer.is_world_process_zero():
-        logger.info("*** Evaluate ***")
-        results = trainer.evaluate(all=True)
-
-        output_eval_file = os.path.join(training_args.output_dir, "eval_results.txt")
-        with open(output_eval_file, "w") as f:
-            logger.info("***** Eval results *****")
-            f.write(
-                f"{results['STS12']['all_spearman_all']:.4f},"
-                f"{results['STS13']['all_spearman_all']:.4f},"
-                f"{results['STS14']['all_spearman_all']:.4f},"
-                f"{results['STS15']['all_spearman_all']:.4f},"
-                f"{results['STS16']['all_spearman_all']:.4f},"
-                f"{results['STSB-test']['all_spearman_all']:.4f},"
-                f"{results['SICKR-test']['all_spearman_all']:.4f},"
-                f"{results['STSB-dev']['all_spearman_all']:.4f}"
-            )
-    else:
-        results = None
-
-    return results
 
 
 if __name__ == "__main__":

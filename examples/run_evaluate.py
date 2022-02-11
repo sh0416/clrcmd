@@ -10,7 +10,11 @@ from tqdm import tqdm
 
 from clrcmd.data.dataset import STSBenchmarkDataset
 from clrcmd.data.sts import load_sts_benchmark
-from clrcmd.models import create_similarity_model, create_tokenizer
+from clrcmd.models import (
+    create_contrastive_learning,
+    create_similarity_model,
+    create_tokenizer,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +36,7 @@ def main():
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s - %(message)s",
-        filename=f"log/evaluate-{args.dataset}-{args.model}-{args.checkpoint}.log",
+        filename=f"log/evaluate-{args.dataset}-{args.model}.log",
     )
     logger.info("** Command Line Arguments **")
     for k, v in vars(args).items():
@@ -40,14 +44,17 @@ def main():
 
     # Create tokenizer and model
     tokenizer = create_tokenizer(args.model)
-    model = create_similarity_model(args.model).to(device)
+    model = create_contrastive_learning(args.model).to(device)
+
+    # Load method
+    if args.checkpoint is not None:
+        model.load_state_dict(torch.load(os.path.join(args.checkpoint, "pytorch_model.bin")))
+    model = model.model
 
     # Load dataset
     source = load_sts_benchmark(args.data_dir, args.dataset)
     datasets = {k: STSBenchmarkDataset(v, tokenizer) for k, v in source.items()}
     loaders = {k: DataLoader(v, batch_size=32) for k, v in datasets.items()}
-
-    # Load method
 
     # Evaluate
     model.eval()
@@ -57,11 +64,10 @@ def main():
             logger.info(f"Evaluate {source}")
             scores, labels = [], []
             for examples in tqdm(loader, desc=f"Evaluate {source}"):
-                text1, text2, label = examples
-                text1 = {k: v.to(device) for k, v in text1.items()}
-                text2 = {k: v.to(device) for k, v in text2.items()}
-                scores.append(model(text1, text2).cpu().numpy())
-                labels.append(label.numpy())
+                inputs1 = {k: v.to(device) for k, v in examples["inputs1"].items()}
+                inputs2 = {k: v.to(device) for k, v in examples["inputs2"].items()}
+                scores.append(model(inputs1, inputs2).cpu().numpy())
+                labels.append(examples["label"].numpy())
             scores, labels = np.concatenate(scores), np.concatenate(labels)
             result[f"{source}_pearson"] = pearsonr(scores, labels)[0]
             result[f"{source}_spearman"] = spearmanr(scores, labels)[0]

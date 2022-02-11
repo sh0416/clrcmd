@@ -387,7 +387,7 @@ def create_similarity_model(model_name: str) -> nn.Module:
 
 
 def create_contrastive_learning(
-    model_name: str, temp: float, dense_rwmd: bool = False
+    model_name: str, temp: float = 1.0, dense_rwmd: bool = False
 ) -> nn.Module:
     model = create_similarity_model(model_name)
     if model_name.endswith("cls"):

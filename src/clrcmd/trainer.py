@@ -1,7 +1,8 @@
-from typing import Dict, Union, Optional, List, Any, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
+
 import torch
 import torch.nn as nn
-
+from scipy.stats import spearmanr
 from transformers import EvalPrediction, Trainer
 from transformers.utils import logging
 
@@ -15,7 +16,6 @@ from clrcmd.data.sts import (
     load_stsb_dev,
     load_stsb_test,
 )
-from scipy.stats import spearmanr
 
 logger = logging.get_logger(__name__)
 

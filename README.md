@@ -51,9 +51,7 @@ python -m torch.distributed.run --nproc_per_node 4 examples/run_train.py --data-
 
 ### 3-2. Evaluate benchmark performance on the trained checkpoint
 ```
-torchrun examples/run_evaluate.py --data-dir data --dataset sts12 --model bert-cls --checkpoint ckpt/simcse.pt
-torchrun examples/run_evaluate.py --data-dir data --dataset sts12 --model bert-avg --checkpoint ckpt/simcse.pt
-torchrun examples/run_evaluate.py --data-dir data --dataset sts12 --model bert-rcmd --checkpoint ckpt/clrcmd.pt
+python examples/run_evaluate.py --data-dir data --dataset sts12 --model bert-cls --checkpoint ckpt/bert-cls/checkpoint-best
 ```
 
 ### 3-3. Evaluate benchmark performance on the checkpoint trained on CLRCMD
