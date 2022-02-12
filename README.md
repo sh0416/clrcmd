@@ -71,3 +71,11 @@ python examples/run_evaluate.py --data-dir data --dataset sts12 --model bert-cls
 ## 4. Report results
 
 ### 4-1. Semantic textual similarity benchmark
+
+```
+optuna create-study --storage sqlite:///experiments.db --study-name train --direction maximize
+optuna studies --storage sqlite:///experiments.db
+optuna trials --storage sqlite:///experiments.db --study-name train --flatten
+CUDA_VISIBLE_DEVICES=2 optuna study optimize examples/run_tune.py objective --n-trials 20 --storage sqlite:///experiments.db --study-name train
+CUDA_VISIBLE_DEVICES=3 optuna study optimize examples/run_tune.py objective --n-trials 20 --storage sqlite:///experiments.db --study-name train
+```
