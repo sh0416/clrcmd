@@ -4,7 +4,7 @@ import os
 
 import numpy as np
 import torch
-from scipy.stats import pearsonr, spearmanr
+from scipy.stats import spearmanr
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
@@ -82,6 +82,8 @@ def main():
     logger.info("** Result **")
     for metric_name, metric_value in result.items():
         logger.info(f"{metric_name} = {metric_value:.4f}")
+    score_avg = np.average(list(result.values()))
+    logger.info(f"avg = {score_avg:.4f}")
 
 
 if __name__ == "__main__":

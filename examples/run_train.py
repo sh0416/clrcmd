@@ -1,8 +1,9 @@
 import argparse
 import logging
 import os
+import uuid
 
-from transformers import TrainingArguments, default_data_collator, set_seed
+from transformers import TrainingArguments, set_seed
 
 from clrcmd.data.dataset import (
     ContrastiveLearningCollator,
@@ -18,16 +19,19 @@ logger = logging.getLogger(__name__)
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 # fmt: off
 parser.add_argument("--data-dir", type=str, help="Data directory", default="data")
-parser.add_argument("--model", type=str, help="Model", choices=["bert-cls", "bert-avg", "bert-rcmd", "roberta-cls", "roberta-avg", "roberta-rcmd"], default="bert-cls")
+parser.add_argument("--model", type=str, help="Model", default="bert-cls",
+                    choices=["bert-cls", "bert-avg", "bert-rcmd", "roberta-cls", "roberta-avg", "roberta-rcmd"])
 parser.add_argument("--output-dir", type=str, help="Output directory", default="ckpt")
 parser.add_argument("--temp", type=float, help="Softmax temperature", default=0.05)
+parser.add_argument("--seed", type=int, help="Seed", default=0)
 # fmt: on
 
 
 def main():
     args = parser.parse_args()
+    experiment_name = f"{args.model}-{uuid.uuid4()[:6]}"
     training_args = TrainingArguments(
-        os.path.join(args.output_dir, args.model),
+        os.path.join(args.output_dir, experiment_name),
         per_device_train_batch_size=128,
         per_device_eval_batch_size=128,
         learning_rate=5e-5,
@@ -41,12 +45,13 @@ def main():
         load_best_model_at_end=True,
         greater_is_better=True,
         save_total_limit=1,
+        seed=args.seed,
     )
     if training_args.local_rank == -1 or training_args.local_rank == 0:
         logging.basicConfig(
             level=logging.INFO,
             format="%(asctime)s - %(message)s",
-            filename=f"log/train-{args.model}.log",
+            filename=f"log/train-{experiment_name}.log",
         )
     logger.info("Hyperparameters")
     for k, v in vars(args).items():
@@ -84,6 +89,7 @@ def main():
         eval_dataset=eval_dataset,
         tokenizer=tokenizer,
         compute_metrics=compute_metrics,
+        callbackes=[],
     )
     train_result = trainer.train()
     logger.info(train_result)
