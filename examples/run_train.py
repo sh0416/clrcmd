@@ -41,6 +41,8 @@ def main():
         logging_steps=20,
         evaluation_strategy="steps",
         eval_steps=250,
+        save_strategy="steps",
+        save_steps=250,
         metric_for_best_model="eval_spearman",
         load_best_model_at_end=True,
         greater_is_better=True,

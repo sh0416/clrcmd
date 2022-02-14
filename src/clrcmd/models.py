@@ -358,9 +358,9 @@ class PairwiseCosineSimilarity(nn.Module):
 
 def create_tokenizer(model_name: str) -> PreTrainedTokenizerBase:
     if model_name.startswith("bert"):
-        return AutoTokenizer.from_pretrained("bert-base-uncased")
+        return AutoTokenizer.from_pretrained("bert-base-uncased", use_fast=False)
     elif model_name.startswith("roberta"):
-        return AutoTokenizer.from_pretrained("roberta-base")
+        return AutoTokenizer.from_pretrained("roberta-base", use_fast=False)
     else:
         raise ValueError(f"Undefined {model_name = }")
 
@@ -373,10 +373,10 @@ def create_similarity_model(model_name: str) -> nn.Module:
     else:
         raise ValueError(f"Undefined {model_name = }")
     if model_name.endswith("cls"):
-        model = CLSPoolingSentenceRepresentationModel(model)
+        model = CLSPoolingSentenceRepresentationModel(model, head=True)
         model = SentenceSimilarityModel(model, nn.CosineSimilarity(dim=-1))
     elif model_name.endswith("avg"):
-        model = AveragePoolingSentenceRepresentationModel(model)
+        model = AveragePoolingSentenceRepresentationModel(model, head=True)
         model = SentenceSimilarityModel(model, nn.CosineSimilarity(dim=-1))
     elif model_name.endswith("rcmd"):
         model = LastHiddenSentenceRepresentationModel(model, head=True)

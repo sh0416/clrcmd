@@ -19,8 +19,12 @@ class STSBenchmarkDataset(Dataset):
 
     def __getitem__(self, idx: int) -> Tuple[Dict[str, Tensor], Dict[str, Tensor], Tensor]:
         (text1, text2), score = self.examples[idx]
-        text1 = self.tokenizer(text1, padding="max_length", max_length=128, return_tensors="pt")
-        text2 = self.tokenizer(text2, padding="max_length", max_length=128, return_tensors="pt")
+        text1 = self.tokenizer(
+            text1, truncation=True, padding="max_length", max_length=128, return_tensors="pt"
+        )
+        text2 = self.tokenizer(
+            text2, truncation=True, padding="max_length", max_length=128, return_tensors="pt"
+        )
         text1 = {k: v[0] for k, v in text1.items()}
         text2 = {k: v[0] for k, v in text2.items()}
         return {"inputs1": text1, "inputs2": text2, "label": torch.tensor(score)}

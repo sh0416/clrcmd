@@ -38,8 +38,8 @@ def test_nli_dataset(filepath_nli, tokenizer, corpus_nli):
     )
     for i in range(len(dataset)):
         raw = corpus_nli[i + 1]
-        pred1, pred2, pred3 = dataset[i]
+        example = dataset[i]
         x, pos, neg = raw.split(",")
-        assert pred1 == tokenize_fn(x)
-        assert pred2 == tokenize_fn(pos)
-        assert pred3 == tokenize_fn(neg)
+        assert {k: v.tolist() for k, v in example["inputs1"].items()} == tokenize_fn(x)
+        assert {k: v.tolist() for k, v in example["inputs2"].items()} == tokenize_fn(pos)
+        assert {k: v.tolist() for k, v in example["inputs_neg"].items()} == tokenize_fn(neg)

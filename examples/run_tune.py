@@ -11,6 +11,7 @@ from clrcmd.data.dataset import (
 from clrcmd.data.sts import load_stsb_dev
 from clrcmd.models import create_contrastive_learning, create_tokenizer
 from clrcmd.trainer import STSTrainer, compute_metrics
+import optuna
 from optuna import Trial
 
 logger = logging.getLogger(__name__)
@@ -22,7 +23,7 @@ def objective(trial: Trial):
         os.path.join("ckpt", experiment_name),
         per_device_train_batch_size=128,
         per_device_eval_batch_size=128,
-        learning_rate=trial.suggest_categorical("learning_rate", [1e-5, 3e-5, 5e-5, 7e-5, 9e-5]),
+        learning_rate=trial.suggest_categorical("learning_rate", [3e-5, 4e-5, 5e-5, 6e-5, 7e-5]),
         num_train_epochs=3,
         fp16=True,
         logging_strategy="steps",
@@ -33,7 +34,7 @@ def objective(trial: Trial):
         load_best_model_at_end=True,
         greater_is_better=True,
         save_total_limit=1,
-        seed=trial.suggest_categorical("seed", [0, 1, 2, 3, 4]),
+        seed=trial.suggest_categorical("seed", [2, 3, 4]),
     )
     if training_args.local_rank == -1 or training_args.local_rank == 0:
         logging.basicConfig(
@@ -57,7 +58,7 @@ def objective(trial: Trial):
     # Load pretrained model and tokenizer
     tokenizer = create_tokenizer("bert-rcmd")
     model = create_contrastive_learning(
-        "bert-rcmd", trial.suggest_categorical("temp", [0.01, 0.05, 0.1, 0.5, 1])
+        "bert-rcmd", trial.suggest_categorical("temp", [0.025, 0.05, 0.075])
     )
     model.train()
 
@@ -81,3 +82,22 @@ def objective(trial: Trial):
     logger.info(train_result)
     trainer.save_model(os.path.join(training_args.output_dir, "checkpoint-best"))
     return trainer.evaluate()["eval_spearman"]
+
+
+def main():
+    study = optuna.create_study(
+        study_name="tune",
+        direction="maximize",
+        storage="sqlite:///tune.db",
+        sampler=optuna.samplers.TPESampler(),
+        pruner=optuna.pruners.MedianPruner(),
+        load_if_exists=True,
+    )
+    study.optimize(objective, n_trials=10)
+    print(f"{study.best_params = }")
+    print(f"{study.best_value = }")
+    print(f"{study.best_trial = }")
+
+
+if __name__ == "__main__":
+    main()

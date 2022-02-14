@@ -38,4 +38,5 @@ class STSTrainer(Trainer):
             inputs2 = self._prepare_inputs(inputs["inputs2"])
             label = self._prepare_inputs(inputs["label"])
             score = model.model(inputs1, inputs2)
+        model.train()
         return (None, score, label)
