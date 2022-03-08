@@ -3,6 +3,10 @@ Contrastive Learning: Relaxed Contextualized word Mover Distance (CLRCMD)
 
 This repository reproduces the experimental result reported in the paper.
 
+## 0. Download checkpoints
+We want to upload model registry such as huggingface hub to make our model easily accessible, but due to the complicated process, we just manually upload the checkpoint to our gdrive.
+Please visit this [link](https://drive.google.com/drive/folders/1q-a7z2Xy09dThp3FtCVdH2GprcEykgaa?usp=sharing) to download the checkpoints we used in our experiment.
+
 ## 1. Prepare Environment
 We assume that the user uses anaconda environment.
 ```
