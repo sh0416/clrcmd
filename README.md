@@ -6,6 +6,7 @@ This repository reproduces the experimental result reported in the paper.
 ## 0. Download checkpoints
 We want to upload model registry such as huggingface hub to make our model easily accessible, but due to the complicated process, we just manually upload the checkpoint to our gdrive.
 Please visit this [link](https://drive.google.com/drive/folders/1q-a7z2Xy09dThp3FtCVdH2GprcEykgaa?usp=sharing) to download the checkpoints we used in our experiment.
+We assume the `pytorch_model.bin` is located in `/home/username/checkpoints/bert-rcmd/pytorch_model.bin`
 
 ## 1. Prepare Environment
 We assume that the user uses anaconda environment.
@@ -59,27 +60,22 @@ bash examples/download_nli.bash
 python examples/run_evaluate.py -h
 
 # One example
-python examples/run_evaluate.py --data-dir data --dataset sts12 --model bert-cls
+python examples/run_evaluate.py --data-dir data --model bert-rcmd
 ```
 
 ### 3-2. Train model using self-supervised learning (e.g. SimCSE, CLRCMD)
 ```
-python examples/run_train.py --data-dir data --model bert-cls
+python examples/run_train.py --data-dir data --model bert-rcmd
 ```
 
 ### 3-2. Evaluate benchmark performance on the trained checkpoint
 ```
-python examples/run_evaluate.py --data-dir data --dataset sts12 --model bert-cls --checkpoint ckpt/bert-cls/checkpoint-best
+python examples/run_evaluate.py --data-dir data --model bert-rcmd --checkpoint /home/username/checkpoints/bert-rcmd
 ```
 
 ## 4. Report results
 
 ### 4-1. Semantic textual similarity benchmark
-
-```
-optuna create-study --storage sqlite:///experiments.db --study-name train --direction maximize
-optuna studies --storage sqlite:///experiments.db
-optuna trials --storage sqlite:///experiments.db --study-name train --flatten
-CUDA_VISIBLE_DEVICES=2 optuna study optimize examples/run_tune.py objective --n-trials 20 --storage sqlite:///experiments.db --study-name train
-CUDA_VISIBLE_DEVICES=3 optuna study optimize examples/run_tune.py objective --n-trials 20 --storage sqlite:///experiments.db --study-name train
-```
+|checkpoint|sts12|sts13|sts14|sts15|sts16|stsb|sickr|avg|
+|----------|-----|-----|-----|-----|-----|----|-----|---|
+|`bert-rcmd`|0.7523|0.8506|0.8099|0.8626|0.8150|0.8521|0.8049|0.8211|
