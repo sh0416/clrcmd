@@ -1,6 +1,8 @@
 import logging
 import os
 
+import optuna
+from optuna import Trial
 from transformers import TrainingArguments, set_seed
 
 from clrcmd.data.dataset import (
@@ -11,8 +13,6 @@ from clrcmd.data.dataset import (
 from clrcmd.data.sts import load_stsb_dev
 from clrcmd.models import create_contrastive_learning, create_tokenizer
 from clrcmd.trainer import STSTrainer, compute_metrics
-import optuna
-from optuna import Trial
 
 logger = logging.getLogger(__name__)
 

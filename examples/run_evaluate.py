@@ -10,10 +10,7 @@ from tqdm import tqdm
 
 from clrcmd.data.dataset import STSBenchmarkDataset
 from clrcmd.data.sts import load_sts_benchmark
-from clrcmd.models import (
-    create_contrastive_learning,
-    create_tokenizer,
-)
+from clrcmd.models import create_contrastive_learning, create_tokenizer
 
 logger = logging.getLogger(__name__)
 
