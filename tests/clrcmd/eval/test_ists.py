@@ -1,7 +1,4 @@
-import os
-
 import pytest
-import torch
 
 from clrcmd.eval.ists import load_instances
 

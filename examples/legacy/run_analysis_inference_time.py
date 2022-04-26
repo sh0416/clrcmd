@@ -41,10 +41,10 @@ def main(args):
     # Execution
     with torch.no_grad():
         # Warmup
-        out = model(sent1, sent2)
+        _ = model(sent1, sent2)
         start.record()
         for _ in range(args.num_iter):
-            out = model(sent1, sent2)
+            _ = model(sent1, sent2)
         end.record()
     torch.cuda.synchronize()
 

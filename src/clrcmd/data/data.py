@@ -13,14 +13,14 @@ def create_intervals(tokens: List[str]) -> List[Pair]:
 def is_overlap(interval1: Pair, interval2: Pair) -> bool:
     assert interval1[0] < interval1[1]
     assert interval2[0] < interval2[1]
-    l = sorted(
+    state = sorted(
         [(interval1[0], 0), (interval1[1], 1), (interval2[0], 0), (interval2[1], 1)],
         key=lambda x: (x[0], 1 - x[1]),
     )
-    l = list(map(lambda x: x[1], l))
+    state = list(map(lambda x: x[1], state))
     # In this case, only two possible cases are yield in this logic,
     # (0, 0, 1, 1), which is overlapped, or (0, 1, 0, 1), which is exclusive
-    return l == [0, 0, 1, 1]
+    return state == [0, 0, 1, 1]
 
 
 def create_overlap_pairs_from_intervals(

@@ -6,17 +6,6 @@ from scipy.stats import spearmanr
 from transformers import EvalPrediction, Trainer
 from transformers.utils import logging
 
-from clrcmd.data.sts import (
-    load_sickr_test,
-    load_sts12,
-    load_sts13,
-    load_sts14,
-    load_sts15,
-    load_sts16,
-    load_stsb_dev,
-    load_stsb_test,
-)
-
 logger = logging.get_logger(__name__)
 
 

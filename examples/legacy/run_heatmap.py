@@ -3,7 +3,6 @@ import json
 import random
 
 import matplotlib.pyplot as plt
-import numpy as np
 import torch
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from sentsim.config import ModelArguments

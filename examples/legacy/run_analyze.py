@@ -40,7 +40,7 @@ def create_alignment(stream: List[str], tokens: List[str]) -> List[Pair]:
 def is_overlap(interval1: Pair, interval2: Pair) -> bool:
     assert interval1[0] < interval1[1]
     assert interval2[0] < interval2[1]
-    l = sorted(
+    state = sorted(
         [
             (interval1[0], 0),
             (interval1[1], 1),
@@ -49,10 +49,10 @@ def is_overlap(interval1: Pair, interval2: Pair) -> bool:
         ],
         key=lambda x: (x[0], 1 - x[1]),
     )
-    l = list(map(lambda x: x[1], l))
+    state = list(map(lambda x: x[1], state))
     # In this case, only two possible cases are yield in this logic,
     # (0, 0, 1, 1), which is overlapped, or (0, 1, 0, 1), which is exclusive
-    return l == [0, 0, 1, 1]
+    return state == [0, 0, 1, 1]
 
 
 def create_overlap_pair(align1: List[Pair], align2: List[Pair]) -> List[Tuple[Pair, Pair]]:
@@ -123,11 +123,9 @@ def main(args: argparse.Namespace):
     interval2idx1 = [{x: i for i, x in enumerate(a)} for a in align1]
     interval2idx2 = [{x: i for i, x in enumerate(a)} for a in align2]
 
-    overlap = list(map(create_overlap_pair, align1, align2))
     overlap_perfect = list(map(create_perfect_overlap_pair, align1, align2))
     first_diff = list(map(get_first_diff_position, align1, align2))
 
-    overlap_idx = list(map(index_pair_list, overlap, interval2idx1, interval2idx2))
     overlap_perfect_idx = list(map(index_pair_list, overlap_perfect, interval2idx1, interval2idx2))
     first_diff_idx = list(map(index_pair, first_diff, interval2idx1, interval2idx2))
 

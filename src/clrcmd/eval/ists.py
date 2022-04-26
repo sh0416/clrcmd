@@ -1,6 +1,5 @@
 import logging
 import re
-import xml.etree.ElementTree as ET
 from typing import List, Optional, Tuple, TypedDict
 
 import numpy as np
