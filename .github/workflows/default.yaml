@@ -18,4 +18,7 @@ jobs:
     container:
       image: python:3.8
     steps:
-    - run: python --version
+    - run: pip install -r requirements.txt
+    - run: black --check .
+    - run: isort -c .
+    - run: flake8 .
