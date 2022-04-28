@@ -13,3 +13,8 @@ jobs:
     - run: black --check .
     - run: isort -c .
     - run: flake8 .
+  test-docker:
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.8
+    - run: python --version
