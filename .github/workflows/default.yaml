@@ -17,4 +17,5 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: python:3.8
+    steps:
     - run: python --version
