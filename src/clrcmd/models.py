@@ -329,9 +329,9 @@ class DensePairwiseRelaxedWordMoverSimilarity(nn.Module):
 
 
 class CosineSimilarity(nn.Module):
-    def __init__(self):
+    def __init__(self, dim: int):
         super().__init__()
-        self.cos = nn.CosineSimilarity(dim=-1)
+        self.cos = nn.CosineSimilarity(dim=dim)
 
     def forward(self, x1: Tensor, x2: Tensor) -> Tensor:
         return self.cos(x1, x2)
@@ -374,10 +374,10 @@ def create_similarity_model(model_name: str) -> nn.Module:
         raise ValueError(f"Undefined {model_name = }")
     if model_name.endswith("cls"):
         model = CLSPoolingSentenceRepresentationModel(model, head=True)
-        model = SentenceSimilarityModel(model, nn.CosineSimilarity(dim=-1))
+        model = SentenceSimilarityModel(model, CosineSimilarity(dim=-1))
     elif model_name.endswith("avg"):
         model = AveragePoolingSentenceRepresentationModel(model, head=True)
-        model = SentenceSimilarityModel(model, nn.CosineSimilarity(dim=-1))
+        model = SentenceSimilarityModel(model, CosineSimilarity(dim=-1))
     elif model_name.endswith("rcmd"):
         model = LastHiddenSentenceRepresentationModel(model, head=True)
         model = SentenceSimilarityModel(model, RelaxedWordMoverSimilarity())

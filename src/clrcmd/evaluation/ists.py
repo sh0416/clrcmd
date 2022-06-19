@@ -6,7 +6,7 @@ import numpy as np
 import torch
 from bs4 import BeautifulSoup
 from tokenizations import get_alignments
-from transformers import AutoTokenizer, PreTrainedTokenizerBase
+from transformers import PreTrainedTokenizerBase
 
 from clrcmd.models import ModelInput, SentenceSimilarityModel
 
@@ -179,7 +179,8 @@ def inference(
         with torch.no_grad():
             inputs1 = prep_example["inputs1"].to(device)
             inputs2 = prep_example["inputs2"].to(device)
-            heatmap_token = model.compute_heatmap(inputs1, inputs2)[0, 1:-1, 1:-1].numpy()
+            heatmap_token = model.compute_heatmap(inputs1, inputs2).cpu()
+            heatmap_token = heatmap_token[0, 1:-1, 1:-1].numpy()
         align_sent1_token2chunk = get_alignments(
             prep_example["sent1_token"], prep_example["example"]["sent1_chunk"]
         )
