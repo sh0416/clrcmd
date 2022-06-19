@@ -6,6 +6,7 @@ import numpy as np
 import torch
 from bs4 import BeautifulSoup
 from tokenizations import get_alignments
+from transformers import AutoTokenizer, PreTrainedTokenizerBase
 
 from clrcmd.models import ModelInput, SentenceSimilarityModel
 
@@ -82,7 +83,7 @@ def save_alignment(data: List[Alignment], filepath: str):
             f.write("</sentence>\n\n\n")
 
 
-class Instance(TypedDict):
+class Example(TypedDict):
     id: int
     sent1: str
     sent2: str
@@ -90,12 +91,12 @@ class Instance(TypedDict):
     sent2_chunk: List[str]  # gold standard chunk sentence
 
 
-def load_instances(
+def load_examples(
     filepath_sent1: str,
     filepath_sent2: str,
     filepath_sent1_chunk: str,
     filepath_sent2_chunk: str,
-) -> List[Instance]:
+) -> List[Example]:
     with open(filepath_sent1) as f:
         sent1 = [x.strip() for x in f]
     with open(filepath_sent2) as f:
@@ -126,38 +127,40 @@ def load_instances(
     ]
 
 
-class PreprocessedInstance(TypedDict):
-    instance: Instance
+class PreprocessedExample(TypedDict):
+    instance: Example
     sent1_token: List[str]  # Subword tokenized sequence for model heatmap
     sent2_token: List[str]  # Subword tokenized sequence for model heatmap
     inputs1: ModelInput
     inputs2: ModelInput
 
 
-def preprocess_instances(tokenizer, instances: List[Instance]) -> List[PreprocessedInstance]:
+def preprocess(
+    tokenizer: PreTrainedTokenizerBase, examples: List[Example]
+) -> List[PreprocessedExample]:
     def tokenize(s: str):
         return tokenizer.convert_ids_to_tokens(tokenizer(s, add_special_tokens=False)["input_ids"])
 
-    prep_instances = []
-    for instance in instances:
-        sent1_token = tokenize(instance["sent1"])
-        sent2_token = tokenize(instance["sent2"])
-        inputs1 = tokenizer(instance["sent1"], return_tensors="pt")
-        inputs2 = tokenizer(instance["sent2"], return_tensors="pt")
-        prep_instances.append(
+    prep_examples = []
+    for example in examples:
+        sent1_token = tokenize(example["sent1"])
+        sent2_token = tokenize(example["sent2"])
+        inputs1 = tokenizer(example["sent1"], return_tensors="pt")
+        inputs2 = tokenizer(example["sent2"], return_tensors="pt")
+        prep_examples.append(
             {
-                "instance": instance,
+                "example": example,
                 "sent1_token": sent1_token,
                 "sent2_token": sent2_token,
                 "inputs1": inputs1,
                 "inputs2": inputs2,
             }
         )
-    return prep_instances
+    return prep_examples
 
 
-class InferedInstance(TypedDict):
-    instance: Instance
+class InferedExample(TypedDict):
+    example: Example
     sent1_token: List[str]  # Subword tokenized sequence for model heatmap
     sent2_token: List[str]  # Subword tokenized sequence for model heatmap
     heatmap_token: np.ndarray
@@ -166,21 +169,22 @@ class InferedInstance(TypedDict):
 
 
 def inference(
-    model: SentenceSimilarityModel, prep_instances: List[PreprocessedInstance]
-) -> List[InferedInstance]:
-    infered_instances = []
-    for prep_instance in prep_instances:
-        logger.debug(f"{prep_instance}")
+    model: SentenceSimilarityModel, prep_examples: List[PreprocessedExample], device=torch.device
+) -> List[InferedExample]:
+    model = model.to(device)
+    infered_examples = []
+    for prep_example in prep_examples:
+        logger.debug(f"{prep_example}")
         # Compute heatmap
         with torch.no_grad():
-            heatmap_token = model.compute_heatmap(
-                prep_instance["inputs1"], prep_instance["inputs2"]
-            )[0, 1:-1, 1:-1].numpy()
+            inputs1 = prep_example["inputs1"].to(device)
+            inputs2 = prep_example["inputs2"].to(device)
+            heatmap_token = model.compute_heatmap(inputs1, inputs2)[0, 1:-1, 1:-1].numpy()
         align_sent1_token2chunk = get_alignments(
-            prep_instance["sent1_token"], prep_instance["instance"]["sent1_chunk"]
+            prep_example["sent1_token"], prep_example["example"]["sent1_chunk"]
         )
         align_sent2_token2chunk = get_alignments(
-            prep_instance["sent2_token"], prep_instance["instance"]["sent2_chunk"]
+            prep_example["sent2_token"], prep_example["example"]["sent2_chunk"]
         )
         logger.debug(f"{align_sent1_token2chunk}")
         logger.debug(f"{align_sent2_token2chunk}")
@@ -191,12 +195,12 @@ def inference(
         mask2 = heatmap_chunk == np.max(heatmap_chunk, axis=1, keepdims=True)
         sent1_chunks, sent2_chunks = np.nonzero(mask1 & mask2)
         align_sent1_chunk2word, _ = get_alignments(
-            prep_instance["instance"]["sent1_chunk"],
-            prep_instance["instance"]["sent1"].split(),
+            prep_example["example"]["sent1_chunk"],
+            prep_example["example"]["sent1"].split(),
         )
         align_sent2_chunk2word, _ = get_alignments(
-            prep_instance["instance"]["sent2_chunk"],
-            prep_instance["instance"]["sent2"].split(),
+            prep_example["example"]["sent2_chunk"],
+            prep_example["example"]["sent2"].split(),
         )
         sent1_word_ids = [[y + 1 for y in align_sent1_chunk2word[x]] for x in sent1_chunks]
         sent2_word_ids = [[y + 1 for y in align_sent2_chunk2word[x]] for x in sent2_chunks]
@@ -210,28 +214,28 @@ def inference(
             }
             for s1, s2 in zip(sent1_word_ids, sent2_word_ids)
         ]
-        infered_instances.append(
+        infered_examples.append(
             {
-                "instance": prep_instance["instance"],
-                "sent1_token": prep_instance["sent1_token"],
-                "sent2_token": prep_instance["sent2_token"],
+                "example": prep_example["example"],
+                "sent1_token": prep_example["sent1_token"],
+                "sent2_token": prep_example["sent2_token"],
                 "heatmap_token": heatmap_token,
                 "heatmap_chunk": heatmap_chunk,
                 "pairs": pairs,
             }
         )
-    return infered_instances
+    return infered_examples
 
 
-def save_infered_instances(infered_instances: List[InferedInstance], filepath: str):
+def save(examples: List[InferedExample], filepath: str):
     alignments = []
-    for infered_instance in infered_instances:
+    for example in examples:
         alignments.append(
             {
-                "id": infered_instance["instance"]["id"],
-                "sent1": infered_instance["instance"]["sent1"],
-                "sent2": infered_instance["instance"]["sent2"],
-                "pairs": infered_instance["pairs"],
+                "id": example["example"]["id"],
+                "sent1": example["example"]["sent1"],
+                "sent2": example["example"]["sent2"],
+                "pairs": example["pairs"],
             }
         )
     save_alignment(alignments, filepath)
