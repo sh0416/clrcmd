@@ -80,11 +80,11 @@ python -m examples.run_preprocess_ists --alignment-path data/ISTS/test_goldStand
 
 # Bert-avg
 python -m examples.run_evaluate_ists --data-dir data/ISTS/test_goldStandard/ --source images --checkpoint-dir checkpoints/bert-avg/
-./data/ISTS/test_goldStandard/evalF1.pl ./data/ISTS/test_goldStandard/STSint.testinput.images.wa ./checkpoints/bert-avg/images.wa.equi
+./data/ISTS/test_goldStandard/evalF1.pl ./data/ISTS/test_goldStandard/STSint.testinput.images.wa.equi ./checkpoints/bert-avg/images.wa
 
 # Bert-Clrcmd
 python -m examples.run_evaluate_ists --data-dir data/ISTS/test_goldStandard/ --source images --checkpoint-dir checkpoints/bert-rcmd/
-./data/ISTS/test_goldStandard/evalF1.pl ./data/ISTS/test_goldStandard/STSint.testinput.images.wa ./checkpoints/bert-rcmd/images.wa.equi
+./data/ISTS/test_goldStandard/evalF1.pl ./data/ISTS/test_goldStandard/STSint.testinput.images.wa.equi ./checkpoints/bert-rcmd/images.wa
 ```
 
 ## 4. Report results
