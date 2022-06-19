@@ -172,6 +172,7 @@ def inference(
     model: SentenceSimilarityModel, prep_examples: List[PreprocessedExample], device=torch.device
 ) -> List[InferedExample]:
     model = model.to(device)
+    model.eval()
     infered_examples = []
     for prep_example in prep_examples:
         logger.debug(f"{prep_example}")

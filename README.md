@@ -75,11 +75,14 @@ python -m examples.run_evaluate_sts --data-dir data --model bert-rcmd --checkpoi
 
 ### 3-3. Evaluate interpretable semantic textual similarity benchmark
 ```
-# Bert average
+# Filter out the alignments which has low score
+python -m examples.run_preprocess_ists --alignment-path data/ISTS/test_goldStandard/STSint.testinput.images.wa
+
+# Bert-avg
 python -m examples.run_evaluate_ists --data-dir data/ISTS/test_goldStandard/ --source images --checkpoint-dir checkpoints/bert-avg/
 ./data/ISTS/test_goldStandard/evalF1.pl ./data/ISTS/test_goldStandard/STSint.testinput.images.wa ./checkpoints/bert-avg/images.wa
 
-# Our method
+# Bert-Clrcmd
 python -m examples.run_evaluate_ists --data-dir data/ISTS/test_goldStandard/ --source images --checkpoint-dir checkpoints/bert-rcmd/
 ./data/ISTS/test_goldStandard/evalF1.pl ./data/ISTS/test_goldStandard/STSint.testinput.images.wa ./checkpoints/bert-rcmd/images.wa
 ```
