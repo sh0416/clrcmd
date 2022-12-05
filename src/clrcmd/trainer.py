@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 from scipy.stats import spearmanr
 from transformers import EvalPrediction, Trainer
+from transformers.modeling_utils import unwrap_model
 from transformers.utils import logging
 
 logger = logging.get_logger(__name__)
@@ -26,6 +27,8 @@ class STSTrainer(Trainer):
             inputs1 = self._prepare_inputs(inputs["inputs1"])
             inputs2 = self._prepare_inputs(inputs["inputs2"])
             label = self._prepare_inputs(inputs["label"])
-            score = model.model(inputs1, inputs2)
+            # make sure the model is unwrapped from distributed modules
+            score = unwrap_model(model).model(inputs1, inputs2)
+
         model.train()
         return (None, score, label)
