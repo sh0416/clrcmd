@@ -5,8 +5,8 @@ This repository reproduces the experimental result of CLRCMD (pronounced as "cle
 
 ## 0. Download checkpoints
 We want to upload our checkpoint to model registry such as huggingface hub to make them easily accessible, but due to the complicated process, we decided to just manually upload the checkpoint to our gdrive.
-Please visit this [link](https://drive.google.com/drive/folders/1q-a7z2Xy09dThp3FtCVdH2GprcEykgaa?usp=sharing) to download the checkpoints we used in our experiment.
-We assume the `pytorch_model.bin` is located in `/home/username/checkpoints/bert-rcmd/pytorch_model.bin`
+Please visit this [link](https://drive.google.com/drive/folders/1P_COPucV-japQcrYrkWuMk_r24Cf9ca-?usp=share_link) to download the checkpoints we used in our experiment.
+We assume the `pytorch_model.bin` and `model_args.json` is located in `/home/username/checkpoints/bert-rcmd/`
 
 ## 1. Prepare Environment
 We assume that the user uses anaconda environment.
